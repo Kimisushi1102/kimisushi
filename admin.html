@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimi Sushi - Admin Dashboard</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <!-- FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#8B0000',
+                            dark: '#1C1C1C',
+                            cream: '#FAFAFA',
+                            gray: '#F3F4F6',
+                            gold: '#C5A059'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .login-overlay {
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-brand-gray text-brand-dark font-sans antialiased h-screen overflow-hidden flex">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 bg-brand-dark z-50 flex items-center justify-center login-overlay transition-opacity duration-500">
+        <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md text-center">
+            <i class="ph-fill ph-flower-lotus text-5xl text-brand-red mb-4 inline-block"></i>
+            <h2 class="font-serif text-3xl font-bold mb-2">Admin Login</h2>
+            <p class="text-gray-500 text-sm mb-8">Passwort eingeben: <br><span class="font-bold text-gray-800">admin123</span></p>
+            
+            <form id="login-form">
+                <input type="password" id="password" required placeholder="Ihr Passwort" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-brand-red mb-4 bg-gray-50 text-center">
+                <p id="login-error" class="text-red-500 text-xs mb-4 hidden">Falsches Passwort!</p>
+                <button type="submit" class="w-full btn-primary justify-center">Login</button>
+            </form>
+            <a href="index.html" class="inline-block mt-6 text-sm text-gray-500 hover:text-brand-red underline">Zurück zur Website</a>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-brand-dark text-white flex flex-col shrink-0">
+            <div class="p-6 border-b border-white/10 flex items-center gap-3">
+                <i class="ph-fill ph-flower-lotus text-2xl text-brand-red"></i>
+                <span class="font-serif text-xl font-bold">Admin Panel</span>
+            </div>
+            
+            <nav class="flex-1 py-6">
+                <ul class="space-y-2 px-4">
+                    <li>
+                        <a href="#" id="nav-menu" class="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg transition-colors">
+                            <i class="ph ph-fork-knife text-xl text-brand-gold"></i>
+                            Quản lý Thực đơn
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-combos" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-hamburger text-xl"></i>
+                            Quản lý Combo (Set)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-settings" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-gear text-xl"></i>
+                            Cài đặt Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-seo" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-globe-hemisphere-west text-xl"></i>
+                            Tối ưu SEO & GEO
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-tunnel" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-shield-check text-xl text-blue-400"></i>
+                            Kết nối Tên miền (SSL)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-finance" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-chart-line-up text-xl text-green-400"></i>
+                            Báo cáo Doanh thu
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-tables" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-grid-four text-xl text-brand-red"></i>
+                            Sơ đồ & Khu vực
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-inbox" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph-fill ph-paper-plane-tilt text-xl text-green-400"></i>
+                            Eingang (Inbox)
+                            <span id="inbox-badge" class="hidden bg-brand-red text-white text-[10px] font-black px-1.5 py-0.5 rounded-full ml-auto">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-pos" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors font-bold">
+                            <i class="ph-fill ph-monitor-play text-xl text-brand-gold"></i>
+                            Giao diện Bán hàng (POS)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-browser text-xl"></i>
+                            Về Trang Chủ
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-6 border-t border-white/10">
+                <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors text-left mt-4 border border-red-500/20">
+                    <i class="ph ph-sign-out text-xl"></i>
+                    Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden bg-brand-gray">
+            
+            <header class="bg-white px-8 py-5 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <h1 class="text-2xl font-serif font-bold text-brand-red">Kimi Sushi - Bảng Quản Trị</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-brand-red text-white flex items-center justify-center font-bold">K</div>
+                    <span class="font-medium text-sm">Manager</span>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-auto p-8">
+                
+                
+                <!-- NEW SECTION: POS Integration -->
+                <div id="pos-management" class="hidden min-h-[calc(100vh-140px)] w-full">
+                    <iframe src="billing/index.html" class="w-full h-[calc(100vh-140px)] border-0 rounded-2xl shadow-inner bg-gray-50"></iframe>
+                </div>
+
+                <!-- NEW SECTION: Inbox Management -->
+                <div id="inbox-management" class="hidden max-w-6xl mx-auto mt-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="ph-fill ph-paper-plane-tilt text-3xl"></i>
+                                <div>
+                                    <h2 class="text-xl font-bold">Eingang - Khách hàng đặt bàn / đặt món</h2>
+                                    <p class="text-green-100 text-xs">Nhấn nút để gửi trả lời tự động bằng tiếng Đức qua Email & Telegram</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="inbox-refresh-btn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
+                                    <i class="ph ph-arrows-clockwise"></i> Làm mới
+                                </button>
+                                <button id="inbox-toggle-all" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                                    Hiện tất cả
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b border-gray-100">
+                            <div class="text-center p-3 bg-white rounded-xl border border-gray-100">
+                                <p class="text-2xl font-black text-brand-red" id="inbox-stat-pending">0</p>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase">Chờ xử lý</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-xl border border-gray-100">
+                                <p class="text-2xl font-black text-green-600" id="inbox-stat-replied">0</p>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase">Đã trả lời</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-xl border border-gray-100">
+                                <p class="text-2xl font-black text-blue-600" id="inbox-stat-reservation">0</p>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase">Đặt bàn</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-xl border border-gray-100">
+                                <p class="text-2xl font-black text-amber-600" id="inbox-stat-order">0</p>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase">Đặt món</p>
+                            </div>
+                        </div>
+
+                        <!-- Inbox List -->
+                        <div id="inbox-list" class="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+                            <div class="p-8 text-center text-gray-400">
+                                <i class="ph ph-inbox text-5xl mb-3"></i>
+                                <p>Chưa có thông báo nào</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Reply Templates Section -->
+                    <div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="ph ph-chats text-brand-gold"></i>
+                            Mẫu trả lời nhanh (Tiếng Đức)
+                            <span class="text-[10px] font-semibold bg-brand-gold/10 text-brand-gold px-2 py-1 rounded-full ml-2">Tự động gửi Email + Telegram</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Template: Reservation Confirmed -->
+                            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-green-800 text-sm flex items-center gap-2">
+                                        <i class="ph ph-check-circle text-green-600"></i> Mẫu 1: Xác nhận đặt bàn
+                                    </h4>
+                                    <span class="text-[10px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded">RESERVIERUNG</span>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-green-100">
+                                    <p class="italic mb-1">Liebe/r <strong>[Name]</strong>,</p>
+                                    <p class="mb-1">vielen Dank für Ihre Reservierung bei <strong>Sakura Sushi</strong>!</p>
+                                    <p class="mb-1">Wir freuen uns, Sie am <strong>[Datum]</strong> um <strong>[Uhrzeit]</strong> bei uns begrüßen zu dürfen.</p>
+                                    <p class="mb-1">Ihre Reservierung ist hiermit <strong>bestätigt</strong>.</p>
+                                    <p class="mb-1">Bei Fragen oder Änderungen kontaktieren Sie uns gerne unter: <strong>[Telefon]</strong></p>
+                                    <p class="mt-2 font-semibold text-green-700">Wir freuen uns auf Ihren Besuch!</p>
+                                    <p class="text-green-600">Ihr Sakura Sushi Team</p>
+                                </div>
+                            </div>
+
+                            <!-- Template: Order Ready in X minutes -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-amber-800 text-sm flex items-center gap-2">
+                                        <i class="ph ph-clock text-amber-600"></i> Mẫu 2: Đơn hàng sẵn sàng sau X phút
+                                    </h4>
+                                    <span class="text-[10px] font-black text-amber-600 bg-amber-100 px-2 py-0.5 rounded">BESTELLUNG</span>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-amber-100">
+                                    <p class="italic mb-1">Hallo <strong>[Name]</strong>,</p>
+                                    <p class="mb-1">wir haben Ihre Bestellung bei <strong>Sakura Sushi</strong> erhalten. Vielen Dank!</p>
+                                    <p class="mb-1">Ihre Bestellung wird in ca. <strong>[X]</strong> Minuten fertig zubereitet sein.</p>
+                                    <p class="mb-1">Sie können Ihre Bestellung dann bei uns <strong>abholen</strong>.</p>
+                                    <p class="mb-1">Falls Sie Fragen haben, rufen Sie uns gerne an: <strong>[Telefon]</strong></p>
+                                    <p class="mt-2 font-semibold text-amber-700">Wir wünschen einen guten Appetit!</p>
+                                    <p class="text-amber-600">Ihr Sakura Sushi Team</p>
+                                </div>
+                            </div>
+
+                            <!-- Template: Reservation Declined -->
+                            <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-red-800 text-sm flex items-center gap-2">
+                                        <i class="ph ph-x-circle text-red-600"></i> Mẫu 3: Từ chối đặt bàn
+                                    </h4>
+                                    <span class="text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded">ABSAGE</span>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-red-100">
+                                    <p class="italic mb-1">Sehr geehrte/r <strong>[Name]</strong>,</p>
+                                    <p class="mb-1">vielen Dank für Ihre Reservierungsanfrage bei <strong>Sakura Sushi</strong>.</p>
+                                    <p class="mb-1">Leider müssen wir Ihnen mitteilen, dass wir für den gewünschten Zeitpunkt bereits <strong>ausgebucht</strong> sind.</p>
+                                    <p class="mb-1">Wir würden uns freuen, Sie zu einem <strong>anderen Zeitpunkt</strong> bei uns begrüßen zu dürfen.</p>
+                                    <p class="mb-1">Für weitere Fragen: <strong>[Telefon]</strong></p>
+                                    <p class="mt-2 text-red-600">Mit freundlichen Grüßen,<br>Ihr Sakura Sushi Team</p>
+                                </div>
+                            </div>
+
+                            <!-- Template: Order Confirmed - Delivery -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-bold text-blue-800 text-sm flex items-center gap-2">
+                                        <i class="ph ph-truck text-blue-600"></i> Mẫu 4: Xác nhận giao hàng
+                                    </h4>
+                                    <span class="text-[10px] font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded">LIEFERUNG</span>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-blue-100">
+                                    <p class="italic mb-1">Hallo <strong>[Name]</strong>,</p>
+                                    <p class="mb-1">wir haben Ihre Lieferbestellung erhalten! Vielen Dank!</p>
+                                    <p class="mb-1">Ihre Bestellung wird in ca. <strong>[X]</strong> Minuten zu Ihnen geliefert.</p>
+                                    <p class="mb-1">Lieferadresse: <strong>[Adresse]</strong></p>
+                                    <p class="mb-1">Gesamtbetrag: <strong>[Betrag]</strong></p>
+                                    <p class="mt-2 font-semibold text-blue-700">Wir wünschen guten Appetit!</p>
+                                    <p class="text-blue-600">Ihr Sakura Sushi Team</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW SECTION: Finance Report -->
+                <div id="finance-report" class="hidden max-w-7xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Doanh thu hôm nay</span>
+                            <span id="stat-today" class="text-3xl font-black text-brand-dark">0,00 €</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Doanh thu tuần này</span>
+                            <span id="stat-week" class="text-3xl font-black text-brand-dark">0,00 €</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Tiền mặt (Cash)</span>
+                            <span id="stat-cash" class="text-xl font-bold text-green-600">0,00 €</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Quẹt thẻ (Card)</span>
+                            <span id="stat-card" class="text-xl font-bold text-blue-600">0,00 €</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <h3 class="text-lg font-black mb-6 uppercase tracking-tighter">Lịch sử giao dịch mới nhất</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead>
+                                        <tr class="text-gray-400 border-b border-gray-100">
+                                            <th class="pb-4 font-black">THỜI GIAN</th>
+                                            <th class="pb-4 font-black">BÀN</th>
+                                            <th class="pb-4 font-black">PHƯƠNG THỨC</th>
+                                            <th class="pb-4 font-black text-right">TỔNG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="finance-table-body">
+                                        <!-- Rows injected via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <h3 class="text-lg font-black mb-6 uppercase tracking-tighter">Món ăn bán chạy nhất</h3>
+                            <div id="top-items-list" class="space-y-4">
+                                <!-- Bars injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW SECTION: Table Management -->
+                <div id="table-management" class="hidden max-w-7xl mx-auto flex flex-col gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-6">
+                            <h3 class="text-xl font-bold uppercase tracking-tighter">Thêm bàn mới</h3>
+                            <div>
+                                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">TÊN BÀN / SỐ BÀN</label>
+                                <input type="text" id="new-table-name" placeholder="Ví dụ: Bàn 10, Bàn VIP..." class="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 focus:border-brand-red outline-none font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">KHU VỰC (VÙNG)</label>
+                                <input type="text" id="new-table-zone" placeholder="Ví dụ: Trong nhà, Sân vườn, Tầng 2..." class="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 focus:border-brand-red outline-none font-bold">
+                                <p class="text-[10px] text-gray-400 mt-2 italic">Ghi chú: Nếu hệ thống chưa có khu vực này, nó sẽ tự động được tạo mới.</p>
+                            </div>
+                            <button onclick="addNewTable()" class="w-full py-4 bg-brand-red text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-brand-red/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                <i class="ph ph-plus-circle text-xl"></i> XÁC NHẬN THÊM
+                            </button>
+                        </div>
+                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                             <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                                <h3 class="text-xl font-bold uppercase tracking-tighter">Danh sách bàn & Sơ đồ</h3>
+                                <button onclick="saveAllTables()" class="px-6 py-2 bg-brand-dark text-white rounded-xl font-bold text-xs uppercase tracking-widest active:scale-95 transition">LƯU THAY ĐỔI</button>
+                            </div>
+                            <div class="p-8 overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead>
+                                        <tr class="text-gray-400 border-b border-gray-100 uppercase tracking-widest text-[10px] font-black">
+                                            <th class="pb-4">TÊN BÀN</th>
+                                            <th class="pb-4">KHU VỰC</th>
+                                            <th class="pb-4">TRẠNG THÁI</th>
+                                            <th class="pb-4 text-right">THAO TÁC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-list-body" class="divide-y divide-gray-50">
+                                        <!-- Tables injected via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="menu-management" class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                    
+                    <!-- Left Column: Add New Item -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                                <i class="ph ph-plus-circle text-brand-red text-xl"></i> Thêm/Sửa Món ăn
+                            </h2>
+                            
+                            <form id="add-menu-form" class="space-y-4">
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="col-span-1">
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mã món (Số)</label>
+                                        <input type="text" id="item-code" placeholder="VD: 01" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tên món *</label>
+                                        <input type="text" id="item-name" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Giá (€) *</label>
+                                        <input type="text" id="item-price" required placeholder="VD: 9,50 €" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Danh mục * (VD: Sushi Bowl)</label>
+                                        <input type="text" id="item-category" list="category-list" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm bg-white">
+                                        <datalist id="category-list">
+                                            <option value="sushi">Nigiri (Sushi)</option>
+                                            <option value="maki">Maki Rolls</option>
+                                            <option value="sashimi">Sashimi</option>
+                                        </datalist>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Link Ảnh (Tải lên hoặc dán Link) *</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="item-image" required placeholder="VD: https://..." class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm bg-white">
+                                        <label class="bg-gray-100 hover:bg-gray-200 text-brand-dark px-3 py-2 rounded-lg cursor-pointer flex items-center justify-center shrink-0 border border-gray-200 transition-colors" title="Tải ảnh từ máy tính">
+                                            <i class="ph ph-upload-simple text-lg"></i>
+                                            <input type="file" class="hidden" accept="image/*" onchange="handleImageUpload(this, 'item-image')">
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mô tả *</label>
+                                    <textarea id="item-desc" required rows="2" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nhãn dán (Optional)</label>
+                                    <select id="item-tag" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm bg-white">
+                                        <option value="">Không có nhãn</option>
+                                        <option value="Bestseller">Bán chạy nhất (Trắng)</option>
+                                        <option value="Empfehlung">Khuyên dùng (Vàng)</option>
+                                        <option value="Neu">Mới ra mắt (Đỏ)</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Số lượng / Miếng</label>
+                                        <input type="text" id="item-pieces" placeholder="VD: 8 miếng" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2 mt-4">
+                                    <button type="submit" id="add-submit-btn" class="w-full btn-primary justify-center text-sm py-3 transition-colors">Thêm món mới</button>
+                                    <button type="button" id="cancel-edit-btn" class="w-full btn-secondary hidden justify-center text-sm py-3 transition-colors">Huỷ sửa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Current Menu -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="flex items-center justify-between mb-6 p-6">
+                                <h2 class="text-lg font-bold flex items-center gap-2">
+                                    <i class="ph ph-list-dashes text-brand-red text-xl"></i> Danh sách Thực đơn
+                                </h2>
+                                <div class="flex gap-2">
+                                    <button id="mock-data-btn" class="px-3 py-1.5 text-xs font-semibold rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                                        <i class="ph ph-magic-wand mr-1"></i> Tạo Dữ liệu Mẫu
+                                    </button>
+                                    <button id="reset-btn" class="px-3 py-1.5 text-xs font-semibold rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
+                                        <i class="ph ph-arrow-counter-clockwise mr-1"></i> Đặt lại (Reset)
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="border-b border-gray-100 text-sm text-gray-500">
+                                            <th class="text-left font-semibold py-3 px-4 w-16">Ảnh</th>
+                                            <th class="text-left font-semibold py-3 px-4 w-20">Mã</th>
+                                            <th class="text-left font-semibold py-3 px-4">Tên Món</th>
+                                            <th class="text-left font-semibold py-3 px-4">Danh Mục</th>
+                                            <th class="text-left font-semibold py-3 px-4">Giá</th>
+                                            <th class="text-right font-semibold py-3 px-4">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-menu-list" class="divide-y divide-gray-100">
+                                        <!-- Items will be injected here via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="combos-management" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mt-8">
+                    
+                    <!-- Left Column: Add New Combo -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                                <i class="ph ph-plus-circle text-brand-red text-xl"></i> Thêm/Sửa Combo
+                            </h2>
+                            
+                            <form id="add-combo-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tên Combo * (VD: Tokyo Set)</label>
+                                    <input type="text" id="combo-name" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tiêu đề phụ (VD: Dành cho 2 người) *</label>
+                                    <input type="text" id="combo-subtitle" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Giá KM (€)*</label>
+                                        <input type="text" id="combo-price" required placeholder="18,90 €" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Giá Gốc (tuỳ chọn)</label>
+                                        <input type="text" id="combo-oldprice" placeholder="52,50 €" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm bg-white">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nhãn Nổi Bật (Optional)</label>
+                                    <select id="combo-tag" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm bg-white">
+                                        <option value="">Không có nhãn</option>
+                                        <option value="Chef's Choice">Chef's Choice (Màu Vàng)</option>
+                                        <option value="Best Value">Best Value (Màu Đỏ)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Danh sách món (Gõ mỗi món 1 dòng) *</label>
+                                    <textarea id="combo-items" required rows="4" placeholder="2x Sake Nigiri&#10;6x Maki Lachs&#10;Miso Suppe" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none text-sm"></textarea>
+                                </div>
+
+                                <div class="flex gap-2 mt-4">
+                                    <button type="submit" id="combo-submit-btn" class="w-full btn-primary justify-center text-sm py-3 transition-colors">Thêm Combo</button>
+                                    <button type="button" id="combo-cancel-btn" class="w-full btn-secondary hidden justify-center text-sm py-3 transition-colors">Huỷ sửa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Current Combos -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="flex items-center justify-between mb-6 p-6">
+                                <h2 class="text-lg font-bold flex items-center gap-2">
+                                    <i class="ph ph-list-dashes text-brand-red text-xl"></i> Danh sách Set Combo
+                                </h2>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="border-b border-gray-100 text-sm text-gray-500">
+                                            <th class="text-left font-semibold py-3 px-4 w-1/3">Tên & Thông tin</th>
+                                            <th class="text-left font-semibold py-3 px-4">Menu chi tiết</th>
+                                            <th class="text-left font-semibold py-3 px-4">Giá</th>
+                                            <th class="text-right font-semibold py-3 px-4">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-combos-list" class="divide-y divide-gray-100">
+                                        <!-- Combos will be injected here via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="settings-management" class="hidden max-w-3xl mx-auto mt-8">
+                    <div class="bg-brand-gold/10 p-6 rounded-2xl border border-brand-gold/20 mb-6">
+                        <div class="flex items-center justify-between border-b border-brand-gold/10 pb-4 mb-4">
+                            <div>
+                                <h4 class="font-black text-brand-gold uppercase tracking-widest text-sm mb-1">ONLINE-BESTELLUNGEN (NHẬN ĐƠN WEB)</h4>
+                                <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Bật hoặc Tắt tính năng đặt đồ ăn trên website</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="set-ordering-enabled" checked class="sr-only peer">
+                                <div class="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-black text-brand-red uppercase tracking-widest text-sm mb-1">LIEFER-SERVICE (GIAO HÀNG TẬN NƠI)</h4>
+                                <p class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Bật tính năng Giao hàng và hiện các mục liên quan trên Web</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="set-delivery-enabled" class="sr-only peer">
+                                <div class="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-brand-red"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-brand-gold/10 grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Đơn tối thiểu giao hàng (€)</label>
+                                <input type="number" id="set-delivery-min" step="0.01" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phí giao hàng < 3km (€)</label>
+                                <input type="number" id="set-delivery-fee-3" step="0.01" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phí 3km - 10km (€)</label>
+                                <input type="number" id="set-delivery-fee-10" step="0.01" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phí > 10km (€)</label>
+                                <input type="number" id="set-delivery-fee-max" step="0.01" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="ph ph-gear text-brand-red text-2xl"></i> Cài đặt chung
+                        </h2>
+                        
+                        <form id="settings-form" class="space-y-6">
+                            <!-- Basic info -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tên nhà hàng *</label>
+                                    <input type="text" id="set-name" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Số điện thoại *</label>
+                                    <input type="tel" id="set-phone" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email *</label>
+                                    <input type="email" id="set-email" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tên Miền (Domain) *</label>
+                                    <input type="text" id="set-domain" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: kimisushi.de">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Địa chỉ *</label>
+                                <input type="text" id="set-address" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Logo nhà hàng (Hoặc Tải ảnh lên)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="set-logo" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Để trống nếu dùng Icon mặc định">
+                                    <label class="bg-gray-100 hover:bg-gray-200 text-brand-dark px-3 py-2 rounded-lg cursor-pointer flex items-center justify-center shrink-0 border border-gray-200 transition-colors" title="Tải ảnh từ máy tính">
+                                        <i class="ph ph-upload-simple text-lg"></i>
+                                        <input type="file" class="hidden" accept="image/*" onchange="handleImageUpload(this, 'set-logo')">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ảnh bìa Header *</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="set-hero" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                    <label class="bg-gray-100 hover:bg-gray-200 text-brand-dark px-3 py-2 rounded-lg cursor-pointer flex items-center justify-center shrink-0 border border-gray-200 transition-colors" title="Tải ảnh từ máy tính">
+                                        <i class="ph ph-upload-simple text-lg"></i>
+                                        <input type="file" class="hidden" accept="image/*" onchange="handleImageUpload(this, 'set-hero')">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ảnh trang Về chúng tôi *</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="set-about" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                    <label class="bg-gray-100 hover:bg-gray-200 text-brand-dark px-3 py-2 rounded-lg cursor-pointer flex items-center justify-center shrink-0 border border-gray-200 transition-colors" title="Tải ảnh từ máy tính">
+                                        <i class="ph ph-upload-simple text-lg"></i>
+                                        <input type="file" class="hidden" accept="image/*" onchange="handleImageUpload(this, 'set-about')">
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Hours -->
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6">Giờ mở cửa (Phân ca)</h3>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Lịch tóm tắt (Hiển thị góc đặt bàn)</label>
+                                <input type="text" id="set-h-summary" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: Di-So: 11:00-15:00 & 17:00-22:00">
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 2</span>
+                                    <input type="text" id="set-h-mon-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1 (VD: Ruhetag)">
+                                    <input type="text" id="set-h-mon-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 3</span>
+                                    <input type="text" id="set-h-tue-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-tue-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 4</span>
+                                    <input type="text" id="set-h-wed-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-wed-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 5</span>
+                                    <input type="text" id="set-h-thu-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-thu-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 6</span>
+                                    <input type="text" id="set-h-fri-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-fri-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Thứ 7</span>
+                                    <input type="text" id="set-h-sat-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-sat-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase w-20">Chủ Nhật</span>
+                                    <input type="text" id="set-h-sun-1" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 1">
+                                    <input type="text" id="set-h-sun-2" class="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Ca 2">
+                                </div>
+                            </div>
+
+                            <!-- Telegram Settings -->
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6 flex items-center gap-2">
+                                <i class="ph-fill ph-paper-plane-tilt text-blue-500"></i> Cấu hình Telegram Bot (Nhận đơn điện thoại)
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Telegram Bot Token *</label>
+                                    <input type="password" id="set-tg-token" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Mã Token từ @BotFather">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Telegram Chat ID *</label>
+                                        <input type="text" id="set-tg-chatid" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Mã Chat ID (Nhóm hoặc Cá nhân)">
+                                    </div>
+                                    <div class="flex items-end">
+                                        <button type="button" id="btn-test-telegram" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 px-4 rounded-lg border border-blue-200 transition-colors text-sm flex items-center justify-center gap-2">
+                                            <i class="ph ph-paper-plane-tilt"></i> Gửi thử tin nhắn
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-400 italic">* Lưu ý: Sau khi nhập mã, hãy bấm "Lưu thay đổi" trước khi bấm "Gửi thử".</p>
+                            </div>
+
+                            <!-- Email Notification Settings -->
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6 flex items-center gap-2">
+                                <i class="ph-fill ph-envelope-simple text-brand-gold"></i> Cấu hình Email Thông báo (Gửi khách)
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-gray-700 uppercase">Tự động gửi Email xác nhận</h4>
+                                        <p class="text-[9px] text-gray-400 uppercase font-black">Gửi mail khi bạn nhấn nút hẹn giờ (15p, 30p...)</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="set-email-enabled" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-gold"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Resend Email API Key *</label>
+                                    <input type="password" id="set-email-key" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="re_...">
+                                    <p class="text-[10px] text-gray-400 mt-1 italic">Lấy tại <a href="https://resend.com" target="_blank" class="text-brand-gold underline font-bold">Resend.com</a> (Miễn phí 3,000 email/tháng)</p>
+                                </div>
+                            </div>
+
+                            <!-- Gmail SMTP Settings - Thông báo cho Admin -->
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6 flex items-center gap-2">
+                                <i class="ph-fill ph-google-logo text-red-500"></i> Cấu hình Gmail SMTP (Nhận thông báo đơn hàng)
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between bg-red-50 p-4 rounded-xl border border-red-100">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-red-700 uppercase">Gửi thông báo qua Gmail</h4>
+                                        <p class="text-[9px] text-red-400 uppercase font-black">Nhận đơn hàng mới vào email của bạn</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="set-gmail-enabled" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Gmail Address *</label>
+                                    <input type="email" id="set-gmail-user" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="your-email@gmail.com">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Gmail App Password *</label>
+                                    <input type="password" id="set-gmail-password" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="16 ký tự App Password">
+                                    <p class="text-[10px] text-gray-400 mt-1 italic">Tạo App Password tại <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-red-500 underline font-bold">Google App Passwords</a></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email nhận thông báo (tuỳ chọn)</label>
+                                    <input type="email" id="set-gmail-notify-email" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="notify@example.com (mặc định = Gmail Address)">
+                                </div>
+                                <div class="flex items-end">
+                                    <button type="button" id="btn-test-gmail" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 px-4 rounded-lg border border-red-200 transition-colors text-sm flex items-center justify-center gap-2">
+                                        <i class="ph ph-envelope"></i> Gửi thử Gmail
+                                    </button>
+                                </div>
+                                <div id="gmail-test-result" class="hidden mt-2 p-3 rounded-lg text-sm"></div>
+                                <p class="text-[10px] text-gray-400 italic">* Lưu ý: Cần bật "Less secure app access" hoặc tạo App Password trong Google Account.</p>
+                            </div>
+
+                            <!-- Tax Settings -->
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6">Cấu hình Thuế (Vat/MwSt)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mức thuế 1 (%) *</label>
+                                    <input type="number" id="set-tax-1" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mức thuế 2 (%) *</label>
+                                    <input type="number" id="set-tax-2" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm">
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4 mt-6 border-t border-gray-100">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-black text-gray-400 uppercase tracking-widest">Link Bộ não Cloud (Cloudflare Worker)</label>
+                                    <input type="text" id="siteDomain" name="siteDomain" placeholder="https://sakura-worker.hoang.workers.dev" class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-brand-red outline-none text-sm font-bold shadow-inner">
+                                    <p class="text-[10px] text-gray-400 italic">Dán link Worker của bạn vào đây để đồng bộ dữ liệu đa thiết bị.</p>
+                                </div>
+                                <button type="submit" class="btn-primary w-full justify-center">Lưu Cài đặt</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                        <!-- Compact Data Management Card -->
+                        <div class="bg-blue-50/50 rounded-2xl p-4 border border-blue-100 mb-8">
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                                        <i class="ph-fill ph-database text-lg text-blue-500"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-gray-800">Dữ liệu Offline</h3>
+                                        <p class="text-[10px] text-gray-400 font-medium">Sao lưu & Khôi phục thực đơn</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <button onclick="exportSystemData()" class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-bold hover:bg-blue-600 transition shadow-sm">
+                                        <i class="ph ph-download-simple"></i> SAO LƯU
+                                    </button>
+                                    <input type="file" id="import-file" class="hidden" accept=".json" onchange="importSystemData(event)">
+                                    <button onclick="document.getElementById('import-file').click()" class="flex items-center gap-2 px-4 py-2 bg-white border border-blue-500 text-blue-500 rounded-xl text-xs font-bold hover:bg-blue-50 transition">
+                                        <i class="ph ph-upload-simple"></i> KHÔI PHỤC
+                                    </button>
+                                    <button onclick="forceResetAllData()" class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition border border-red-100" title="Dọn dẹp và nạp lại bản mẫu">
+                                        <i class="ph ph-wrench"></i> SỬA LỖI
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                <!-- NEW SECTION: Cloudflare Tunnel Support -->
+                <div id="tunnel-management" class="hidden max-w-4xl mx-auto flex flex-col gap-8">
+                    <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="bg-blue-600 p-10 text-white flex justify-between items-center relative overflow-hidden">
+                            <div class="z-10">
+                                <span class="bg-white/20 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">CẤU HÌNH DÀNH CHO VPS</span>
+                                <h3 class="text-4xl font-black mb-2 tracking-tighter uppercase italic">Gắn Tên Miền & SSL</h3>
+                                <p class="text-blue-100 font-medium max-w-md">Cách dễ nhất để gõ tên miền là vào thẳng web (không cần số :3000) và có ổ khóa xanh HTTPS.</p>
+                            </div>
+                            <i class="ph-fill ph-shield-check text-9xl text-white/10 absolute -right-4 -bottom-4"></i>
+                        </div>
+                        
+                        <div class="p-10 space-y-10">
+                            <!-- Helper Script Note -->
+                            <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-start gap-4">
+                                <i class="ph ph-magic-wand text-3xl text-amber-500 shrink-0"></i>
+                                <div>
+                                    <h4 class="font-bold text-amber-900 mb-1">CÔNG CỤ HỖ TRỢ TỰ ĐỘNG</h4>
+                                    <p class="text-amber-800 text-sm">Tôi đã chuẩn bị sẵn file <span class="font-mono bg-white/50 px-1 rounded">deploy-helper.ps1</span> trong thư mục dự án. Bạn chỉ cần chạy nó bằng PowerShell để hệ thống tự động cài đặt mọi thứ!</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 1 -->
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">1</div>
+                                <div class="space-y-3">
+                                    <h4 class="text-lg font-bold">Chuẩn bị Cloudflare</h4>
+                                    <p class="text-gray-500 text-sm">Bạn cần đăng ký tài khoản <a href="https://dash.cloudflare.com/" target="_blank" class="text-blue-600 underline font-bold">Cloudflare dashboard</a> (Miễn phí) và trỏ Tên miền của mình về đây.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">2</div>
+                                <div class="space-y-3">
+                                    <h4 class="text-lg font-bold">Tạo "Đường hầm" (Tunnel)</h4>
+                                    <p class="text-gray-500 text-sm">Vào menu <b>Zero Trust</b> -> <b>Networks</b> -> <b>Tunnels</b>. Nhấn <b>Create a Tunnel</b>, đặt tên là "Sakura-POS", sau đó nhấn Save.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="flex gap-6">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">3</div>
+                                <div class="space-y-4 w-full">
+                                    <h4 class="text-lg font-bold">Kích hoạt trên VPS (Chạy Lệnh)</h4>
+                                    <p class="text-gray-500 text-sm">Chọn <b>Windows</b> và copy lệnh cài đặt (Install Service) mà Cloudflare cung cấp, sau đó dán vào <b>PowerShell (Admin)</b> trên VPS của bạn.</p>
+                                    <div class="bg-gray-900 rounded-2xl p-4 text-blue-400 font-mono text-xs border-l-4 border-blue-500 shadow-inner group relative">
+                                        <code id="tunnel-cmd">cloudflared-windows-amd64.exe service install [TOKEN_CUA_BAN]</code>
+                                        <button onclick="copyTunnelCmd()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"><i class="ph ph-copy text-lg"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!-- Step 4 -->
+                             <div class="flex gap-6">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xl shrink-0">4</div>
+                                <div class="space-y-3">
+                                    <h4 class="text-lg font-bold">Cấu hình Tên Miền</h4>
+                                    <p class="text-gray-500 text-sm">Trong phần <b>Public Hostname</b> trên Cloudflare:</p>
+                                    <ul class="list-disc ml-5 text-sm text-gray-500 space-y-2 italic">
+                                        <li><b>Public Hostname:</b> Nhập tên miền của bạn (VD: <span class="text-blue-600 font-bold">sakurasushi.com</span>)</li>
+                                        <li><b>Service Type:</b> Chọn <span class="text-blue-600 font-bold">HTTP</span></li>
+                                        <li><b>URL:</b> Nhập <span class="text-blue-600 font-bold">localhost:3000</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-50 p-6 rounded-2xl border border-green-100 flex items-center gap-4">
+                                <i class="ph-fill ph-check-circle text-3xl text-green-500"></i>
+                                <p class="text-green-800 text-sm font-medium">Bây giờ bạn có thể gõ trực tiếp Tên miền là vào thẳng web với HTTPS chuyên nghiệp!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seo-management" class="hidden max-w-3xl mx-auto mt-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="ph ph-globe-hemisphere-west text-brand-red text-2xl"></i> Tối ưu Công cụ tìm kiếm (SEO & GEO)
+                        </h2>
+                        
+                        <form id="seo-form" class="space-y-6">
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-2">Thẻ Meta SEO Cơ bản</h3>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tiêu đề trang (Title Tag) *</label>
+                                <input type="text" id="seo-title" required class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: Sakura Sushi | Authentic Japanese">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mô tả (Meta Description) *</label>
+                                <textarea id="seo-desc" required rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="Mô tả dưới 160 ký tự..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Từ khóa (Meta Keywords)</label>
+                                <input type="text" id="seo-keywords" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: sushi, japanisches restaurant, berlin">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Thương hiệu / Tác giả (Author)</label>
+                                <input type="text" id="seo-author" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: Sakura Sushi Team">
+                            </div>
+
+                            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mt-6">Thông tin Bản đồ (GEO Data)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mã Vùng định vị (geo.region)</label>
+                                    <input type="text" id="geo-region" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: DE-BE">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tên Khu Vực (geo.placename)</label>
+                                    <input type="text" id="geo-placename" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: Berlin">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tọa độ Bản đồ (geo.position - Vĩ độ;Kinh độ)</label>
+                                <input type="text" id="geo-position" class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-brand-red outline-none text-sm" placeholder="VD: 52.5200;13.4050">
+                            </div>
+
+                            <div class="pt-4 mt-6 border-t border-gray-100">
+                                <button type="submit" class="btn-primary w-full justify-center">Lưu Dữ liệu SEO</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation (App-like) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 flex justify-around items-center px-2 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe">
+        <a href="#" class="flex flex-col items-center gap-1 text-brand-red">
+            <i class="ph-fill ph-fork-knife text-2xl"></i>
+            <span class="text-[10px] font-semibold">Menü</span>
+        </a>
+        <a href="#" id="mobile-cal-btn" class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-red transition-colors">
+            <i class="ph ph-calendar-check text-2xl"></i>
+            <span class="text-[10px] font-medium">Lịch</span>
+        </a>
+        <a href="index.html" class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-red transition-colors">
+            <i class="ph ph-browser text-2xl"></i>
+            <span class="text-[10px] font-medium">Web</span>
+        </a>
+        <button id="mobile-logout-btn" class="flex flex-col items-center gap-1 text-gray-400 hover:text-brand-red transition-colors">
+            <i class="ph ph-sign-out text-2xl"></i>
+            <span class="text-[10px] font-medium">Thoát</span>
+        </button>
+    </nav>
+
+    <!-- Inbox Detail Modal -->
+    <div id="inbox-detail-modal" class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white rounded-t-2xl sticky top-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-fill ph-envelope-simple text-2xl"></i>
+                        <div>
+                            <h3 class="font-bold text-lg" id="inbox-detail-title">Chi tiết đơn hàng</h3>
+                            <p class="text-green-100 text-xs" id="inbox-detail-type">RESERVIERUNG</p>
+                        </div>
+                    </div>
+                    <button id="close-inbox-detail" class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition">
+                        <i class="ph ph-x text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <!-- Customer Info -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+                    <h4 class="text-xs font-black text-gray-400 uppercase mb-3">Kundeninformationen</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase">Name</p>
+                            <p class="font-bold text-gray-800" id="inbox-detail-name">-</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase">Telefon</p>
+                            <p class="font-bold text-gray-800" id="inbox-detail-phone">-</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-[10px] text-gray-500 uppercase">Email</p>
+                            <p class="font-bold text-gray-800" id="inbox-detail-email">-</p>
+                        </div>
+                        <div id="inbox-detail-date-row">
+                            <p class="text-[10px] text-gray-500 uppercase">Datum & Uhrzeit</p>
+                            <p class="font-bold text-gray-800" id="inbox-detail-datetime">-</p>
+                        </div>
+                        <div id="inbox-detail-guests-row">
+                            <p class="text-[10px] text-gray-500 uppercase">Anzahl Gäste</p>
+                            <p class="font-bold text-gray-800" id="inbox-detail-guests">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items (for orders) -->
+                <div id="inbox-detail-items-container" class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100 hidden">
+                    <h4 class="text-xs font-black text-gray-400 uppercase mb-3">Bestellung</h4>
+                    <div id="inbox-detail-items"></div>
+                    <div class="border-t border-gray-200 mt-3 pt-3 flex justify-between items-center">
+                        <span class="font-bold text-gray-700">Gesamt:</span>
+                        <span class="font-black text-brand-red text-lg" id="inbox-detail-total">0,00 €</span>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div id="inbox-detail-notes-container" class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100 hidden">
+                    <h4 class="text-xs font-black text-gray-400 uppercase mb-2">Notizen</h4>
+                    <p class="text-sm text-gray-700" id="inbox-detail-notes">-</p>
+                </div>
+
+                <!-- Quick Reply Actions -->
+                <div class="border-t border-gray-100 pt-4">
+                    <h4 class="text-xs font-black text-gray-400 uppercase mb-3">Schnelle Antwort (Automatisch per Email & Telegram)</h4>
+
+                    <!-- Reservation Actions -->
+                    <div id="inbox-detail-reservation-actions" class="space-y-2">
+                        <button onclick="sendReply('reservation_confirmed')" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition">
+                            <i class="ph-fill ph-check-circle"></i>
+                            OK - Xác nhận đặt bàn thành công
+                        </button>
+                        <button onclick="sendReply('reservation_declined')" class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition">
+                            <i class="ph ph-x-circle"></i>
+                            Từ chối - Đặt bàn không thành công
+                        </button>
+                    </div>
+
+                    <!-- Order Actions -->
+                    <div id="inbox-detail-order-actions" class="space-y-2">
+                        <p class="text-xs text-gray-500 mb-2 text-center">Chọn thời gian chuẩn bị:</p>
+                        <div class="grid grid-cols-3 gap-2 mb-2">
+                            <button onclick="sendReply('order_ready', 15)" class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-sm transition">15 min</button>
+                            <button onclick="sendReply('order_ready', 20)" class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-sm transition">20 min</button>
+                            <button onclick="sendReply('order_ready', 30)" class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-sm transition">30 min</button>
+                            <button onclick="sendReply('order_ready', 45)" class="bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-bold text-sm transition">45 min</button>
+                            <button onclick="sendReply('order_ready', 60)" class="bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-bold text-sm transition">60 min</button>
+                            <button onclick="sendReply('order_ready', 90)" class="bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-bold text-sm transition">90 min</button>
+                        </div>
+                        <button onclick="sendReply('order_declined')" class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition">
+                            <i class="ph ph-x-circle"></i>
+                            Từ chối đơn hàng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reply Status -->
+                <div id="inbox-reply-status" class="mt-4 p-3 rounded-xl text-center text-sm font-semibold hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-brand-dark text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+        <i class="ph-fill ph-check-circle text-green-400 text-xl"></i>
+        <span id="toast-msg" class="text-sm font-medium">Gespeichert erfolgreich</span>
+    </div>
+
+    <!-- Incoming Request Alert (Audio & Modal) -->
+    <audio id="bell-sound" src="https://actions.google.com/sounds/v1/alarms/ding_dong.ogg" preload="auto"></audio>
+    
+    <div id="incoming-modal" class="fixed bottom-24 md:bottom-6 left-4 right-4 md:left-6 z-50 bg-white border border-brand-red shadow-2xl rounded-2xl w-[calc(100%-2rem)] md:w-80 p-5 md:p-6 transform translate-y-40 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-brand-red/10 flex items-center justify-center text-brand-red animate-pulse">
+                <i class="ph-fill ph-bell-ringing text-2xl"></i>
+            </div>
+            <h4 class="font-bold text-brand-dark" id="inc-title">Neue Bestellung!</h4>
+        </div>
+        
+        <div class="text-sm text-gray-600 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100" id="inc-details">
+            Name: Johannes<br>
+            Telefon: 0123...<br>
+            Items: 3
+        </div>
+
+        <p class="text-[10px] font-semibold text-gray-500 uppercase mb-2">Bạn cần bao nhiêu phút chuẩn bị?</p>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+            <button class="bg-brand-red text-white py-2 rounded-lg text-xs font-semibold hover:bg-brand-red/90 transition" onclick="acceptRequest(15)">15 Phút</button>
+            <button class="bg-brand-red text-white py-2 rounded-lg text-xs font-semibold hover:bg-brand-red/90 transition" onclick="acceptRequest(20)">20 Phút</button>
+            <button class="bg-brand-red text-white py-2 rounded-lg text-xs font-semibold hover:bg-brand-red/90 transition" onclick="acceptRequest(25)">25 Phút</button>
+            <button class="bg-brand-red text-white py-2 rounded-lg text-xs font-semibold hover:bg-brand-red/90 transition" onclick="acceptRequest(30)">30 Phút</button>
+            <button class="bg-gray-700 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-800 transition" onclick="acceptRequest(45)">45 Phút</button>
+            <button class="bg-gray-700 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-800 transition" onclick="acceptRequest(60)">60 Phút</button>
+        </div>
+        <button class="w-full bg-blue-600 text-white py-3 rounded-lg text-xs font-bold hover:bg-blue-700 transition mt-2 flex items-center justify-center gap-2" onclick="acceptRequest(20, true)">
+            <i class="ph ph-printer"></i> XÁC NHẬN & IN BILL (20p)
+        </button>
+    </div>
+
+    <!-- Calendar View Overlay -->
+    <div id="calendar-view" class="fixed inset-0 z-50 bg-white transform translate-y-full transition-transform duration-500 overflow-y-auto pb-20 md:pb-0">
+        <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl md:text-3xl font-serif font-bold text-brand-dark">Reservierungen</h2>
+                <button id="close-calendar" class="btn-secondary px-3 py-2 text-sm"><i class="ph ph-x"></i> Schließen</button>
+            </div>
+            <div id="calendar" class="h-[500px] md:h-[600px] border border-gray-100 rounded-xl shadow-soft p-2 md:p-4 text-xs md:text-base"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar button to open calendar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.querySelector('nav');
+            const calBtn = document.createElement('a');
+            calBtn.href = "#";
+            calBtn.className = "flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-brand-red/5 hover:text-brand-red rounded-xl transition-colors font-medium cursor-pointer";
+            calBtn.innerHTML = '<i class="ph ph-calendar-check text-xl"></i> Reservierungen';
+            calBtn.onclick = openCalendar;
+            if(nav && nav.children.length > 1) {
+                nav.insertBefore(calBtn, nav.children[1]);
+            }
+            
+            const mobCalBtn = document.getElementById('mobile-cal-btn');
+            if (mobCalBtn) mobCalBtn.onclick = openCalendar;
+
+            function openCalendar(e) {
+                if (e) e.preventDefault();
+                document.getElementById('calendar-view').classList.remove('translate-y-full');
+                if(window.calendar) setTimeout(() => window.calendar.render(), 100);
+            }
+            
+            document.getElementById('close-calendar').onclick = () => {
+                document.getElementById('calendar-view').classList.add('translate-y-full');
+            };
+
+            const logoutBtn = document.getElementById('mobile-logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    sessionStorage.removeItem('kimi_admin_auth');
+                    window.location.reload();
+                });
+            }
+        });
+    </script>
+
+    <script src="js/data.js?v=1.1"></script>
+    <script src="js/admin.js?v=1.1"></script>
+</body>
+</html>

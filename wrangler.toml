@@ -1,0 +1,30 @@
+name = "sakura-sushi-pos"
+pages_build_output_dir = "."
+compatibility_date = "2024-04-09"
+
+# KV Namespace - Tạo bằng: npx wrangler kv:namespace create SAKURA_KV
+# Hoặc xem ID trong Cloudflare Dashboard > KV > Namespaces
+[[kv_namespaces]]
+binding = "SAKURA_KV"
+id = "a263657256a34e14b102a2f2a9c4550b"
+
+# ============================================
+# CÁCH CÀI ĐẶT BIẾN MÔI TRƯỜNG (Environment Variables)
+# ============================================
+# Vì đây là Cloudflare Pages (không phải Workers),
+# các biến môi trường cần được cài đặt THỦ CÔNG trong Cloudflare Dashboard:
+#
+# 1. Vào Cloudflare Dashboard > Workers & Pages > Your Project
+# 2. Settings > Environment Variables
+# 3. Thêm các biến sau:
+#
+#    TÊN              | GIÁ TRỊ                          | LOẠI
+#    -----------------|----------------------------------|--------
+#    RESEND_API_KEY   | re_xxxxx (từ resend.com)       | Secret
+#    TELEGRAM_BOT_TOKEN | 7xxxxxx:AAxxxxxx (từ BotFather) | Secret
+#    TELEGRAM_CHAT_ID | 5xxxxxx (chat ID của bạn)       | Secret
+#
+# LƯU Ý QUAN TRỌNG:
+# - KHÔNG đặt API key trong code - phải dùng Environment Variables
+# - Secret variables không hiển thị trong logs
+# - Sau khi thêm, cần Redeploy để có hiệu lực

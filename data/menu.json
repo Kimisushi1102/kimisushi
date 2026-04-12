@@ -1,0 +1,12 @@
+[
+  {"id":"1","name":"Sake Nigiri","price":"5,90 €","category":"Nigiri","description":"Premium Lachs auf perfekt gewürztem Sushireis","image":"images/salmon_nigiri.png","pieces":"2 Stück","tag":"Bestseller"},
+  {"id":"2","name":"Dragon Roll","price":"14,90 €","category":"Maki","description":"Gebackene Garnele, Gurke, Avocado mit Unagi-Sauce","image":"images/dragon_roll.png","pieces":"8 Stück","tag":"Empfehlung"},
+  {"id":"3","name":"Maguro Nigiri","price":"6,50 €","category":"Nigiri","description":"Feinster Thunfisch auf Sushireis","image":"images/maguro_nigiri.png","pieces":"2 Stück"},
+  {"id":"4","name":"Rainbow Roll","price":"15,90 €","category":"Maki","description":"Lachs, Thunfisch und Bass mit Avocado","image":"images/rainbow_roll.png","pieces":"8 Stück"},
+  {"id":"5","name":"Gyoza","price":"6,90 €","category":"Appetizer","description":"Knusprige japanische Teigtaschen","image":"images/gyoza.png","pieces":"6 Stück"},
+  {"id":"6","name":"Miso Soup","price":"3,50 €","category":"Soup","description":"Traditionelle Misosuppe","image":"images/miso_soup.png"},
+  {"id":"7","name":"Edamame","price":"4,50 €","category":"Appetizer","description":"Gedämpfte Sojabohnen","image":"images/edamame.png"},
+  {"id":"8","name":"Ebi Tempura","price":"9,90 €","category":"Tempura","description":"Knusprige Garnelen im Tempurateig","image":"images/ebi_tempura.png","pieces":"5 Stück"},
+  {"id":"9","name":"Sashimi Platter","price":"18,90 €","category":"Sashimi","description":"Auswahl an frischem Sashimi","image":"images/sashimi_platter.png","pieces":"12 Stück","tag":"Neu"},
+  {"id":"10","name":"Salmon Teriyaki","price":"12,90 €","category":"Hot","description":"Gegrillter Lachs mit Teriyaki-Sauce","image":"images/salmon_teriyaki.png"}
+]

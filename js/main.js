@@ -1,0 +1,1180 @@
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- Live Sync when Storage changes (from Admin/POS) ---
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'kimi_settings' || e.key === 'kimi_menu' || e.key === 'kimi_combos') {
+            console.log("[WEBSITE] Dữ liệu đã thay đổi từ Admin, đang làm mới trang...");
+            location.reload(); 
+        }
+    });
+
+    
+    // --- 0. Scroll & UI Failsafe ---
+    // Ensure body scroll is never stuck on load
+    document.body.style.overflow = '';
+    
+    const lockScroll = (lock) => {
+        if (lock) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.paddingRight = '8px'; // Prevent layout shift from scrollbar
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '0';
+        }
+    };
+
+    // --- 0.1 Load Dynamic Settings ---
+    if (typeof getSettings === 'function') {
+        const config = getSettings();
+        
+        const updateText = (id, text) => {
+            const el = document.getElementById(id);
+            if(el && text) el.textContent = text;
+        };
+        const updateLink = (id, pf, text) => {
+            const el = document.getElementById(id);
+            if(el && text) el.href = pf + text.replace(/\s+/g, '');
+        };
+
+        updateText('site-brand-1', config.brandName);
+        updateText('site-brand-2', config.brandName);
+        
+        updateText('site-phone-1', config.phone);
+        updateText('site-phone-2', config.phone);
+        updateText('res-site-phone', config.phone);
+        updateLink('site-phone-link-1', 'tel:', config.phone);
+        updateLink('site-phone-link-2', 'tel:', config.phone);
+        
+        // Sync with Live Server if available
+        fetch('/api/settings').then(r => r.json()).then(liveConfig => {
+            Object.assign(config, liveConfig);
+            applyConfigToUI(config);
+        }).catch(err => console.log("Standard configuration active."));
+
+        function applyConfigToUI(config) {
+            updateText('site-brand-1', config.brandName);
+            updateText('site-brand-2', config.brandName);
+            // ... apply rest of settings ...
+        }
+
+        updateText('site-email', config.email);
+        updateLink('site-email-link', 'mailto:', config.email);
+
+        if (config.address) {
+            const el = document.getElementById('site-address');
+            if (el) el.innerHTML = config.address.replace(/,\s*/g, '<br>');
+        }
+
+        updateText('res-hours-summary', config.hoursSummary);
+        updateText('site-h-mon-1', config.hoursMon1);
+        updateText('site-h-mon-2', config.hoursMon2);
+        updateText('site-h-tue-1', config.hoursTue1);
+        updateText('site-h-tue-2', config.hoursTue2);
+        updateText('site-h-wed-1', config.hoursWed1);
+        updateText('site-h-wed-2', config.hoursWed2);
+        updateText('site-h-thu-1', config.hoursThu1);
+        updateText('site-h-thu-2', config.hoursThu2);
+        updateText('site-h-fri-1', config.hoursFri1);
+        updateText('site-h-fri-2', config.hoursFri2);
+        updateText('site-h-sat-1', config.hoursSat1);
+        updateText('site-h-sat-2', config.hoursSat2);
+        updateText('site-h-sun-1', config.hoursSun1);
+        updateText('site-h-sun-2', config.hoursSun2);
+
+        if (config.heroImage) {
+            const h1 = document.getElementById('site-hero-1');
+            if (h1) h1.src = config.heroImage;
+            const h2 = document.getElementById('site-hero-2');
+            if (h2) h2.style.backgroundImage = `url('${config.heroImage}')`;
+        }
+
+        if (config.aboutImage) {
+            const a1 = document.getElementById('site-about');
+            if (a1) a1.src = config.aboutImage;
+        }
+
+        if (config.logoImage && config.logoImage.trim() !== '') {
+            document.getElementById('site-logo-icon-1')?.classList.add('hidden');
+            document.getElementById('site-logo-img-1')?.classList.remove('hidden');
+            if(document.getElementById('site-logo-img-1')) document.getElementById('site-logo-img-1').src = config.logoImage;
+            
+            document.getElementById('site-logo-icon-2')?.classList.add('hidden');
+            document.getElementById('site-logo-img-2')?.classList.remove('hidden');
+            if(document.getElementById('site-logo-img-2')) document.getElementById('site-logo-img-2').src = config.logoImage;
+        } else {
+            document.getElementById('site-logo-icon-1')?.classList.remove('hidden');
+            document.getElementById('site-logo-img-1')?.classList.add('hidden');
+            document.getElementById('site-logo-icon-2')?.classList.remove('hidden');
+            document.getElementById('site-logo-img-2')?.classList.add('hidden');
+        }
+
+        // --- 0.5 Delivery Visibility ---
+        document.querySelectorAll('.delivery-content').forEach(el => {
+            if (config.deliveryEnabled === true) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+    }
+    // --- 1. Mobile Menu Toggle ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    // --- 1.5 Prevent empty hash links from jumping to top ---
+    document.querySelectorAll('a[href="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+        });
+    });
+
+    function toggleMenu() {
+        if (mobileMenu.classList.contains('translate-x-full')) {
+            mobileMenu.classList.remove('translate-x-full');
+            lockScroll(true);
+        } else {
+            mobileMenu.classList.add('translate-x-full');
+            lockScroll(false);
+        }
+    }
+
+    if (mobileMenuBtn && closeMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        closeMenuBtn.addEventListener('click', toggleMenu);
+        
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+    }
+
+    // --- 2. Sticky Header ---
+    const header = document.getElementById('header');
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('header-scrolled');
+        } else {
+            header.classList.remove('header-scrolled');
+        }
+    });
+
+    // --- 3. Scroll Reveal Animations ---
+    const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right');
+    
+    const revealOptions = {
+        threshold: 0.15,
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const revealObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                return;
+            }
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+        });
+    }, revealOptions);
+
+    revealElements.forEach(el => {
+        revealObserver.observe(el);
+    });
+
+    // --- 4. Render Menu Grid & Dynamic Filters from LocalStorage ---
+    const menuGrid = document.getElementById('menu-grid');
+    const filterTabsContainer = document.getElementById('filter-tabs-container');
+
+    let activeMenu = typeof getMenu === 'function' ? getMenu() : [];
+
+    function renderCategoryFilters() {
+        if (!filterTabsContainer) return;
+        
+        const categories = [...new Set(activeMenu.map(item => item.category))].filter(c => c && c.trim() !== "");
+        
+        // Helper to capitalize first letter
+        const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+        
+        // Hardcoded mapping for legacy categories (optional)
+        const categoryLabels = {
+            'sushi': 'Nigiri',
+            'maki': 'Maki Rolls',
+            'sashimi': 'Sashimi'
+        };
+
+        let filtersHtml = `<button class="filter-btn active px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="all">Alle</button>`;
+        
+        categories.forEach(cat => {
+            const label = categoryLabels[cat.toLowerCase()] || capitalize(cat);
+            filtersHtml += `<button class="filter-btn px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="${cat}">${label}</button>`;
+        });
+
+        filterTabsContainer.innerHTML = filtersHtml;
+
+        // Re-attach listeners via delegation
+        filterTabsContainer.onclick = (e) => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+
+            const allBtns = filterTabsContainer.querySelectorAll('.filter-btn');
+            allBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const filterValue = btn.getAttribute('data-filter');
+            
+            if(menuGrid) {
+                menuGrid.style.opacity = '0';
+                setTimeout(() => {
+                    renderMenu(filterValue);
+                    menuGrid.style.opacity = '1';
+                }, 300);
+            }
+        };
+    }
+
+    function renderMenu(filterValue = 'all') {
+        if (!menuGrid) return;
+        
+        const menu = activeMenu;
+        menuGrid.innerHTML = ''; 
+
+        [...menu].reverse().forEach(item => {
+            if (filterValue !== 'all' && item.category !== filterValue) return;
+
+            let badgeHtml = '';
+            if (item.tag) {
+                if (item.tag === 'Bestseller') {
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-brand-dark text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Bestseller</span>`;
+                } else if (item.tag === 'Empfehlung') {
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-gold text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Empfehlung</span>`;
+                } else if (item.tag === 'Neu') {
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-red text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Neu</span>`;
+                }
+            }
+
+            const itemHtml = `
+                <div class="menu-item rounded-2xl bg-brand-gray/30 border border-gray-100 overflow-hidden hover-card group reveal-up active" data-category="${item.category}">
+                    <div class="relative h-56 overflow-hidden bg-brand-dark">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90">
+                        ${badgeHtml}
+                    </div>
+                    <div class="p-6 flex flex-col h-[calc(100%-14rem)]">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-serif font-bold text-xl text-brand-dark">${item.name}</h3>
+                            <span class="text-brand-red font-semibold whitespace-nowrap ml-2">${item.price}</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-4 font-light line-clamp-3 flex-grow">${item.description}</p>
+                        <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-100">
+                            <span class="text-xs text-gray-400 font-medium">${item.pieces || ''}</span>
+                            <button class="add-to-cart-btn w-8 h-8 rounded-full bg-brand-dark text-white flex items-center justify-center hover:bg-brand-red transition-colors" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            menuGrid.insertAdjacentHTML('beforeend', itemHtml);
+        });
+    }
+
+    if(menuGrid) {
+        menuGrid.style.transition = 'opacity 0.3s ease';
+        
+        // Fetch Live Menu from Server
+        fetch('/api/menu').then(r => r.json()).then(liveMenu => {
+            if (liveMenu && liveMenu.length > 0) {
+                activeMenu = liveMenu;
+                renderCategoryFilters();
+                renderMenu('all');
+            }
+        }).catch(err => {
+            console.log("Server offline, using cached menu data.");
+            renderCategoryFilters();
+            renderMenu('all');
+        });
+    }
+
+
+    // --- 4.5. Render Combos ---
+    const combosGrid = document.getElementById('combos-grid');
+
+    function renderCombos() {
+        if (!combosGrid) return;
+        const combos = typeof getCombos === 'function' ? getCombos() : [];
+        combosGrid.innerHTML = '';
+
+        combos.forEach((c, idx) => {
+            let tagHtml = '';
+            let wrapperClasses = "bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors group reveal-up active";
+            let colorType = "brand-gold";
+            let textStyles = "text-white/80 font-light text-sm";
+            let priceClasses = "text-4xl font-bold text-brand-gold";
+            let btnClasses = "w-full py-3 px-6 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors";
+            
+            if (c.tag && c.tag !== "") {
+                tagHtml = `<div class="absolute top-0 right-8 transform -translate-y-1/2 bg-brand-gold text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.tag}</div>`;
+                wrapperClasses = "bg-gradient-to-b from-brand-red/80 to-brand-red/20 border border-brand-red/50 rounded-2xl p-8 relative transform md:-translate-y-4 shadow-2xl group reveal-up active";
+                colorType = "brand-gold";
+                priceClasses = "text-4xl font-bold text-white";
+                btnClasses = "w-full py-3 px-6 rounded-lg bg-white text-brand-dark font-semibold hover:bg-brand-gray transition-colors shadow-lg";
+                textStyles = "text-white/90 font-light text-sm";
+            }
+            
+            if (c.name.toLowerCase().includes('veggie') || c.name.toLowerCase().includes('vegan')) {
+                colorType = "brand-matcha";
+                priceClasses = "text-4xl font-bold text-brand-matcha";
+            }
+
+            const oldPriceHtml = c.oldPrice ? `<span class="text-white/50 line-through text-sm">${c.oldPrice}</span>` : '';
+            
+            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3"><i class="ph ph-check text-${colorType} mt-0.5"></i> ${i}</li>`).join('');
+
+            const comboHtml = `
+                <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
+                    ${tagHtml}
+                    <h3 class="font-serif text-2xl font-bold mb-2">${c.name}</h3>
+                    <p class="${c.tag ? 'text-white/70 border-white/20' : 'text-white/50 border-white/10'} text-sm mb-6 pb-6 border-b">${c.subtitle}</p>
+                    
+                    <div class="flex items-baseline gap-2 mb-8">
+                        <span class="${priceClasses}">${c.price}</span>
+                        ${oldPriceHtml}
+                    </div>
+
+                    <ul class="space-y-4 mb-8 ${textStyles}">
+                        ${itemsListHtml}
+                    </ul>
+
+                    <button class="${btnClasses} add-to-cart-btn" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png">In den Warenkorb</button>
+                </div>
+            `;
+            combosGrid.insertAdjacentHTML('beforeend', comboHtml);
+        });
+    }
+
+    if(combosGrid) {
+        renderCombos();
+    }
+
+    // --- 5. Back to Top Button ---
+    const backToTopBtn = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 500) {
+            backToTopBtn.classList.remove('translate-y-20', 'opacity-0');
+        } else {
+            backToTopBtn.classList.add('translate-y-20', 'opacity-0');
+        }
+    });
+
+    if (backToTopBtn) {
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // --- 6. Form Validation ---
+    const reservationForm = document.getElementById('reservation-form');
+    const formSuccess = document.getElementById('form-success');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (reservationForm) {
+        reservationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            
+            const name = document.getElementById('res-name');
+            const email = document.getElementById('res-email');
+            const phone = document.getElementById('res-phone');
+            
+            if (name.value.trim() === '') {
+                name.classList.add('error-border');
+                name.nextElementSibling.classList.remove('hidden');
+                isValid = false;
+            } else {
+                name.classList.remove('error-border');
+                name.nextElementSibling.classList.add('hidden');
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailRegex.test(email.value.trim())) {
+                email.classList.add('error-border');
+                email.nextElementSibling.classList.remove('hidden');
+                isValid = false;
+            } else if (email) {
+                email.classList.remove('error-border');
+                email.nextElementSibling.classList.add('hidden');
+            }
+
+            if (phone.value.trim() === '' || phone.value.length < 6) {
+                phone.classList.add('error-border');
+                phone.nextElementSibling.classList.remove('hidden');
+                isValid = false;
+            } else {
+                phone.classList.remove('error-border');
+                phone.nextElementSibling.classList.add('hidden');
+            }
+
+            if (isValid) {
+                const btnText = submitBtn.querySelector('span');
+                const originalText = btnText.innerHTML;
+                
+                btnText.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Senden...';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+
+                const resData = {
+                    name: document.getElementById('res-name').value,
+                    phone: document.getElementById('res-phone').value,
+                    email: document.getElementById('res-email').value,
+                    date: document.getElementById('res-date').value,
+                    time: document.getElementById('res-time').value,
+                    guests: document.getElementById('res-persons').value,
+                    notes: document.getElementById('res-message').value
+                };
+
+                // Save to inbox for admin management
+                const inboxItem = {
+                    id: 'res_' + Date.now(),
+                    type: 'reservation',
+                    name: resData.name,
+                    phone: resData.phone,
+                    email: resData.email,
+                    date: resData.date,
+                    time: resData.time,
+                    guests: resData.guests,
+                    notes: resData.notes,
+                    status: 'pending',
+                    time: new Date().toISOString()
+                };
+                try {
+                    const ls = JSON.parse(localStorage.getItem('kimi_inbox') || '[]');
+                    ls.unshift(inboxItem);
+                    if (ls.length > 200) ls.splice(200);
+                    localStorage.setItem('kimi_inbox', JSON.stringify(ls));
+                } catch(e) {}
+                try {
+                    fetch('/api/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inboxItem) }).catch(() => {});
+                } catch(e) {}
+
+                // Send Telegram notification to admin
+                const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
+                if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
+                    fetch('/api/notify-admin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            botToken: tgConfig.telegramBotToken,
+                            chatId: tgConfig.telegramChatId,
+                            orderType: 'reservation',
+                            customerName: resData.name,
+                            customerPhone: resData.phone,
+                            customerEmail: resData.email,
+                            pickupTime: `${resData.date} um ${resData.time}`,
+                            itemCount: resData.guests + ' Gäste'
+                        })
+                    }).catch(() => {});
+                }
+
+                // Send email notification to admin (Gmail)
+                const emailConfig = typeof getSettings === 'function' ? getSettings() : {};
+                if (emailConfig.emailEnabled && emailConfig.emailApiKey) {
+                    fetch('/api/notify-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            customerEmail: resData.email,
+                            customerName: resData.name,
+                            customerPhone: resData.phone,
+                            orderType: 'reservation',
+                            pickupTime: `${resData.date} um ${resData.time}`,
+                            itemCount: resData.guests + ' Gäste',
+                            resendApiKey: emailConfig.emailApiKey || ''
+                        })
+                    }).catch(() => {});
+                }
+
+                // Send Gmail notification to admin (khi khach dat ban)
+                const gmailResConfig = typeof getSettings === 'function' ? getSettings() : {};
+                if (gmailResConfig.gmailEnabled && gmailResConfig.gmailUser && gmailResConfig.gmailPassword) {
+                    fetch('/api/gmail-notify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderType: 'reservation',
+                            customerName: resData.name,
+                            customerPhone: resData.phone,
+                            customerEmail: resData.email,
+                            pickupTime: `${resData.date} um ${resData.time}`,
+                            itemCount: resData.guests + ' Gäste',
+                            notes: resData.notes,
+                            gmailEnabled: gmailResConfig.gmailEnabled,
+                            gmailUser: gmailResConfig.gmailUser,
+                            gmailPassword: gmailResConfig.gmailPassword,
+                            gmailNotifyEmail: gmailResConfig.gmailNotifyEmail
+                        })
+                    }).catch(() => {});
+                }
+
+                if (socket) {
+                    socket.emit('submit_reservation', resData);
+                }
+
+                setTimeout(() => {
+                    reservationForm.reset();
+                    formSuccess.classList.remove('hidden');
+                    btnText.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                    setTimeout(() => { formSuccess.classList.add('hidden'); }, 5000);
+                }, 1500);
+            }
+        });
+
+        const dateInput = document.getElementById('res-date');
+        if (dateInput) {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            // Sau 22h thì mặc định là ngày mai
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const defaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
+            
+            dateInput.min = todayStr;
+            dateInput.value = defaultDate;
+        }
+    }
+});
+
+// --- 7. Shopping Cart Logic ---
+const cartBadges = document.querySelectorAll('.cart-badge');
+const cartToast = document.getElementById('cart-toast');
+const cartItemsList = document.getElementById('cart-items-list');
+let cart = [];
+
+// Price helper: "5,90 €" -> 5.90, "14.90€" -> 14.90
+function parsePrice(priceStr) {
+    if (typeof priceStr === 'number') return priceStr;
+    if (!priceStr) return 0;
+    const cleaned = String(priceStr).replace('€', '').replace(/\s/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+}
+
+// Format price: 5.9 -> "5,90 €"
+function formatPrice(num) {
+    return num.toFixed(2).replace('.', ',') + ' €';
+}
+
+function updateCartUI() {
+    // 1. Update Badges
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartBadges.forEach(badge => {
+        badge.textContent = totalQty;
+        if (totalQty > 0) {
+            badge.classList.remove('scale-0');
+            badge.classList.add('scale-100');
+        } else {
+            badge.classList.remove('scale-100');
+            badge.classList.add('scale-0');
+        }
+    });
+
+    // 2. Update Kasse List
+    if (cartItemsList) {
+        if (cart.length === 0) {
+            cartItemsList.innerHTML = '<div class="text-center py-4 text-gray-400 text-sm">Warenkorb ist leer</div>';
+        } else {
+            cartItemsList.innerHTML = cart.map((item, index) => {
+                const unitPrice = parsePrice(item.price);
+                const subtotal = unitPrice * item.quantity;
+                return `
+                <div class="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0 group">
+                    <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-brand-dark truncate">${item.name}</h4>
+                        <p class="text-xs text-gray-400">${formatPrice(unitPrice)} / Stück</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
+                        <button type="button" onclick="window.changeQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-red rounded shadow-sm transition-all"><i class="ph ph-minus text-xs"></i></button>
+                        <span class="text-xs font-black min-w-[20px] text-center">${item.quantity}</span>
+                        <button type="button" onclick="window.changeQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-red rounded shadow-sm transition-all"><i class="ph ph-plus text-xs"></i></button>
+                    </div>
+                    <div class="text-right min-w-[60px]">
+                        <span class="text-xs font-bold text-brand-red">${formatPrice(subtotal)}</span>
+                    </div>
+                    <button type="button" onclick="window.removeFromCart('${item.id}')" class="text-gray-300 hover:text-red-500 transition-colors mr-1">
+                        <i class="ph ph-trash text-lg"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+    }
+
+    // 3. Update Totals
+    if (typeof updateOrderSummary === 'function') {
+        updateOrderSummary();
+    }
+}
+
+// Global functions for inline onclick handlers
+window.changeQuantity = (id, delta) => {
+    const item = cart.find(i => i.id === id);
+    if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            cart = cart.filter(i => i.id !== id);
+        }
+        updateCartUI();
+    }
+};
+
+window.removeFromCart = (id) => {
+    cart = cart.filter(i => i.id !== id);
+    updateCartUI();
+};
+
+document.body.addEventListener('click', (e) => {
+    const targetBtn = e.target.closest('.add-to-cart-btn');
+    
+    if (targetBtn) {
+        const id = targetBtn.dataset.id;
+        const name = targetBtn.dataset.name;
+        const price = targetBtn.dataset.price;
+        const image = targetBtn.dataset.image;
+
+        const existingItem = cart.find(i => i.id === id);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ id, name, price, image, quantity: 1 });
+        }
+
+        // DEBUG: Log cart state
+        console.log('[CART] Item added/updated:', { id, name, price, image });
+        console.log('[CART] Full cart:', JSON.parse(JSON.stringify(cart)));
+        console.log('[CART] Cart item count:', cart.reduce((s, i) => s + i.quantity, 0));
+
+        updateCartUI();
+
+        if (cartToast) {
+            cartToast.classList.remove('translate-x-[120%]');
+            setTimeout(() => { cartToast.classList.add('translate-x-[120%]'); }, 3000);
+        }
+    }
+});
+
+// --- 8. Checkout UI & Socket.io Logic ---
+const checkoutModal = document.getElementById('checkout-modal');
+const closeCheckout = document.getElementById('close-checkout');
+const coCount = document.getElementById('co-count'); // This is mostly for fallback now
+const checkoutForm = document.getElementById('checkout-form');
+const statusModal = document.getElementById('status-modal');
+const socket = (typeof io !== 'undefined') ? io() : null;
+
+document.querySelectorAll('.cart-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (cart.length > 0) {
+            if (coCount) coCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            checkoutModal.classList.remove('opacity-0', 'pointer-events-none');
+            lockScroll(true);
+            updateCartUI();
+        } else {
+            alert('Warenkorb ist leer!');
+        }
+    });
+});
+
+if (closeCheckout) {
+    closeCheckout.addEventListener('click', () => {
+        checkoutModal.classList.add('opacity-0', 'pointer-events-none');
+        lockScroll(false);
+    });
+}
+
+// --- Unified Time Slot Logic ---
+if (checkoutForm) {
+    const coDate = document.getElementById('co-date');
+    const coTime = document.getElementById('co-time');
+    const shopNotice = document.getElementById('shop-closed-notice');
+    const methodBtns = document.querySelectorAll('.method-btn');
+    const deliveryFields = document.getElementById('delivery-fields');
+    let currentMethod = 'pickup';
+
+    methodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            methodBtns.forEach(b => b.classList.remove('active', 'bg-brand-red', 'text-white'));
+            btn.classList.add('active', 'bg-brand-red', 'text-white');
+            currentMethod = btn.dataset.method;
+            
+            if (currentMethod === 'delivery') {
+                deliveryFields?.classList.remove('hidden');
+                document.getElementById('checkout-summary-box')?.classList.remove('hidden');
+                const addrInput = document.getElementById('co-address');
+                if(addrInput) addrInput.required = true;
+                updateOrderSummary();
+            } else {
+                deliveryFields?.classList.add('hidden');
+                document.getElementById('checkout-summary-box')?.classList.add('hidden');
+                const addrInput = document.getElementById('co-address');
+                if(addrInput) addrInput.required = false;
+            }
+        });
+    });
+
+    const addrInput = document.getElementById('co-address');
+    if (addrInput) {
+        let debounceTimer;
+        addrInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(updateOrderSummary, 800);
+        });
+    }
+
+    async function updateOrderSummary() {
+        const config = typeof getSettings === 'function' ? getSettings() : {};
+        // FIX: Multiply by quantity!
+        const subtotal = cart.reduce((sum, item) => {
+            const unitPrice = parsePrice(item.price);
+            return sum + (unitPrice * item.quantity);
+        }, 0);
+        document.getElementById('co-subtotal').textContent = formatPrice(subtotal);
+
+        let fee = 0;
+        if (currentMethod === 'delivery') {
+            const address = document.getElementById('co-address').value;
+            const res = await getDeliveryFee(address);
+            fee = res.fee;
+            document.getElementById('co-distance-text').textContent = res.distance.toFixed(1) + 'km';
+        }
+
+        document.getElementById('co-delivery-fee').textContent = fee > 0 ? formatPrice(fee) : 'Gratis';
+        document.getElementById('co-total').textContent = formatPrice(subtotal + fee);
+    }
+
+    const updateDropdownSlots = (dateInput, timeSelect, noticeEl = null, isOrder = false) => {
+        const config = typeof getSettings === 'function' ? getSettings() : {};
+        if (!dateInput || !timeSelect) return;
+
+        const selectedDate = new Date(dateInput.value);
+        const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        const dayKey = dayNames[selectedDate.getDay()];
+        
+        const h1 = config[`hours${dayKey.charAt(0).toUpperCase() + dayKey.slice(1)}1`] || "11:00 - 15:00";
+        const h2 = config[`hours${dayKey.charAt(0).toUpperCase() + dayKey.slice(1)}2`] || "17:00 - 22:00";
+        
+        const parseHours = (str) => {
+            if (!str || !str.includes('-')) return null;
+            const parts = str.split('-').map(s => s.trim());
+            return {
+                start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
+                end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
+            };
+        };
+
+        const slots = [parseHours(h1), parseHours(h2)].filter(s => s !== null);
+        timeSelect.innerHTML = '<option value="asap">Schnellstmöglich</option>';
+        
+        const now = new Date();
+        const isToday = dateInput.value === now.toISOString().split('T')[0];
+        const currentMin = now.getHours() * 60 + now.getMinutes();
+        
+        if (noticeEl) {
+            let storeCurrentlyOpen = false;
+            slots.forEach(s => {
+                if (currentMin >= s.start && currentMin < s.end - 20) storeCurrentlyOpen = true;
+            });
+
+            const masterEnabled = config.orderingEnabled !== false;
+            if (masterEnabled && isOrder) {
+                noticeEl.classList.add('hidden');
+            } else if (isOrder) {
+                noticeEl.innerHTML = '<i class="ph-fill ph-warning mr-1"></i> Wir nehmen aktuell keine Online-Bestellungen entgegen.';
+                noticeEl.classList.remove('hidden');
+            }
+        }
+
+        slots.forEach(s => {
+            for (let m = s.start; m < s.end; m += 30) {
+                if (isToday && m < currentMin + 30) continue;
+                const hh = Math.floor(m / 60).toString().padStart(2, '0');
+                const mm = (m % 60).toString().padStart(2, '0');
+                const timeStr = `${hh}:${mm}`;
+                timeSelect.innerHTML += `<option value="${timeStr}">${timeStr} Uhr</option>`;
+            }
+        });
+
+        // Set default to ASAP
+        timeSelect.value = 'asap';
+    };
+
+    const updateOrderSlots = () => updateDropdownSlots(coDate, coTime, shopNotice, true);
+    const updateResSlots = () => updateDropdownSlots(document.getElementById('res-date'), document.getElementById('res-time'), null, false);
+
+    coDate.addEventListener('change', updateOrderSlots);
+    const now = new Date();
+    // Dùng local date thay vì UTC để tránh lệch múi giờ
+    const getLocalDateStr = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const todayStr = getLocalDateStr(now);
+    // Sau 22h thì mặc định là ngày mai
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = getLocalDateStr(tomorrow);
+    const defaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
+    
+    coDate.min = todayStr;
+    coDate.value = defaultDate;
+    updateOrderSlots(); // Cập nhật slots ngay
+    
+    const rDate = document.getElementById('res-date');
+    if (rDate) {
+        const rDefaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
+        rDate.min = todayStr;
+        rDate.value = rDefaultDate;
+        rDate.addEventListener('change', updateResSlots);
+        setTimeout(updateResSlots, 500);
+    }
+
+    document.querySelectorAll('.cart-trigger').forEach(btn => {
+        btn.addEventListener('click', () => setTimeout(updateOrderSlots, 100));
+    });
+
+    async function getDeliveryFee(address) {
+        const config = typeof getSettings === 'function' ? getSettings() : {};
+        if (!address || address.trim().length < 5) return { fee: 0, distance: 0 };
+
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+            const data = await response.json();
+            if (data && data.length > 0) {
+                const lat2 = parseFloat(data[0].lat);
+                const lon2 = parseFloat(data[0].lon);
+                
+                const coords = config.geoPosition ? config.geoPosition.split(';') : ["48.67756", "9.20638"];
+                const lat1 = parseFloat(coords[0]);
+                const lon1 = parseFloat(coords[1]);
+
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                          Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distKm = R * c * 1.25; // 25% buffer for street distance
+
+                let fee = 0;
+                if (distKm < 3) fee = parseFloat(config.deliveryFee3km || 0);
+                else if (distKm < 10) fee = parseFloat(config.deliveryFee10km || 2.5);
+                else fee = parseFloat(config.deliveryFeeMax || 5);
+
+                return { fee, distance: distKm };
+            }
+        } catch (e) {
+            console.error("Geocoding error:", e);
+        }
+        return { fee: parseFloat(config.deliveryFee10km || 2.5), distance: 0 };
+    }
+
+    checkoutForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const config = typeof getSettings === 'function' ? getSettings() : {};
+        if (config.orderingEnabled === false) return alert("Wir nehmen aktuell leider keine Bestellungen entgegen.");
+
+        // FIX: Multiply by quantity!
+        const currentTotal = cart.reduce((sum, item) => {
+            const unitPrice = parsePrice(item.price);
+            return sum + (unitPrice * item.quantity);
+        }, 0);
+        
+        // DEBUG LOG
+        console.log('[CHECKOUT] Cart before submit:', JSON.parse(JSON.stringify(cart)));
+        console.log('[CHECKOUT] Cart items count:', cart.length);
+        console.log('[CHECKOUT] Total calculated:', currentTotal);
+
+        if (currentMethod === 'delivery' && currentTotal < parseFloat(config.deliveryMinOrder || 20)) {
+            return alert(`Mindestbestellwert für Lieferung ist ${config.deliveryMinOrder} €. Bitte fügen Sie weitere Produkte hinzu.`);
+        }
+
+        const coName = document.getElementById('co-name');
+        const coPhone = document.getElementById('co-phone');
+        const coEmail = document.getElementById('co-email');
+        if (!coName.value.trim()) return alert("Bitte geben Sie Ihren Namen ein.");
+        if (!coPhone.value.trim()) return alert("Bitte geben Sie Ihre Telefonnummer ein.");
+        if (!coEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coEmail.value.trim())) return alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+
+        const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Berechne...';
+
+        let feeObj = { fee: 0, distance: 0 };
+        if (currentMethod === 'delivery') {
+            feeObj = await getDeliveryFee(document.getElementById('co-address').value);
+        }
+
+        // FIX: Send full cart with proper structure
+        const cartItemsForBackend = cart.map(item => {
+            const unitPrice = parsePrice(item.price);
+            return {
+                id: item.id,
+                name: item.name,
+                price: formatPrice(unitPrice), // send formatted price string
+                unitPrice: unitPrice, // send numeric for calculations
+                quantity: item.quantity,
+                subtotal: formatPrice(unitPrice * item.quantity), // send formatted subtotal
+                image: item.image || ''
+            };
+        });
+
+        const orderData = {
+            id: 'order_' + Date.now(),
+            name: document.getElementById('co-name').value,
+            phone: document.getElementById('co-phone').value,
+            email: document.getElementById('co-email').value,
+            pickupDate: coDate.value,
+            pickupTime: coTime.value,
+            items: cart.reduce((sum, item) => sum + item.quantity, 0),
+            method: currentMethod,
+            address: currentMethod === 'delivery' ? document.getElementById('co-address').value : 'Abholung / Vor Ort',
+            floor: currentMethod === 'delivery' ? document.getElementById('co-floor').value : '',
+            bell: currentMethod === 'delivery' ? document.getElementById('co-bell').value : '',
+            deliveryFee: feeObj.fee.toFixed(2),
+            distance: feeObj.distance.toFixed(1) + 'km',
+            total: (currentTotal + feeObj.fee).toFixed(2),
+            cart: cartItemsForBackend,
+            cartRaw: JSON.parse(JSON.stringify(cart)) // DEBUG: raw cart
+        };
+
+        // DEBUG LOG
+        console.log('[CHECKOUT] Order data to send:', JSON.parse(JSON.stringify(orderData)));
+        console.log('[CHECKOUT] Cart items in order:', orderData.cart.length);
+
+        // Save to inbox for admin management
+        const inboxItem = {
+            id: orderData.id,
+            type: 'order',
+            name: orderData.name,
+            phone: orderData.phone,
+            email: orderData.email,
+            customerEmail: orderData.email,
+            customerName: orderData.name,
+            customerPhone: orderData.phone,
+            pickupDate: orderData.pickupDate,
+            pickupTime: orderData.pickupTime,
+            items: orderData.cart, // Use enriched cart
+            total: orderData.total,
+            address: orderData.address,
+            status: 'pending',
+            time: new Date().toISOString()
+        };
+        try {
+            const ls = JSON.parse(localStorage.getItem('kimi_inbox') || '[]');
+            ls.unshift(inboxItem);
+            if (ls.length > 200) ls.splice(200);
+            localStorage.setItem('kimi_inbox', JSON.stringify(ls));
+        } catch(e) {}
+        try {
+            // DEBUG LOG - what is being sent
+            console.log('[CHECKOUT] Sending to /api/inbox:', JSON.stringify(inboxItem));
+            fetch('/api/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inboxItem) }).catch(() => {});
+        } catch(e) {}
+
+        if (!orderData.pickupTime) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return alert("Bitte wählen Sie eine Abholzeit.");
+        }
+        
+        checkoutModal.classList.add('opacity-0', 'pointer-events-none');
+        statusModal.classList.remove('opacity-0', 'pointer-events-none');
+        
+        // Send Telegram notification to admin
+        const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
+        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        // pickupTime = "asap" = Schnellstmöglich, ngược lại hiển thị giờ cụ thể
+        const pickupTimeStr = orderData.pickupTime === 'asap' 
+            ? 'Schnellstmöglich'
+            : (orderData.pickupDate 
+                ? `${orderData.pickupDate.split('-').reverse().join('.')} @ ${orderData.pickupTime} Uhr`
+                : `${orderData.pickupTime} Uhr`);
+
+        if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
+            fetch('/api/notify-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    botToken: tgConfig.telegramBotToken,
+                    chatId: tgConfig.telegramChatId,
+                    orderType: 'order',
+                    customerName: orderData.name,
+                    customerPhone: orderData.phone,
+                    customerEmail: orderData.email,
+                    pickupTime: pickupTimeStr,
+                    total: orderData.total,
+                    itemCount: itemCount,
+                    items: orderData.cart.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price
+                    }))
+                })
+            }).catch(() => {});
+        }
+
+        // Send email confirmation to customer
+        const emailConfig = typeof getSettings === 'function' ? getSettings() : {};
+        fetch('/api/notify-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                customerEmail: orderData.email,
+                customerName: orderData.name,
+                customerPhone: orderData.phone,
+                orderType: 'order',
+                pickupTime: pickupTimeStr,
+                items: orderData.cart.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                total: orderData.total,
+                itemCount: itemCount,
+                resendApiKey: emailConfig.emailApiKey || ''
+            })
+        }).catch(() => {});
+
+        // Send Gmail notification to admin (khi khach dat hang)
+        const gmailConfig = typeof getSettings === 'function' ? getSettings() : {};
+        if (gmailConfig.gmailEnabled && gmailConfig.gmailUser && gmailConfig.gmailPassword) {
+            const gmailPayload = {
+                orderType: 'order',
+                customerName: orderData.name,
+                customerPhone: orderData.phone,
+                customerEmail: orderData.email,
+                pickupTime: pickupTimeStr,
+                items: orderData.cart.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                total: orderData.total,
+                itemCount: itemCount,
+                address: orderData.address,
+                gmailEnabled: gmailConfig.gmailEnabled,
+                gmailUser: gmailConfig.gmailUser,
+                gmailPassword: gmailConfig.gmailPassword,
+                gmailNotifyEmail: gmailConfig.gmailNotifyEmail
+            };
+            // DEBUG LOG - Gmail payload
+            console.log('[CHECKOUT] Gmail payload:', JSON.stringify(gmailPayload));
+            fetch('/api/gmail-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gmailPayload)
+            }).catch(() => {});
+        }
+
+        if (socket) {
+            socket.emit('submit_order', orderData);
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    });
+}
+
+// --- 9. Dynamic SEO Automation ---
+function initDynamicSEO() {
+    const config = typeof getSettings === 'function' ? getSettings() : {};
+    const urlParams = new URLSearchParams(window.location.search);
+    const lang = urlParams.get('lang') || (navigator.language.startsWith('en') ? 'en' : 'de');
+    const isEn = lang === 'en';
+    
+    const title = isEn ? (config.seoTitleEn || config.seoTitle) : config.seoTitle;
+    const desc = isEn ? (config.seoDescriptionEn || config.seoDescription) : config.seoDescription;
+    const keywords = isEn ? (config.seoKeywordsEn || config.seoKeywords) : config.seoKeywords;
+    
+    // Domain Handling
+    const currentDomain = window.location.hostname || config.siteDomain || "kimisushi.de";
+    const currentProtocol = window.location.protocol;
+    const siteUrl = `${currentProtocol}//${currentDomain}`;
+
+    document.title = title;
+    
+    const setAttr = (sel, attr, val) => {
+        const el = document.querySelector(sel);
+        if (el && val) el.setAttribute(attr, val);
+    };
+
+    setAttr('meta[name="description"]', 'content', desc);
+    setAttr('meta[name="keywords"]', 'content', keywords);
+    
+    // Social & Canonical
+    setAttr('link[rel="canonical"]', 'href', window.location.href);
+    setAttr('meta[property="og:url"]', 'content', window.location.href);
+    setAttr('meta[property="og:title"]', 'content', title);
+    setAttr('meta[property="og:description"]', 'content', desc);
+    setAttr('meta[property="og:image"]', 'content', `${siteUrl}/images/hero_sushi.png`);
+    
+    setAttr('meta[property="twitter:url"]', 'content', window.location.href);
+    setAttr('meta[property="twitter:title"]', 'content', title);
+    setAttr('meta[property="twitter:description"]', 'content', desc);
+    setAttr('meta[property="twitter:image"]', 'content', `${siteUrl}/images/hero_sushi.png`);
+    
+    // GEO Tags Sync
+    const pos = config.geoPosition || "48.67499;9.21361";
+    setAttr('meta[name="geo.region"]', 'content', config.geoRegion || "DE-BW");
+    setAttr('meta[name="geo.placename"]', 'content', config.geoPlacename || "Filderstadt");
+    setAttr('meta[name="geo.position"]', 'content', pos);
+    setAttr('meta[name="ICBM"]', 'content', pos.replace(';', ', '));
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": config.brandName || "Kimi Sushi",
+        "image": `${siteUrl}/images/hero_sushi.png`,
+        "@id": siteUrl,
+        "url": siteUrl,
+        "telephone": config.phone || "+49 123 4567890",
+        "priceRange": "$$",
+        "servesCuisine": "Japanese, Sushi",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": config.address?.split(',')[0] || "Bernhäuser Hauptstraße 27",
+            "addressLocality": config.geoPlacename || "Filderstadt",
+            "postalCode": config.address?.match(/\d{5}/)?.[0] || "70794",
+            "addressRegion": "BW",
+            "addressCountry": "DE"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": parseFloat(pos.split(';')[0]),
+            "longitude": parseFloat(pos.split(';')[1])
+        }
+    };
+
+    let script = document.getElementById('dynamic-schema');
+    if (!script) {
+        script = document.createElement('script');
+        script.id = 'dynamic-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+    }
+    script.text = JSON.stringify(schema);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDynamicSEO);
+} else {
+    initDynamicSEO();
+}

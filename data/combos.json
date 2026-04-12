@@ -1,0 +1,5 @@
+[
+  {"id":"c1","name":"Tokyo Set","subtitle":"Für 1 Person","price":"18,90 €","oldPrice":"","tag":"","items":"2x Sake Nigiri\n4x Maki Lachs\n2x California Roll\nMiso Suppe"},
+  {"id":"c2","name":"Sakura Premium","subtitle":"Ideal für 2 Personen","price":"45,00 €","oldPrice":"52,50 €","tag":"Chef's Choice","items":"8x Chef's Signature Rolls\n6x Premium Nigiri Mix\n4x Dragon Roll\nEdamame & 2 Miso Suppen"},
+  {"id":"c3","name":"Veggie Delight","subtitle":"100% Pflanzlich","price":"16,50 €","oldPrice":"","tag":"","items":"2x Avocado Nigiri\n6x Gurke Maki\n8x Veggie Tempura Roll\nWakame Salat"}
+]

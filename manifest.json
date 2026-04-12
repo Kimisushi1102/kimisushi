@@ -1,0 +1,20 @@
+{
+  "name": "Kimi Sushi POS System",
+  "short_name": "Kimi Sushi",
+  "start_url": "pos.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#D32F2F",
+  "icons": [
+    {
+      "src": "images/salmon_nigiri.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/salmon_nigiri.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

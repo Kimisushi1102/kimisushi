@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- PWA Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="images/salmon_nigiri.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Kimi POS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css?v=1.1">
+    <style>
+        body { overscroll-behavior-y: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+        .safe-pt { padding-top: env(safe-area-inset-top); }
+        
+        .touch-button { min-height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 12px; border-radius: 16px; font-weight: 700; transition: all 0.1s ease; }
+        .touch-button:active { transform: scale(0.96); opacity: 0.8; }
+        .mobile-tab-view { display: none; }
+        .mobile-tab-view.active { display: flex; }
+        @media (max-width: 1023px) {
+            .mobile-tab-view { flex-direction: column; width: 100%; position: absolute; inset: 0; background: #fff; z-index: 40; }
+            #pos-header { z-index: 50; }
+            #bill-panel { position: fixed; z-index: 45; }
+        }
+        .touch-active:active { transform: scale(0.96); filter: brightness(0.95); }
+        .category-sidebar-btn { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
+        
+        /* Iframe Specific Styles */
+        .is-iframed #pos-header { display: none !important; }
+        .is-iframed #pos-body { padding-top: 0 !important; }
+        .is-iframed nav.lg\:hidden { display: none !important; }
+        .is-iframed .mobile-tab-view { bottom: 0 !important; }
+    </style>
+    <script>
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('is-iframed');
+        }
+    </script>
+    <script src="js/data.js?v=1.1"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { brand: { red: '#D32F2F', dark: '#1A1A1A', gold: '#D4AF37' } } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden safe-pt" id="pos-body">
+
+    <!-- Top Navigation -->
+    <header id="pos-header" class="bg-brand-dark text-white p-3 flex justify-between items-center shrink-0 sticky top-0">
+        <div class="flex items-center gap-3">
+            <i class="ph-fill ph-flower-lotus text-2xl text-brand-red"></i>
+            <span class="font-bold text-lg tracking-tight lg:block hidden">KIMI POS</span>
+        </div>
+        
+        <div class="flex items-center gap-2 lg:gap-4">
+            <a href="index.html" class="flex items-center gap-1 text-gray-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg">
+                <i class="ph ph-house"></i> <span class="hidden sm:inline">Trang chủ</span>
+            </a>
+            <a href="admin.html" class="flex items-center gap-1 text-gray-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg">
+                <i class="ph ph-user-gear"></i> <span class="hidden sm:inline">Admin</span>
+            </a>
+            <button id="setup-mode-btn" onclick="toggleManagementMode()" class="flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-lg transition-all text-[10px] font-bold uppercase tracking-widest border border-transparent">
+                <i class="ph-bold ph-gear-six text-xs"></i> <span id="setup-text">Thiết lập</span>
+            </button>
+            <button onclick="location.reload(true)" class="flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-widest">
+                <i class="ph ph-arrows-clockwise text-xs"></i> <span>Làm mới</span>
+            </button>
+            <div id="connection-status" class="flex items-center gap-2 text-sm ml-1">
+                <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]" id="sync-dot"></div>
+                <span id="sync-text" class="text-gray-400 font-medium whitespace-nowrap text-[10px]">Cloud Sync ...</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden flex-col lg:flex-row relative">
+        <!-- VIEW: TABLES -->
+        <div id="view-tables" class="mobile-tab-view active lg:flex-1 flex flex-col bg-gray-50 h-full overflow-hidden">
+            <!-- Diagnostic Trace (Helpful for debugging) -->
+            <div id="debug-trace" class="bg-black/80 text-[8px] text-green-400 p-1 font-mono flex gap-2 overflow-x-auto whitespace-nowrap z-50">
+                <span>[LOG]:</span> <span id="trace-step">Khởi động...</span>
+            </div>
+
+            <div class="bg-white p-2 border-b border-gray-200 flex justify-between items-center shrink-0 z-10 shadow-sm">
+                <div id="zone-selector" class="flex gap-2 overflow-x-auto hide-scroll p-1"></div>
+                <button onclick="showOnlineOrders()" class="px-3 py-2 bg-brand-gold/10 text-brand-gold rounded-xl font-black text-[10px] flex items-center gap-2 touch-active shrink-0">
+                    <i class="ph-fill ph-globe"></i> ONLINE <span id="online-badge" class="bg-brand-red text-white w-4 h-4 flex items-center justify-center rounded-full text-[8px]">0</span>
+                </button>
+            </div>
+            
+            <div id="table-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-24">
+                <!-- If empty, show emergency button -->
+                <div id="emergency-empty" class="col-span-full py-20 flex flex-col items-center gap-6">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center animate-bounce">
+                        <i class="ph ph-table text-4xl text-gray-300"></i>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="font-black text-gray-400 uppercase tracking-widest mb-2">Không tìm thấy bàn</h3>
+                        <p class="text-[10px] text-gray-400 max-w-[200px] mx-auto opacity-50 italic">Bạn hãy thử bấm nút bên dưới để nạp lại dữ liệu chuẩn.</p>
+                    </div>
+                    <button onclick="localStorage.clear(); location.reload();" class="px-8 py-4 bg-brand-red text-white rounded-2xl font-black text-sm shadow-xl active:scale-95 transition flex items-center gap-2">
+                        <i class="ph-bold ph-lightning"></i> CÀI ĐẶT LẠI NGAY
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: MENU/ORDERING -->
+        <div id="view-menu" class="mobile-tab-view lg:flex-1 hidden flex-col bg-white h-full overflow-hidden border-r border-gray-200">
+             <div class="bg-white p-2 border-b border-gray-200 flex justify-between items-center shrink-0 sticky top-0 z-30 shadow-sm">
+                <button onclick="closeMenu()" class="px-4 py-2 bg-gray-100 rounded-xl text-gray-800 font-black text-[10px] uppercase flex items-center gap-2 touch-active">
+                    <i class="ph ph-arrow-left"></i> Quay lại
+                </button>
+                <span id="order-table-name" class="font-black text-sm text-brand-red uppercase">Bàn --</span>
+                <div class="w-10"></div>
+            </div>
+            
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Left: Search & Menu Grid -->
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <div class="px-4 py-3 bg-white border-b border-gray-50 flex gap-2">
+                        <div class="relative flex-1">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="menu-search" oninput="renderMenu()" placeholder="Tìm món..." class="w-full pl-10 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-brand-red outline-none text-sm font-bold shadow-inner">
+                        </div>
+                        <button onclick="addMiscItem()" class="px-4 bg-brand-gold/10 text-brand-gold rounded-2xl flex flex-col items-center justify-center gap-0.5 border border-brand-gold/20 active:scale-95 transition-transform" title="Món ngoài thực đơn">
+                            <i class="ph-bold ph-plus-circle text-lg"></i>
+                            <span class="text-[8px] font-black uppercase">Món lẻ</span>
+                        </button>
+                    </div>
+                    <div id="menu-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 pb-32 content-start">
+                        <!-- Items injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Vertical Category Sidebar -->
+                <div id="category-tabs" class="w-16 bg-gray-50 border-l border-gray-200 flex flex-col gap-2 p-2 overflow-y-auto hide-scroll pb-32">
+                    <!-- Categories injected via JS -->
+                </div>
+                <button id="add-cat-btn" onclick="quickAddCategory()" class="hidden absolute bottom-24 right-2 w-12 h-12 bg-brand-gold text-white rounded-full shadow-lg items-center justify-center z-50 animate-bounce">
+                    <i class="ph-bold ph-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW: BILL / CHECKOUT -->
+        <div id="view-bill" class="mobile-tab-view lg:w-96 hidden flex-col bg-white h-full border-l border-gray-200 shadow-2xl lg:shadow-none z-30">
+            <div class="p-4 bg-brand-dark text-white shrink-0 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="text-[8px] uppercase font-black tracking-widest text-white/50">AKTUELLER TISCH</span>
+                    <span id="bill-table-badge" class="font-black text-lg">CHOOSE TABLE</span>
+                </div>
+                <div id="split-indicator" class="hidden bg-brand-red text-white text-[8px] font-black px-2 py-1 rounded-md animate-pulse uppercase">SPLIT MODE</div>
+            </div>
+            <div id="bill-items" class="flex-1 overflow-y-auto p-4 space-y-1 bg-gray-50/50 min-h-[100px]">
+                <div class="text-center text-gray-300 py-20 flex flex-col items-center gap-3">
+                    <i class="ph ph-receipt text-6xl opacity-20"></i>
+                    <p class="font-bold text-xs uppercase opacity-30">Bàn trống</p>
+                </div>
+            </div>
+            <div class="p-4 bg-white border-t border-gray-100 shrink-0 pb-24 lg:pb-4 shadow-inner">
+                <div id="table-actions" class="hidden grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="startMoveTable()" class="py-3 bg-gray-50 border border-gray-200 rounded-2xl text-[8px] font-black text-gray-800 flex flex-col items-center justify-center gap-1 touch-active">
+                        <i class="ph ph-arrows-out-cardinal text-xl"></i> UMSETZEN
+                    </button>
+                    <button id="split-mode-btn" onclick="toggleSplitMode()" class="py-3 bg-gray-50 border border-gray-200 rounded-2xl text-[8px] font-black text-gray-800 flex flex-col items-center justify-center gap-1 touch-active">
+                        <i class="ph ph-columns text-xl"></i> TRENNEN
+                    </button>
+                    <button onclick="printKitchenTicket()" class="py-3 bg-brand-gold/10 border border-brand-gold/30 rounded-2xl text-[8px] font-black text-brand-gold flex flex-col items-center justify-center gap-1 touch-active">
+                        <i class="ph ph-fire text-xl"></i> IN BẾP
+                    </button>
+                </div>
+                <div class="flex justify-between items-end mb-4">
+                    <div class="flex flex-col">
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest" id="total-label">GESAMTBETRAG</span>
+                        <span id="bill-total" class="text-3xl font-black text-brand-red leading-none">0,00 €</span>
+                    </div>
+                </div>
+                <button id="checkout-btn" disabled class="w-full bg-brand-red text-white rounded-2xl py-5 font-black text-xl flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(211,47,47,0.3)] touch-active disabled:bg-gray-300 disabled:shadow-none uppercase">
+                    <i class="ph-fill ph-credit-card"></i> THANH TOÁN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE NAVIGATION BAR -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-200 flex justify-around items-center z-[60] px-4 pb-2">
+        <button onclick="switchMobileView('tables')" id="tab-tables" class="flex flex-col items-center gap-1 text-brand-red font-black">
+            <i class="ph ph-grid-four text-2xl"></i>
+            <span class="text-[8px] uppercase">Bàn</span>
+        </button>
+        <button onclick="switchMobileView('menu')" id="tab-menu" class="flex flex-col items-center gap-1 text-gray-400 font-black">
+            <i class="ph ph-notebook text-2xl"></i>
+            <span class="text-[8px] uppercase">Thực đơn</span>
+        </button>
+        <button onclick="switchMobileView('bill')" id="tab-bill" class="flex flex-col items-center gap-1 text-gray-400 font-black relative">
+            <i class="ph ph-receipt text-2xl"></i>
+            <span class="text-[8px] uppercase">Hóa đơn</span>
+            <div id="tab-bill-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-brand-red text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white">0</div>
+        </button>
+    </nav>
+
+    <!-- Modals -->
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="fixed inset-0 bg-brand-dark/90 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-lg mx-4 rounded-[40px] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="checkout-box">
+            <div class="p-8 pb-4 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">ZAHLUNG ABWICKELN</span>
+                    <h3 class="text-2xl font-black text-brand-dark" id="modal-table-name">Tisch 1</h3>
+                </div>
+                <button onclick="hideCheckoutModal()" class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-8 pt-4">
+                <div class="bg-gray-50 rounded-3xl p-6 mb-4 border border-gray-100 flex flex-col gap-2">
+                    <div class="flex justify-between text-sm font-bold text-gray-500"><span>Zwischensumme</span><span id="modal-subtotal">0,00 €</span></div>
+                    <div class="flex justify-between text-sm font-bold text-gray-400"><span>MwSt (<span id="modal-tax-rate">19</span>%)</span><span id="modal-tax-amount">0,00 €</span></div>
+                    
+                    <!-- NEW: Discount Row -->
+                    <div class="flex justify-between items-center text-sm font-bold text-blue-600 pt-2 border-t border-gray-200">
+                        <div class="flex items-center gap-2">
+                            <span>Rabatt / Giảm giá</span>
+                            <select id="discount-select" onchange="updateCheckoutTotals()" class="bg-transparent border-none p-0 font-black focus:ring-0 cursor-pointer">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="10">10%</option>
+                                <option value="15">15%</option>
+                                <option value="20">20%</option>
+                            </select>
+                        </div>
+                        <span id="modal-discount-amount">-0,00 €</span>
+                    </div>
+
+                    <div class="pt-4 border-t-2 border-dashed border-gray-200 mt-2 flex justify-between items-center text-brand-red">
+                        <span class="font-black text-lg uppercase">Gesamtbetrag</span>
+                        <span id="modal-total" class="text-4xl font-black">0,00 €</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="payment" value="cash" checked class="peer hidden" onchange="toggleCashInput(true)">
+                        <div class="py-4 rounded-3xl border-4 border-gray-100 peer-checked:border-brand-red peer-checked:bg-red-50 transition flex flex-col items-center gap-1">
+                            <i class="ph-fill ph-money text-3xl opacity-30 peer-checked:opacity-100 peer-checked:text-brand-red transition"></i>
+                            <span class="font-black text-[10px] uppercase tracking-wider">Tiền mặt</span>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="payment" value="card" class="peer hidden" onchange="toggleCashInput(false)">
+                        <div class="py-4 rounded-3xl border-4 border-gray-100 peer-checked:border-brand-red peer-checked:bg-red-50 transition flex flex-col items-center gap-1">
+                            <i class="ph-fill ph-credit-card text-3xl opacity-30 peer-checked:opacity-100 peer-checked:text-brand-red transition"></i>
+                            <span class="font-black text-[10px] uppercase tracking-wider">Thẻ (Card)</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Quick Cash Input -->
+                <div id="cash-calculator" class="mb-6 p-4 bg-gray-50 rounded-3xl border border-gray-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[10px] font-black text-gray-400 uppercase">Khách đưa</span>
+                        <span id="change-amount" class="text-xs font-black text-brand-matcha">TIỀN THỪA: 0,00 €</span>
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-2 hide-scroll">
+                        <button onclick="setCash(0)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black whitespace-nowrap">Đủ tiền</button>
+                        <button onclick="addCash(5)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">5 €</button>
+                        <button onclick="addCash(10)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">10 €</button>
+                        <button onclick="addCash(20)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">20 €</button>
+                        <button onclick="addCash(50)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">50 €</button>
+                        <button onclick="addCash(100)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">100 €</button>
+                    </div>
+                    <input type="number" id="cash-received" oninput="calculateChange()" placeholder="Nhập số tiền..." class="w-full mt-2 bg-white border border-gray-200 rounded-2xl p-4 text-xl font-black text-center outline-none focus:border-brand-red">
+                </div>
+                <button onclick="finalizeCheckout()" class="w-full bg-brand-red text-white py-6 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition flex items-center justify-center gap-4">
+                    <i class="ph-fill ph-printer"></i> ABSCHLIESSEN & DRUCKEN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Table Modal -->
+    <div id="move-modal" class="fixed inset-0 bg-brand-dark/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+        <div class="bg-white w-full max-w-2xl mx-4 rounded-[40px] shadow-2xl overflow-hidden p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">TISCH UMSETZEN</span>
+                     <h3 class="text-2xl font-black text-brand-dark"><span id="move-source-name" class="text-brand-red">Tisch 1</span> verschieben nach...</h3>
+                </div>
+                <button onclick="hideMoveModal()" class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"><i class="ph ph-x"></i></button>
+            </div>
+            <div id="move-table-grid" class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-2">
+                <!-- Empty tables here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Orders Modal -->
+    <div id="online-orders-modal" class="fixed inset-0 bg-brand-dark/95 backdrop-blur-lg z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+        <div class="bg-white w-full max-w-3xl mx-4 rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="bg-brand-gold text-white p-8 flex justify-between items-center shadow-lg">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black tracking-widest opacity-70">SYSTEM BENACHRICHTIGUNG</span>
+                    <h3 class="text-3xl font-black">Online Bestellungen</h3>
+                </div>
+                <button onclick="hideOnlineOrders()" class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <div id="online-orders-list" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <!-- Orders here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA Setup
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+        const socket = (typeof io !== 'undefined') ? io() : null;
+        
+        let isManagementMode = false;
+        let allTables = [];
+        let allMenu = [];
+        let onlineOrders = JSON.parse(localStorage.getItem('kimi_online_orders') || '[]');
+        let activeTableId = null;
+        let isSplitMode = false;
+        let selectedItemIndices = [];
+        let taxRate1 = 19;
+        let currentCategory = 'Tất cả';
+        let currentZone = 'Tất cả';
+
+        // XSS protection helper
+        function escapeHTML(str) {
+            if (!str) return "";
+            return str.replace(/[&<>'"]/g,
+                tag => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;',
+                    "'": '&#39;', '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        const tableGrid = document.getElementById('table-grid');
+        const menuView = document.getElementById('menu-view');
+        const menuGrid = document.getElementById('menu-grid');
+        const billItems = document.getElementById('bill-items');
+        const billTableBadge = document.getElementById('bill-table-badge');
+        const billTotal = document.getElementById('bill-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const tableActions = document.getElementById('table-actions');
+        const backToTables = document.getElementById('back-to-tables');
+        const zoneSelector = document.getElementById('zone-selector');
+
+        if (socket) {
+            socket.on('connect', () => {
+                updateSyncStatus(true, "Live Aktiv");
+            });
+            socket.on('pos_state_update', (tables) => {
+                allTables = tables;
+                renderTables();
+                if (activeTableId) renderBill();
+            });
+            socket.on('admin_new_order', (order) => {
+                onlineOrders.push(order);
+                localStorage.setItem('kimi_online_orders', JSON.stringify(onlineOrders));
+                updateOnlineCount();
+            });
+            socket.on('pos_menu_update', (newMenu) => {
+                allMenu = newMenu;
+                renderCategories();
+                renderMenu();
+            });
+        }
+
+        function toggleManagementMode() {
+            isManagementMode = !isManagementMode;
+            const btn = document.getElementById('setup-mode-btn');
+            const text = document.getElementById('setup-text');
+            
+            if (isManagementMode) {
+                btn.classList.add('bg-brand-gold', 'border-brand-gold');
+                btn.classList.remove('bg-white/10');
+                text.textContent = "ĐANG SỬA";
+            } else {
+                btn.classList.remove('bg-brand-gold', 'border-brand-gold');
+                btn.classList.add('bg-white/10');
+                text.textContent = "Thiết lập";
+            }
+            
+            // Toggle related buttons
+            const addCatBtn = document.getElementById('add-cat-btn');
+            if (addCatBtn) addCatBtn.classList.toggle('hidden', !isManagementMode);
+            
+            // Re-render everything to show/hide edit buttons
+            renderTables();
+            renderCategories();
+            renderMenu();
+        }
+
+        // Helper to update UI status
+        function updateSyncStatus(isLive, text) {
+            const dot = document.getElementById('sync-dot');
+            const txt = document.getElementById('sync-text');
+            if (!dot || !txt) return;
+
+            if (isLive) {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
+                txt.textContent = text || "Cloud Sync OK";
+                txt.className = "text-green-500 font-bold whitespace-nowrap text-[10px]";
+            } else {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b] animate-pulse";
+                txt.textContent = text || "Syncing...";
+                txt.className = "text-amber-500 font-bold whitespace-nowrap text-[10px]";
+            }
+        }
+
+        // --- Dữ liệu sẳn sàng ---
+        async function loadAppData() {
+            const trace = (msg) => { 
+                const el = document.getElementById('trace-step');
+                if (el) el.textContent = msg;
+                console.log("[POS-TRACE]: " + msg); 
+            };
+            try {
+                trace("Đang tìm thư viện...");
+                if (typeof getTables !== 'function') {
+                    throw new Error("Không thấy data.js!");
+                }
+                
+                trace("Đang đồng bộ Cloud...");
+                updateSyncStatus(false, "Đang tải...");
+                await initCloudSync();
+                updateSyncStatus(true, "Cloud Ready");
+
+                trace("Đang đọc bàn...");
+                allTables = getTables();
+                trace("Đã nhận " + allTables.length + " bàn.");
+
+                trace("Đang đọc menu...");
+                allMenu = getMenu();
+                const settings = getSettings();
+                taxRate1 = parseFloat(settings.taxRate1) || 19;
+                
+                trace("Đang vẽ bàn ghế...");
+                updateOnlineCount();
+                renderZoneFilters();
+                renderTables();
+                renderCategories();
+                renderMenu();
+
+                trace("100% HOÀN TẤT!");
+                // Ẩn nút cấp cứu nếu đã có bàn
+                if (allTables.length > 0) {
+                    const em = document.getElementById('emergency-empty');
+                    if (em) em.classList.add('hidden');
+                }
+
+            } catch (err) {
+                trace("LỖI: " + err.message);
+                updateSyncStatus(false, "Offline");
+                console.error(err);
+                if (typeof defaultTables !== 'undefined') {
+                    allTables = defaultTables;
+                    renderTables();
+                }
+            }
+        }
+        
+        window.onload = async () => {
+             // initCloudSync đã được gọi trong loadAppData
+             await loadAppData();
+        };
+
+        // Lắng nghe lệnh đồng bộ từ trang Admin (Cha)
+        window.addEventListener('message', (event) => {
+            if (event && event.data && event.data.type === 'SYNC_DATA') {
+                console.log("[POS] Nhận lệnh đồng bộ dữ liệu từ Admin...");
+                loadAppData();
+            }
+        });
+
+        function renderZoneFilters() {
+            const zones = ['Tất cả', ...new Set(allTables.map(t => t.zone))].filter(z => z);
+            zoneSelector.innerHTML = '';
+            zones.forEach(z => {
+                const btn = document.createElement('button');
+                const isActive = currentZone === z;
+                btn.className = `px-4 py-2 rounded-xl font-black text-[10px] uppercase whitespace-nowrap transition active:scale-95 ${isActive ? 'bg-brand-dark text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
+                btn.textContent = z;
+                btn.onclick = () => {
+                    currentZone = z;
+                    renderZoneFilters();
+                    renderTables();
+                };
+                zoneSelector.appendChild(btn);
+            });
+        }
+
+        function updateOnlineCount() {
+            const count = onlineOrders.filter(o => o.status !== 'assigned_to_table').length;
+            document.getElementById('online-badge').textContent = count;
+        }
+
+        function renderTables() {
+            tableGrid.innerHTML = '';
+            const filtered = currentZone === 'Tất cả' ? allTables : allTables.filter(t => t.zone === currentZone);
+            
+            // Chèn nút Thêm Bàn nếu đang ở chế độ Thiết lập
+            if (isManagementMode) {
+                const addBtn = document.createElement('div');
+                addBtn.className = "p-4 rounded-[28px] border-4 border-dashed border-brand-gold text-brand-gold bg-brand-gold/5 h-32 flex flex-col items-center justify-center gap-2 cursor-pointer active:scale-95 transition hover:bg-brand-gold/10";
+                addBtn.onclick = quickAddTable;
+                addBtn.innerHTML = `<i class="ph-bold ph-plus text-3xl"></i><span class="text-[10px] font-black uppercase">Thêm bàn</span>`;
+                tableGrid.appendChild(addBtn);
+            }
+
+            filtered.forEach(t => {
+                const isOcc = t.status === 'occupied';
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-[28px] border-4 transition active:scale-95 h-32 flex flex-col justify-between shadow-sm cursor-pointer relative ${isOcc ? 'bg-red-50 border-brand-red text-brand-red' : 'bg-white border-gray-100 text-gray-400'}`;
+                div.onclick = () => isManagementMode ? quickDeleteTable(t.id) : openTable(t.id);
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="font-black text-xl uppercase tracking-tighter leading-none">${t.name}</span>
+                        ${isManagementMode ? '<i class="ph-bold ph-trash text-xl text-brand-red"></i>' : `<i class="ph-fill ${isOcc ? 'ph-users text-2xl' : 'ph-check-circle text-xl opacity-30'}"></i>`}
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-[8px] font-black bg-gray-200/20 px-2 py-0.5 rounded-md uppercase">${t.zone}</span>
+                        <span class="font-black text-lg">${isOcc ? t.total.toFixed(2).replace('.', ',') + '€' : 'TRỐNG'}</span>
+                    </div>
+                `;
+                tableGrid.appendChild(div);
+            });
+        }
+
+        function quickAddTable() {
+            const name = prompt("Nhập tên bàn (Vd: Bàn 10):");
+            if (!name) return;
+            const zone = prompt("Nhập khu vực (Vd: Phòng 1, Ngoài trời):", currentZone === 'Tất cả' ? 'Chung' : currentZone);
+            if (!zone) return;
+
+            const newTable = {
+                id: 'T' + Date.now(),
+                name: name,
+                zone: zone,
+                status: 'empty',
+                orderItems: [],
+                total: 0
+            };
+
+            allTables.push(newTable);
+            saveTables(allTables);
+            renderZoneFilters();
+            renderTables();
+        }
+
+        function quickDeleteTable(id) {
+            if (!confirm("Bạn có chắc muốn xóa bàn này không?")) return;
+            allTables = allTables.filter(t => t.id !== id);
+            saveTables(allTables);
+            renderZoneFilters();
+            renderTables();
+        }
+
+        function renderCategories() {
+            const uniqueCategories = [...new Set(allMenu.map(m => m.category || 'Khác'))];
+            const categories = ['Tất cả', ...uniqueCategories];
+            
+            const catContainer = document.getElementById('category-tabs');
+            catContainer.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                const isActive = currentCategory === cat;
+                
+                btn.className = `w-12 h-24 shrink-0 rounded-2xl font-black text-[10px] uppercase transition active:scale-90 flex items-center justify-center category-sidebar-btn relative ${isActive ? 'bg-brand-red text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
+                btn.innerHTML = `
+                    <span>${cat}</span>
+                    ${isManagementMode && cat !== 'Tất cả' ? `<i onclick="event.stopPropagation(); quickDeleteCategory('${cat}')" class="ph-bold ph-x-circle absolute -top-1 -right-1 text-red-500 bg-white rounded-full z-10 text-lg shadow-sm"></i>` : ''}
+                `;
+                btn.onclick = () => { 
+                    currentCategory = cat; 
+                    renderCategories(); 
+                    renderMenu(); 
+                };
+                catContainer.appendChild(btn);
+            });
+        }
+
+        function renderMenu() {
+            menuGrid.innerHTML = '';
+            const searchTerm = document.getElementById('menu-search')?.value.toLowerCase() || '';
+            
+            // Nút Thêm Món (nếu ở chế độ thiết lập)
+            if (isManagementMode && currentCategory !== 'Tất cả') {
+                const addBtn = document.createElement('button');
+                addBtn.className = "touch-button border-4 border-dashed border-brand-gold bg-brand-gold/5 text-brand-gold flex flex-col items-center justify-center gap-2";
+                addBtn.onclick = quickAddItem;
+                addBtn.innerHTML = `<i class="ph-bold ph-plus-circle text-2xl"></i><span class="text-[8px] font-black uppercase">Thêm món</span>`;
+                menuGrid.appendChild(addBtn);
+            }
+
+            let filtered = allMenu;
+            if (currentCategory !== 'Tất cả') filtered = filtered.filter(m => m.category === currentCategory);
+            if (searchTerm) {
+                filtered = filtered.filter(m => m.name.toLowerCase().includes(searchTerm) || (m.code && m.code.toLowerCase().includes(searchTerm)));
+            }
+
+            if (filtered.length === 0 && !isManagementMode) {
+                menuGrid.innerHTML = `<div class="col-span-full py-10 text-center text-gray-300 font-bold uppercase tracking-widest opacity-30">Không tìm thấy món</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = "touch-button bg-white border-2 border-gray-100 shadow-sm text-gray-800 hover:border-brand-red/30 relative group";
+                btn.onclick = () => isManagementMode ? quickDeleteItem(item.id) : addItemToActiveTable(item);
+                btn.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        ${item.code ? `<span class="absolute top-1 left-2 text-[8px] font-black text-brand-red opacity-60">#${item.code}</span>` : ''}
+                        <span class="text-sm font-black uppercase leading-tight">${escapeHTML(item.name)}</span>
+                        <span class="text-brand-red text-xs mt-1 font-bold">${item.price}</span>
+                        ${isManagementMode ? `<div class="absolute inset-0 bg-red-500/10 flex items-center justify-center rounded-2xl backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph-bold ph-trash text-red-600 text-2xl"></i></div>` : ''}
+                    </div>
+                `;
+                menuGrid.appendChild(btn);
+            });
+        }
+
+        function quickAddCategory() {
+            const name = prompt("Nhập tên Nhóm mới (Vd: Sushi, Khai vị, Đồ uống...):");
+            if (!name) return;
+            
+            const newItem = { id: 'M' + Date.now(), name: "Mẫu " + name, price: "0,00 €", category: name, code: "S1" };
+            allMenu.push(newItem);
+            saveMenu(allMenu);
+            currentCategory = name;
+            renderCategories();
+            renderMenu();
+        }
+
+        function quickDeleteCategory(catName) {
+            if (!confirm(`Bạn có chắc muốn xóa toàn bộ nhóm "${catName}" không?`)) return;
+            allMenu = allMenu.filter(m => m.category !== catName);
+            saveMenu(allMenu);
+            currentCategory = 'Tất cả';
+            renderCategories();
+            renderMenu();
+        }
+
+        function addMiscItem() {
+            if (!activeTableId) {
+                alert("Vui lòng chọn bàn trước khi thêm món!");
+                return;
+            }
+            const name = prompt("Tên món lẻ (Tùy chọn):", "Món tự do");
+            if (name === null) return;
+            const priceVal = prompt("Đơn giá (Vd: 5.50 hoặc 10):", "0.00");
+            if (priceVal === null) return;
+
+            const priceNum = parseFloat(priceVal.toString().replace(',', '.'));
+            if (isNaN(priceNum)) {
+                alert("Giá tiền không hợp lệ!");
+                return;
+            }
+
+            const formattedPrice = priceNum.toFixed(2).replace('.', ',') + " €";
+            const customItem = {
+                id: 'MISC-' + Date.now(),
+                name: name || "Món lẻ",
+                price: formattedPrice,
+                category: "Linh hoạt",
+                code: "FIX"
+            };
+
+            addItemToActiveTable(customItem);
+        }
+
+        function quickAddItem() {
+            const name = prompt("Nhập tên món mới:");
+            if (!name) return;
+            const priceVal = prompt("Nhập giá tiền (Vd: 15.5):", "0.00");
+            if (priceVal === null) return;
+            const code = prompt("Nhập mã món (Vd: S1):", "");
+
+            const formattedPrice = parseFloat(priceVal.toString().replace(',', '.')).toFixed(2).replace('.', ',') + " €";
+
+            const newItem = {
+                id: 'M' + Date.now(),
+                name: name,
+                price: formattedPrice,
+                category: currentCategory,
+                code: code || ""
+            };
+
+            allMenu.push(newItem);
+            saveMenu(allMenu);
+            renderMenu();
+        }
+
+        function quickDeleteItem(id) {
+            if (!confirm("Xóa món ăn này?")) return;
+            allMenu = allMenu.filter(m => m.id !== id);
+            saveMenu(allMenu);
+            renderMenu();
+        }
+
+        function openTable(id) {
+            activeTableId = id;
+            isSplitMode = false;
+            selectedItemIndices = [];
+            const table = allTables.find(t => t.id === activeTableId);
+            document.getElementById('order-table-name').textContent = table ? table.name : "Món";
+            
+            // Switch to Menu View for mobile/desktop unified flow
+            switchMobileView('menu');
+            renderBill();
+            
+            // Auto-focus search for rapid ordering
+            setTimeout(() => {
+                const searchInput = document.getElementById('menu-search');
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.focus();
+                }
+            }, 100);
+        }
+
+        function closeMenu() {
+            activeTableId = null;
+            isSplitMode = false;
+            selectedItemIndices = [];
+            switchMobileView('tables');
+            renderBill();
+        }
+
+        function switchMobileView(view) {
+            // Hide all tab views
+            document.querySelectorAll('.mobile-tab-view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            
+            // Update Tab Bar Icons
+            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-brand-red', 'text-gray-400'));
+            document.getElementById('tab-' + view).classList.replace('text-gray-400', 'text-brand-red');
+        }
+
+        function addItemToActiveTable(item) {
+            if (!activeTableId) return;
+            const table = allTables.find(t => t.id === activeTableId);
+            if (!table) return;
+
+            // Add locally first
+            table.status = 'occupied';
+            table.orderItems.push({ ...item });
+            table.total = table.orderItems.reduce((sum, i) => sum + (parseFloat(i.price.replace(' €', '').replace(',', '.')) || 0), 0);
+            
+            saveTables(allTables);
+            renderTables();
+            renderBill();
+
+            // Try to sync with server if available
+            if (socket) {
+                socket.emit('pos_add_item', { tableId: activeTableId, item: item });
+            }
+        }
+
+        function renderBill() {
+            if (!activeTableId) {
+                billItems.innerHTML = `<div class="text-center text-gray-300 py-10"><i class="ph ph-mask-sad text-6xl opacity-10"></i></div>`;
+                billTotal.textContent = "0,00 €";
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            const table = allTables.find(t => t.id === activeTableId);
+            billTableBadge.textContent = table.name;
+            document.getElementById('split-indicator').classList.toggle('hidden', !isSplitMode);
+
+            billItems.innerHTML = '';
+            let currentTotal = 0;
+
+            if (table.orderItems.length === 0) {
+                billItems.innerHTML = `<div class="text-center text-gray-300 py-20 font-bold text-xs uppercase opacity-30 tracking-widest">Keine Artikel</div>`;
+                document.getElementById('tab-bill-badge').classList.add('hidden');
+            } else {
+                // Update mobile badge
+                const badge = document.getElementById('tab-bill-badge');
+                badge.textContent = table.orderItems.length;
+                badge.classList.remove('hidden');
+                
+                // In split mode
+                if (isSplitMode) {
+                    table.orderItems.forEach((item, index) => {
+                        const priceNum = parseFloat(item.price.replace(' €', '').replace(',', '.')) || 0;
+                        const isSelected = selectedItemIndices.includes(index);
+                        if (isSelected) currentTotal += priceNum;
+
+                        const div = document.createElement('div');
+                        div.className = `flex justify-between items-center p-4 rounded-2xl transition border-l-4 ${isSelected ? 'bg-brand-red/10 border-brand-red' : 'bg-white border-transparent shadow-sm'}`;
+                        div.onclick = () => toggleItemSelection(index);
+                        div.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 ${isSelected ? 'bg-brand-red border-brand-red' : 'border-gray-200'} flex items-center justify-center text-white text-[10px]">${isSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div>
+                                <span class="text-sm font-black text-gray-800 uppercase tracking-tighter">${escapeHTML(item.name)}</span>
+                            </div>
+                            <span class="text-sm text-gray-500 font-bold">${item.price}</span>
+                        `;
+                        billItems.appendChild(div);
+                    });
+                } else {
+                    // Regular Mode: Group identical items for a cleaner bill
+                    const grouped = [];
+                    table.orderItems.forEach((item, originalIndex) => {
+                        const existing = grouped.find(g => g.name === item.name);
+                        if (existing) {
+                            existing.count++;
+                            existing.indices.push(originalIndex);
+                        } else {
+                            grouped.push({ ...item, count: 1, indices: [originalIndex] });
+                        }
+                    });
+
+                    grouped.forEach(group => {
+                        const priceNum = parseFloat(group.price.replace(' €', '').replace(',', '.')) || 0;
+                        currentTotal += (priceNum * group.count);
+
+                        const div = document.createElement('div');
+                        div.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-transparent flex justify-between items-center mb-1 group-bill-item";
+                        div.innerHTML = `
+                            <div class="flex flex-col">
+                                <span class="text-sm font-black text-gray-800 uppercase tracking-tighter">${group.count}x ${escapeHTML(group.name)}</span>
+                                <span class="text-[10px] font-bold text-gray-400">${group.price} / Stk</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-black text-gray-800">${(priceNum * group.count).toFixed(2).replace('.', ',')} €</span>
+                                <button onclick="removeItemFromTable(${group.indices[0]})" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center active:scale-90 transition">
+                                    <i class="ph-fill ph-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        billItems.appendChild(div);
+                    });
+                }
+            }
+
+            document.getElementById('total-label').textContent = isSplitMode ? 'SPLIT BETRAG' : 'GESAMTBETRAG';
+            billTotal.textContent = currentTotal.toFixed(2).replace('.', ',') + ' €';
+            checkoutBtn.disabled = table.orderItems.length === 0 || (isSplitMode && selectedItemIndices.length === 0);
+        }
+
+        function toggleSplitMode() {
+            isSplitMode = !isSplitMode;
+            selectedItemIndices = [];
+            const btn = document.getElementById('split-mode-btn');
+            btn.classList.toggle('bg-brand-red', isSplitMode);
+            btn.classList.toggle('text-white', isSplitMode);
+            renderBill();
+        }
+
+        function toggleItemSelection(index) {
+            const pos = selectedItemIndices.indexOf(index);
+            if (pos === -1) selectedItemIndices.push(index);
+            else selectedItemIndices.splice(pos, 1);
+            renderBill();
+        }
+
+        function removeItemFromTable(index) {
+            if (!activeTableId) return;
+            const table = allTables.find(t => t.id === activeTableId);
+            if (!table) return;
+
+            // Remove locally
+            table.orderItems.splice(index, 1);
+            if (table.orderItems.length === 0) {
+                table.status = 'empty';
+                table.total = 0;
+            } else {
+                table.total = table.orderItems.reduce((sum, i) => sum + (parseFloat(i.price.replace(' €', '').replace(',', '.')) || 0), 0);
+            }
+
+            saveTables(allTables);
+            renderTables();
+            renderBill();
+
+            // Try sync
+            if (socket) {
+                socket.emit('pos_remove_item', { tableId: activeTableId, itemIndex: index });
+            }
+        }
+
+        function printKitchenTicket() {
+            if (!activeTableId) return;
+            const table = allTables.find(t => t.id === activeTableId);
+            if (table.orderItems.length === 0) return alert("Bàn trống, không có gì để in!");
+            
+            const printWindow = window.open('', '_blank', 'width=600,height=600');
+            if(!printWindow) return alert("Vui lòng cho phép Pop-up!");
+            
+            // Group for kitchen too
+            const grouped = [];
+            table.orderItems.forEach(item => {
+                const existing = grouped.find(g => g.name === item.name);
+                if (existing) existing.count++;
+                else grouped.push({ ...item, count: 1 });
+            });
+
+            const itemsHtml = grouped.map(i => `<div style="font-size: 20px; font-weight: bold; border-bottom: 1px solid #eee; padding: 2mm 0;">${i.count}x ${escapeHTML(i.name)}</div>`).join('');
+            const html = `<html><head><style>body{font-family:sans-serif; width:80mm; padding:5mm; margin:0;}.hdr{text-align:center;border-bottom:3px solid #000;padding-bottom:2mm;margin-bottom:2mm;}</style></head>
+            <body><div class="hdr"><h1>BẾP - ${table.name}</h1><p>${new Date().toLocaleTimeString('de-DE')}</p></div>
+            <div class="items">${itemsHtml}</div>
+            <script>window.onload=function(){window.print();setTimeout(window.close,1000);};<\/script></body></html>`;
+            printWindow.document.write(html);
+            printWindow.document.close();
+        }
+
+        function updateCheckoutTotals() {
+            const table = allTables.find(t => t.id === activeTableId);
+            const discountPercent = parseInt(document.getElementById('discount-select').value) || 0;
+            
+            let itemsToPay = isSplitMode ? selectedItemIndices.map(idx => table.orderItems[idx]) : table.orderItems;
+            let subtotalGross = itemsToPay.reduce((sum, item) => sum + (parseFloat(item.price.replace(' €', '').replace(',', '.')) || 0), 0);
+            
+            const discountAmount = subtotalGross * (discountPercent / 100);
+            const finalTotal = subtotalGross - discountAmount;
+            
+            const netAmount = finalTotal / (1 + taxRate1/100);
+            const taxAmount = finalTotal - netAmount;
+            
+            document.getElementById('modal-subtotal').textContent = subtotalGross.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('modal-discount-amount').textContent = `-${discountAmount.toFixed(2).replace('.', ',')} €`;
+            document.getElementById('modal-tax-amount').textContent = taxAmount.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('modal-total').textContent = finalTotal.toFixed(2).replace('.', ',') + ' €';
+        }
+
+        // Update checkout trigger to call the new total calculator
+        checkoutBtn.onclick = () => {
+            const table = allTables.find(t => t.id === activeTableId);
+            const modal = document.getElementById('checkout-modal');
+            const box = document.getElementById('checkout-box');
+            document.getElementById('modal-table-name').textContent = table.name + (isSplitMode ? ' (Split)' : '');
+            
+            // Reset calculator for a fresh start
+            document.getElementById('discount-select').value = "0";
+            document.getElementById('cash-received').value = "";
+            document.getElementById('change-amount').textContent = "TIỀN THỪA: 0,00 €";
+            document.querySelector('input[name="payment"][value="cash"]').checked = true;
+            toggleCashInput(true);
+
+            updateCheckoutTotals();
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-95');
+        };
+
+        function hideCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('checkout-box').classList.add('scale-95');
+        }
+
+        function toggleCashInput(isCash) {
+            document.getElementById('cash-calculator').classList.toggle('hidden', !isCash);
+        }
+
+        function setCash(val) {
+            const totalStr = document.getElementById('modal-total').textContent.replace(' €', '').replace(',', '.');
+            const total = parseFloat(totalStr) || 0;
+            document.getElementById('cash-received').value = val === 0 ? total.toFixed(2) : val.toFixed(2);
+            calculateChange();
+        }
+
+        function addCash(val) {
+            const input = document.getElementById('cash-received');
+            const current = parseFloat(input.value) || 0;
+            input.value = (current + val).toFixed(2);
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const totalStr = document.getElementById('modal-total').textContent.replace(' €', '').replace(',', '.');
+            const total = parseFloat(totalStr) || 0;
+            const received = parseFloat(document.getElementById('cash-received').value) || 0;
+            const change = received - total;
+            const el = document.getElementById('change-amount');
+            if (change < 0) {
+                el.textContent = "THIẾU: " + Math.abs(change).toFixed(2).replace('.', ',') + " €";
+                el.className = "text-xs font-black text-brand-red";
+            } else {
+                el.textContent = "TIỀN THỪA: " + change.toFixed(2).replace('.', ',') + " €";
+                el.className = "text-xs font-black text-brand-matcha";
+            }
+        }
+
+        function finalizeCheckout() {
+            if (!activeTableId) return;
+            const table = allTables.find(t => t.id === activeTableId);
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+            const discountPercent = parseInt(document.getElementById('discount-select').value) || 0;
+
+            let itemsToPay = isSplitMode ? selectedItemIndices.map(idx => table.orderItems[idx]) : table.orderItems;
+            let subtotalGross = itemsToPay.reduce((sum, item) => sum + (parseFloat(item.price.replace(' €', '').replace(',', '.')) || 0), 0);
+
+            const discountAmount = subtotalGross * (discountPercent / 100);
+            const finalTotal = subtotalGross - discountAmount;
+            const netAmount = finalTotal / (1 + taxRate1/100);
+            const taxAmount = finalTotal - netAmount;
+
+            const checkoutData = {
+                tableId: activeTableId,
+                tableName: table.name,
+                items: itemsToPay,
+                subtotal: subtotalGross,
+                discount: discountAmount,
+                discountPercent: discountPercent,
+                tax: taxAmount,
+                total: finalTotal,
+                paymentMethod: paymentMethod,
+                timestamp: new Date().toISOString()
+            };
+
+            // Xóa các món đã thanh toán khỏi bàn (split mode: chỉ xóa món đã chọn; normal: xóa hết)
+            if (isSplitMode) {
+                // Xóa theo thứ tự giảm dần để không lệch index
+                const sortedIndices = [...selectedItemIndices].sort((a, b) => b - a);
+                sortedIndices.forEach(idx => table.orderItems.splice(idx, 1));
+                if (table.orderItems.length === 0) {
+                    table.status = 'empty';
+                    table.total = 0;
+                } else {
+                    table.total = table.orderItems.reduce((sum, i) => sum + (parseFloat(i.price.replace(' €', '').replace(',', '.')) || 0), 0);
+                }
+            } else {
+                // Xóa toàn bộ: reset bàn về trạng thái trống
+                table.status = 'empty';
+                table.orderItems = [];
+                table.total = 0;
+            }
+
+            // Lưu lại bộ nhớ máy và đồng bộ Cloud
+            updateSyncStatus(false);
+            Promise.all([
+                saveHistory(checkoutData),
+                saveTables(allTables)
+            ]).then(() => updateSyncStatus(true));
+
+            renderTables();
+
+            // Thông báo qua Socket (nếu có)
+            if (socket) {
+                if (isSplitMode) socket.emit('pos_split_checkout', {...checkoutData, selectedItems: itemsToPay});
+                else socket.emit('pos_checkout', checkoutData);
+            }
+
+            hideCheckoutModal();
+            if (!isSplitMode) closeMenu();
+            else { isSplitMode = false; selectedItemIndices = []; renderBill(); }
+        }
+
+        // Table Management
+        function startMoveTable() {
+            if (!activeTableId) return;
+            const table = allTables.find(t => t.id === activeTableId);
+            document.getElementById('move-source-name').textContent = table.name;
+            const grid = document.getElementById('move-table-grid'); grid.innerHTML = '';
+            
+            allTables.filter(t => t.status === 'empty').forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = "py-6 bg-gray-50 border-4 border-gray-100 rounded-3xl font-black text-gray-800 active:bg-green-50 active:border-green-400 transition";
+                btn.textContent = t.name;
+                btn.onclick = () => { 
+                    // Move locally
+                    t.status = 'occupied';
+                    t.orderItems = [...table.orderItems];
+                    t.total = table.total;
+                    
+                    table.status = 'empty';
+                    table.orderItems = [];
+                    table.total = 0;
+
+                    saveTables(allTables);
+                    renderTables();
+                    
+                    if (socket) socket.emit('pos_move_table', { sourceId: activeTableId, targetId: t.id });
+                    
+                    hideMoveModal(); 
+                    closeMenu(); 
+                };
+                grid.appendChild(btn);
+            });
+            document.getElementById('move-modal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+        function hideMoveModal() { document.getElementById('move-modal').classList.add('opacity-0', 'pointer-events-none'); }
+
+        // Online Orders
+        let currentAssigningOrderId = null;
+        function showOnlineOrders() {
+            const list = document.getElementById('online-orders-list'); list.innerHTML = '';
+            const pending = onlineOrders.filter(o => o.status !== 'assigned_to_table' && o.status !== 'cancelled');
+            if (pending.length === 0) list.innerHTML = `<div class="text-center text-gray-400 py-10 font-bold uppercase tracking-widest opacity-20"><i class="ph ph-moon text-6xl mb-4"></i><br>Keine Bestellungen</div>`;
+            else pending.forEach(order => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-6 rounded-[32px] border-4 border-white shadow-sm flex flex-col gap-4 relative overflow-hidden";
+                
+                const pickupTimeStr = order.pickupDate ? `${order.pickupDate.split('-').reverse().join('.')} @ ${order.pickupTime === 'asap' ? 'SOFORT' : order.pickupTime}` : 'SOFORT';
+                
+                div.innerHTML = `
+                    <div class="absolute top-0 right-0 px-3 py-1 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
+                        ${pickupTimeStr}
+                    </div>
+                    <div class="flex flex-col pt-2">
+                        <span class="font-black text-xl text-gray-800 uppercase tracking-tighter">${order.name}</span>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">${order.phone} • ${order.total}€</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100 mt-2">
+                        <button onclick="confirmAndNotify('${order.id}', 15)" class="flex-1 bg-gray-100 hover:bg-brand-red hover:text-white px-3 py-2 rounded-xl font-black text-[10px] transition uppercase">15 Min</button>
+                        <button onclick="confirmAndNotify('${order.id}', 20)" class="flex-1 bg-gray-100 hover:bg-brand-red hover:text-white px-3 py-2 rounded-xl font-black text-[10px] transition uppercase">20 Min</button>
+                        <button onclick="confirmAndNotify('${order.id}', 30)" class="flex-1 bg-gray-100 hover:bg-brand-red hover:text-white px-3 py-2 rounded-xl font-black text-[10px] transition uppercase">30 Min</button>
+                        <button onclick="confirmAndNotify('${order.id}', 45)" class="flex-1 bg-gray-100 hover:bg-brand-red hover:text-white px-3 py-2 rounded-xl font-black text-[10px] transition uppercase">45 Min</button>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="startAssignToTable('${order.id}')" class="flex-1 bg-brand-gold text-white px-8 py-4 rounded-2xl font-black shadow-lg active:scale-95 transition uppercase text-xs">Phân bàn</button>
+                        <button onclick="cancelOnlineOrder('${order.id}')" class="px-4 py-4 bg-gray-100 text-gray-400 rounded-2xl font-black hover:bg-red-50 hover:text-red-500 transition" title="Hủy đơn">
+                            <i class="ph ph-x-circle text-xl"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('online-orders-modal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        async function confirmAndNotify(orderId, waitTime) {
+            const order = onlineOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const settings = getSettings();
+            if (settings.emailEnabled && settings.emailApiKey) {
+                // Show loading on button if possible, or just a toast
+                console.log(`[POS] Đang gửi thông báo email (${waitTime}p)...`);
+                
+                try {
+                    const response = await fetch('/api/notify-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            waitTime: waitTime,
+                            customerEmail: order.email,
+                            customerName: order.name,
+                            orderTotal: order.total,
+                            apiKey: settings.emailApiKey
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(`Đã xác nhận ${waitTime} phút và gửi Email tới ${order.name}!`);
+                    } else {
+                        console.error("Lỗi gửi mail:", result.error);
+                        alert("Xác nhận OK nhưng lỗi gửi Email: " + result.error);
+                    }
+                } catch (err) {
+                    console.error("Fetch error:", err);
+                    alert("Lỗi kết nối Server khi gửi mail!");
+                }
+            } else {
+                alert(`Đã xác nhận ${waitTime} phút (Chưa gửi mail vì chưa cài API Key)`);
+            }
+        }
+
+        function cancelOnlineOrder(orderId) {
+            if (!confirm("Bạn có chắc chắn muốn HỦY đơn hàng này không?")) return;
+            const order = onlineOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'cancelled';
+                localStorage.setItem('kimi_online_orders', JSON.stringify(onlineOrders));
+                updateOnlineCount();
+                showOnlineOrders();
+                if (socket) socket.emit('pos_cancel_order', orderId);
+            }
+        }
+        function startAssignToTable(orderId) {
+            currentAssigningOrderId = orderId; hideOnlineOrders();
+            const grid = document.getElementById('move-table-grid');
+            document.getElementById('move-source-name').textContent = "ONLINE BEST.";
+            grid.innerHTML = '';
+            
+            allTables.filter(t => t.status === 'empty').forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = "py-6 bg-white border-4 border-gray-100 rounded-3xl font-black active:border-brand-gold transition";
+                btn.textContent = t.name;
+                btn.onclick = () => { 
+                    const order = onlineOrders.find(o => o.id === currentAssigningOrderId);
+                    if (order) {
+                        t.status = 'occupied';
+                        t.total = parseFloat(order.total) || 0;
+                        t.orderItems = Array.isArray(order.cart) ? order.cart : (Array.isArray(order.items) ? order.items : []);
+                        order.status = 'assigned_to_table';
+
+                        localStorage.setItem('kimi_online_orders', JSON.stringify(onlineOrders));
+                        saveTables(allTables);
+                        renderTables();
+                        updateOnlineCount();
+                        
+                        if (socket) socket.emit('pos_assign_order', { orderId: currentAssigningOrderId, tableId: t.id });
+                        
+                        hideMoveModal(); 
+                        setTimeout(() => openTable(t.id), 200); 
+                    }
+                };
+                grid.appendChild(btn);
+            });
+            document.getElementById('move-modal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+        function hideOnlineOrders() { document.getElementById('online-orders-modal').classList.add('opacity-0', 'pointer-events-none'); }
+
+        function printReceipt(data) {
+            const printWindow = window.open('', '_blank', 'width=600,height=600');
+            if(!printWindow) return;
+            
+            // Group identical items for receipt
+            const grouped = [];
+            data.items.forEach(item => {
+                const existing = grouped.find(g => g.name === item.name);
+                if (existing) existing.count++;
+                else grouped.push({ ...item, count: 1 });
+            });
+
+            let itemsHtml = grouped.map(i => `
+                <div style="display:flex;justify-content:space-between;margin-bottom:1mm;">
+                    <span>${i.count}x ${escapeHTML(i.name)}</span>
+                    <span>${(i.count * (parseFloat(i.price.replace(' €', '').replace(',', '.')) || 0)).toFixed(2).replace('.', ',')} €</span>
+                </div>
+            `).join('');
+
+            const html = `<html><head><style>body{font-family:'Courier New',monospace;width:80mm;padding:5mm;margin:0;font-size:14px;}.hdr{text-align:center;border-bottom:1px dashed #000;margin-bottom:5mm;padding-bottom:5mm;}.summary{margin-top:5mm;border-top:1px solid #000;padding-top:2mm;}.total{display:flex;justify-content:space-between;font-weight:bold;font-size:18px;margin-top:2mm;}.ftr{text-align:center;margin-top:10mm;border-top:1px dashed #000;padding-top:5mm;font-size:12px;}</style></head>
+            <body>
+                <div class="hdr"><h2>KIMI SUSHI</h2><p>${new Date().toLocaleString('de-DE')}</p><p>Tisch: ${data.tableName}</p></div>
+                <div class="items">${itemsHtml}</div>
+                <div class="summary">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;"><span>Zwischensumme:</span> <span>${data.subtotal.toFixed(2).replace('.', ',')} €</span></div>
+                    ${data.discount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12px;color:#000;"><span>Rabatt (${data.discountPercent}%):</span> <span>-${data.discount.toFixed(2).replace('.', ',')} €</span></div>` : ''}
+                    <div style="display:flex;justify-content:space-between;font-size:12px;"><span>MwSt (19%):</span> <span>${data.tax.toFixed(2).replace('.', ',')} €</span></div>
+                    <div class="total"><span>GESAMT:</span> <span>${data.total.toFixed(2).replace('.', ',')} €</span></div>
+                </div>
+                <div class="ftr"><p>Zahlart: ${data.paymentMethod.toUpperCase()}</p><p>Vielen Dank cho khách yêu!</p></div>
+                <script>window.onload=function(){window.print();setTimeout(window.close,1000);};\x3C/script>
+            </body></html>`;
+            printWindow.document.write(html); printWindow.document.close();
+        }
+    </script>
+</body>
+</html>

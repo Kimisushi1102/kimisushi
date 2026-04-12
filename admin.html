@@ -16,6 +16,9 @@
     <!-- FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -77,7 +80,32 @@
             <nav class="flex-1 py-6">
                 <ul class="space-y-2 px-4">
                     <li>
-                        <a href="#" id="nav-menu" class="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg transition-colors">
+                        <a href="#" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-house text-xl text-brand-gold"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-analytics" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-chart-bar text-xl text-brand-gold"></i>
+                            Analytik
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-orders" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-receipt text-xl text-brand-gold"></i>
+                            Bestellungen & Reservierungen
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-website-hours" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-clock text-xl text-brand-gold"></i>
+                            Öffnungszeiten
+                        </a>
+                    </li>
+                    <div class="border-t border-white/10 my-3"></div>
+                    <li>
+                        <a href="#" id="nav-menu" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
                             <i class="ph ph-fork-knife text-xl text-brand-gold"></i>
                             Quản lý Thực đơn
                         </a>
@@ -92,6 +120,18 @@
                         <a href="#" id="nav-settings" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
                             <i class="ph ph-gear text-xl"></i>
                             Cài đặt Website
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-media" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-images text-xl"></i>
+                            Medien
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-activity" class="flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                            <i class="ph ph-clock-counter-clockwise text-xl"></i>
+                            Änderungsverlauf
                         </a>
                     </li>
                     <li>
@@ -161,9 +201,241 @@
 
             <!-- Scrollable Content -->
             <div class="flex-1 overflow-auto p-8">
-                
-                
-                <!-- NEW SECTION: POS Integration -->
+
+                <!-- ===================== SECTION: DASHBOARD ===================== -->
+                <div id="section-dashboard" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-serif font-bold text-brand-dark">Dashboard</h1>
+                        <p class="text-gray-500 text-sm">Willkommen zurück — Übersicht aller wichtigen Kennzahlen</p>
+                    </div>
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="ph ph-receipt text-brand-red text-xl"></i>
+                                <span class="text-xs text-green-600 font-semibold" id="dash-orders-today-label">Heute</span>
+                            </div>
+                            <p class="text-3xl font-black text-brand-dark" id="dash-orders-count">0</p>
+                            <p class="text-xs text-gray-400 mt-1">Bestellungen heute</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="ph ph-currency-eur text-green-600 text-xl"></i>
+                                <span class="text-xs text-green-600 font-semibold">Heute</span>
+                            </div>
+                            <p class="text-3xl font-black text-brand-dark" id="dash-revenue-today">0 €</p>
+                            <p class="text-xs text-gray-400 mt-1">Umsatz heute</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="ph ph-users text-blue-600 text-xl"></i>
+                                <span class="text-xs text-blue-600 font-semibold">Woche</span>
+                            </div>
+                            <p class="text-3xl font-black text-brand-dark" id="dash-visits-week">0</p>
+                            <p class="text-xs text-gray-400 mt-1">Besucher diese Woche</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="ph ph-trend-up text-brand-gold text-xl"></i>
+                                <span class="text-xs text-brand-gold font-semibold">Rate</span>
+                            </div>
+                            <p class="text-3xl font-black text-brand-dark" id="dash-conversion">0%</p>
+                            <p class="text-xs text-gray-400 mt-1">Conversion Rate</p>
+                        </div>
+                    </div>
+                    <!-- Recent orders preview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-3 flex items-center gap-2"><i class="ph ph-clock text-brand-red"></i> Letzte Bestellungen</h3>
+                            <div id="dash-recent-orders" class="space-y-2 max-h-64 overflow-y-auto">
+                                <p class="text-gray-400 text-sm text-center py-4">Keine Bestellungen</p>
+                            </div>
+                            <button onclick="switchSection('orders')" class="mt-3 w-full text-center text-sm text-brand-red font-semibold hover:underline py-2 border-t border-gray-50">Alle Bestellungen →</button>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-3 flex items-center gap-2"><i class="ph ph-chart-pie text-brand-gold"></i> Status-Verteilung</h3>
+                            <canvas id="chart-dash-status" class="max-h-48" height="180"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== SECTION: ANALYTICS ===================== -->
+                <div id="section-analytics" class="hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-serif font-bold text-brand-dark">Analytik & Statistiken</h1>
+                            <p class="text-gray-500 text-sm">Besucher, Klicks, Conversion und Umsatzanalysen</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="analytics-refresh" class="bg-brand-red text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 flex items-center gap-2 transition"><i class="ph ph-arrows-clockwise"></i> Aktualisieren</button>
+                            <button id="analytics-reset" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 flex items-center gap-2 transition"><i class="ph ph-trash"></i> Zurücksetzen</button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-brand-dark" id="kpi-today-orders">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Bestellungen heute</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-brand-dark" id="kpi-week-orders">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Bestellungen Woche</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-green-600" id="kpi-today-revenue">0 €</p><p class="text-[10px] text-gray-400 uppercase font-bold">Umsatz heute</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-green-600" id="kpi-week-revenue">0 €</p><p class="text-[10px] text-gray-400 uppercase font-bold">Umsatz Woche</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-blue-600" id="kpi-today-visits">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Besucher heute</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-blue-600" id="kpi-week-visits">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Besucher Woche</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-brand-dark" id="kpi-total-orders">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Gesamt Bestellungen</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-green-600" id="kpi-total-revenue">0 €</p><p class="text-[10px] text-gray-400 uppercase font-bold">Gesamt Umsatz</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-purple-600" id="kpi-conv-today">0%</p><p class="text-[10px] text-gray-400 uppercase font-bold">Conversion heute</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-purple-600" id="kpi-conv-week">0%</p><p class="text-[10px] text-gray-400 uppercase font-bold">Conversion Woche</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-brand-gold" id="kpi-tel-clicks">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Tel-Klicks</p></div>
+                        <div class="bg-white rounded-xl p-3 border border-gray-100 text-center"><p class="text-xl font-black text-brand-gold" id="kpi-order-clicks">0</p><p class="text-[10px] text-gray-400 uppercase font-bold">Bestell-Klicks</p></div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-chart-bar text-brand-red"></i> Bestellungen (14 Tage)</h3>
+                            <div class="h-64"><canvas id="chart-orders"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-chart-line text-green-600"></i> Umsatz (14 Tage)</h3>
+                            <div class="h-64"><canvas id="chart-revenue"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-clock text-blue-600"></i> Stoßzeiten</h3>
+                            <div class="h-64"><canvas id="chart-hourly"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-chart-pie text-brand-gold"></i> Status-Verteilung</h3>
+                            <div class="h-64"><canvas id="chart-status"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Top Products & Clicks -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-star text-brand-gold"></i> Beliebte Produkte</h3>
+                            <div id="top-products-list"><p class="text-gray-400 text-sm text-center py-8">Keine Daten</p></div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                            <h3 class="font-bold text-brand-dark mb-4 flex items-center gap-2"><i class="ph ph-cursor-click text-blue-600"></i> Klick-Statistik</h3>
+                            <div id="clicks-summary"><p class="text-gray-400 text-sm text-center py-8">Keine Daten</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== SECTION: ORDERS & RESERVATIONS ===================== -->
+                <div id="section-orders" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-serif font-bold text-brand-dark">Bestellungen & Reservierungen</h1>
+                        <p class="text-gray-500 text-sm">Alle eingehenden Bestellungen und Reservierungen verwalten</p>
+                    </div>
+                    <div class="flex gap-3 mb-4 flex-wrap">
+                        <select id="orders-type-filter" class="border rounded-lg px-3 py-2 text-sm">
+                            <option value="all">Alle Typen</option>
+                            <option value="order">Nur Bestellungen</option>
+                            <option value="reservation">Nur Reservierungen</option>
+                        </select>
+                        <select id="orders-status-filter" class="border rounded-lg px-3 py-2 text-sm">
+                            <option value="all">Alle Status</option>
+                            <option value="neu">Neu</option>
+                            <option value="in_bearbeitung">In Bearbeitung</option>
+                            <option value="fertig">Fertig</option>
+                            <option value="abgeschlossen">Abgeschlossen</option>
+                            <option value="storniert">Storniert</option>
+                        </select>
+                        <input type="date" id="orders-date-filter" class="border rounded-lg px-3 py-2 text-sm">
+                        <input type="text" id="orders-search" placeholder="Suche Name, Tel., E-Mail, Nr...." class="border rounded-lg px-3 py-2 text-sm flex-1 min-w-[200px]">
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-bold text-brand-dark mb-3 flex items-center gap-2"><i class="ph ph-receipt text-brand-red"></i> Bestellungen</h3>
+                            <div id="orders-list"><div class="text-gray-400 text-sm text-center py-8">Lädt...</div></div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-brand-dark mb-3 flex items-center gap-2"><i class="ph ph-calendar text-brand-gold"></i> Reservierungen</h3>
+                            <div id="reservations-list"><div class="text-gray-400 text-sm text-center py-8">Lädt...</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== SECTION: OPENING HOURS ===================== -->
+                <div id="section-website-hours" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-serif font-bold text-brand-dark">Öffnungszeiten</h1>
+                        <p class="text-gray-500 text-sm">Öffnungszeiten bearbeiten — wirkt sich auf Checkout und Verfügbarkeit aus</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-3xl">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-bold text-sm text-gray-500 mb-2 pb-2 border-b">
+                                <span>Tag</span><span>Zeitblock 1</span><span>Zeitblock 2</span>
+                            </div>
+                            ${['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'].map((d,i) => {
+                                const keys = ['mon','tue','wed','thu','fri','sat','sun'];
+                                return `<div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">${d}</label>
+                                    <input type="text" id="hours-${keys[i]}1" placeholder="11:00 - 15:00" class="border rounded-lg px-3 py-2 text-sm col-span-1">
+                                    <input type="text" id="hours-${keys[i]}2" placeholder="17:00 - 22:00" class="border rounded-lg px-3 py-2 text-sm col-span-1">
+                                </div>`;
+                            }).join('')}
+                        </div>
+                        <div class="mt-4">
+                            <label class="block font-semibold text-sm text-gray-700 mb-1">Zusammenfassung (wird auf Website angezeigt)</label>
+                            <input type="text" id="hours-summary" placeholder="Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <button id="save-hours" class="mt-6 bg-brand-red text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-red-700 transition">
+                            <i class="ph ph-floppy-disk"></i> Öffnungszeiten speichern
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===================== SECTION: ACTIVITY LOG ===================== -->
+                <div id="section-activity" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-serif font-bold text-brand-dark">Änderungsverlauf</h1>
+                        <p class="text-gray-500 text-sm">Alle Änderungen und Admin-Aktivitäten im Überblick</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+                        <div class="p-4 border-b border-gray-100">
+                            <h3 class="font-bold text-brand-dark">Letzte Aktivitäten</h3>
+                        </div>
+                        <div id="activity-log-list" class="p-4 max-h-[600px] overflow-y-auto">
+                            <p class="text-gray-400 text-sm text-center py-8">Keine Aktivitäten</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== SECTION: MEDIA ===================== -->
+                <div id="section-media" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-serif font-bold text-brand-dark">Medienverwaltung</h1>
+                        <p class="text-gray-500 text-sm">Bilder und Medieninhalte verwalten</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block font-semibold text-sm text-gray-700 mb-2">Hero-Bild</label>
+                                <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'hero-image-val')" class="w-full border rounded-lg px-3 py-2 text-sm">
+                                <input type="hidden" id="hero-image-val">
+                                <p class="text-xs text-gray-400 mt-1">Empfohlen: 1200x600px, JPG/PNG</p>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-sm text-gray-700 mb-2">Galerie-Bild 1</label>
+                                <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'gallery-1-val')" class="w-full border rounded-lg px-3 py-2 text-sm">
+                                <input type="hidden" id="gallery-1-val">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-sm text-gray-700 mb-2">Logo</label>
+                                <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'logo-val')" class="w-full border rounded-lg px-3 py-2 text-sm">
+                                <input type="hidden" id="logo-val">
+                                <p class="text-xs text-gray-400 mt-1">Empfohlen: 200x60px, PNG transparent</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-100 pt-4">
+                            <h4 class="font-bold text-brand-dark mb-3">Vorhandene Bilder</h4>
+                            <div id="media-gallery" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="text-center text-gray-400 text-xs py-8">Lädt...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="pos-management" class="hidden min-h-[calc(100vh-140px)] w-full">
                     <iframe src="billing/index.html" class="w-full h-[calc(100vh-140px)] border-0 rounded-2xl shadow-inner bg-gray-50"></iframe>
                 </div>
@@ -1130,6 +1402,17 @@
         </div>
     </div>
 
+    <!-- Order Detail Modal -->
+    <div id="order-detail-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
+                <h3 class="font-bold text-brand-dark text-lg flex items-center gap-2"><i class="ph ph-receipt text-brand-red"></i> Details</h3>
+                <button onclick="closeOrderDetail()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition"><i class="ph ph-x text-gray-500"></i></button>
+            </div>
+            <div class="p-5" id="order-detail-content"></div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 bg-brand-dark text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
         <i class="ph-fill ph-check-circle text-green-400 text-xl"></i>
@@ -1215,6 +1498,9 @@
     </script>
 
     <script src="js/data.js?v=1.1"></script>
+    <script src="js/admin-orders.js?v=1.0"></script>
+    <script src="js/admin-analytics.js?v=1.0"></script>
+    <script src="js/admin-seo.js?v=1.0"></script>
     <script src="js/admin.js?v=1.1"></script>
 </body>
 </html>

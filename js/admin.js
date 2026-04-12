@@ -110,7 +110,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navFinance = document.getElementById('nav-finance');
     const navPos = document.getElementById('nav-pos');
     const navInbox = document.getElementById('nav-inbox');
-    
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navAnalytics = document.getElementById('nav-analytics');
+    const navOrders = document.getElementById('nav-orders');
+    const navHours = document.getElementById('nav-website-hours');
+    const navMedia = document.getElementById('nav-media');
+    const navActivity = document.getElementById('nav-activity');
+
     const menuManagement = document.getElementById('menu-management');
     const combosManagement = document.getElementById('combos-management');
     const settingsManagement = document.getElementById('settings-management');
@@ -120,42 +126,106 @@ document.addEventListener('DOMContentLoaded', async () => {
     const financeReport = document.getElementById('finance-report');
     const posManagement = document.getElementById('pos-management');
     const inboxManagement = document.getElementById('inbox-management');
-    
+    const sectionDashboard = document.getElementById('section-dashboard');
+    const sectionAnalytics = document.getElementById('section-analytics');
+    const sectionOrders = document.getElementById('section-orders');
+    const sectionHours = document.getElementById('section-website-hours');
+    const sectionMedia = document.getElementById('section-media');
+    const sectionActivity = document.getElementById('section-activity');
+
     // Khởi tạo biến lưu trữ bàn để tránh lỗi undefined khi thêm bàn
     window.allTablesEditor = getTables();
 
-    function notifyPosUpdate() {
-        const iframe = document.querySelector('#pos-management iframe');
-        if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({ type: 'SYNC_DATA' }, '*');
+    // Global switchSection for new modules
+    window.switchSection = function(section) {
+        const allSections = [sectionDashboard, sectionAnalytics, sectionOrders, sectionHours, menuManagement, combosManagement, settingsManagement, seoManagement, tableManagement, tunnelManagement, financeReport, posManagement, inboxManagement, sectionMedia, sectionActivity];
+        const allNavs = [navDashboard, navAnalytics, navOrders, navHours, navMenu, navCombos, navSettings, navSeo, navTables, navTunnel, navFinance, navPos, navInbox, navMedia, navActivity];
+        allSections.forEach(s => s && s.classList.add('hidden'));
+        allNavs.forEach(n => n && (n.className = 'flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors'));
+
+        const sectionMap = {
+            'dashboard': [sectionDashboard, navDashboard],
+            'analytics': [sectionAnalytics, navAnalytics],
+            'orders': [sectionOrders, navOrders],
+            'hours': [sectionHours, navHours],
+            'menu': [menuManagement, navMenu],
+            'combos': [combosManagement, navCombos],
+            'settings': [settingsManagement, navSettings],
+            'seo': [seoManagement, navSeo],
+            'tables': [tableManagement, navTables],
+            'tunnel': [tunnelManagement, navTunnel],
+            'finance': [financeReport, navFinance],
+            'pos': [posManagement, navPos],
+            'inbox': [inboxManagement, navInbox],
+            'media': [sectionMedia, navMedia],
+            'activity': [sectionActivity, navActivity]
+        };
+
+        const pair = sectionMap[section];
+        if (pair) {
+            pair[0] && pair[0].classList.remove('hidden');
+            if (pair[1]) pair[1].className = 'flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg transition-colors';
         }
+
+        // Init modules on first view
+        if (section === 'analytics' && typeof window.initAnalytics === 'function') window.initAnalytics();
+        if (section === 'orders' && typeof window.initOrdersManagement === 'function') window.initOrdersManagement();
+        if (section === 'hours' && typeof window.initHoursManagement === 'function') window.initHoursManagement();
+        if (section === 'seo' && typeof window.initSEOManagement === 'function') window.initSEOManagement();
+        if (section === 'dashboard') initDashboardQuickView();
+        if (section === 'media') initMediaGallery();
+    };
+
+    function initDashboardQuickView() {
+        fetch('/api/analytics').then(r => r.json()).then(data => {
+            const today = new Date().toISOString().split('T')[0];
+            const todayOrders = (data.dailyOrders || []).filter(d => d.date === today).reduce((s, d) => s + d.count, 0);
+            const todayRev = (data.dailyRevenue || []).filter(d => d.date === today).reduce((s, d) => s + d.amount, 0);
+            const weekStart = (() => { const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1); return d.toISOString().split('T')[0]; })();
+            const weekVisits = (data.visits || []).filter(v => v.date >= weekStart).length;
+            const weekOrders = (data.dailyOrders || []).filter(d => d.date >= weekStart).reduce((s, d) => s + d.count, 0);
+            const conv = weekVisits > 0 ? ((weekOrders / weekVisits) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('dash-orders-count').textContent = todayOrders;
+            document.getElementById('dash-revenue-today').textContent = todayRev.toFixed(2) + ' €';
+            document.getElementById('dash-visits-week').textContent = weekVisits;
+            document.getElementById('dash-conversion').textContent = conv + '%';
+        }).catch(() => {});
     }
 
+    function initMediaGallery() {
+        const container = document.getElementById('media-gallery');
+        if (!container) return;
+        const images = ['images/hero_sushi.png','images/gallery-1.jpg','images/salmon_nigiri.png','images/dragon_roll.png','images/gyoza.png','images/miso_soup.png','images/tuna_nigiri.png','images/california_roll.png'];
+        container.innerHTML = images.map(src => `<div class="border rounded-lg p-2 text-center bg-gray-50"><img src="${src}" class="w-full h-24 object-cover rounded mb-1" onerror="this.style.display='none'"><span class="text-xs text-gray-500 truncate block">${src.split('/').pop()}</span></div>`).join('');
+    }
+
+    // Nav click bindings for new items
+    [navDashboard, navAnalytics, navOrders, navHours, navMedia, navActivity].forEach((nav, i) => {
+        if (!nav) return;
+        const sections = ['dashboard', 'analytics', 'orders', 'hours', 'media', 'activity'];
+        nav.addEventListener('click', e => { e.preventDefault(); switchSection(sections[i]); });
+    });
+
+    // Keep old switchTab for backward compat, redirect to switchSection
     function switchTab(activeNav, activeContent) {
-        // Reset all
-        [navMenu, navCombos, navSettings, navSeo, navFinance, navTables, navTunnel, navPos, navInbox].forEach(nav => {
-            if(nav) nav.className = "flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors font-medium";
-        });
-        [menuManagement, combosManagement, settingsManagement, seoManagement, financeReport, tableManagement, tunnelManagement, posManagement, inboxManagement].forEach(content => {
-            if(content) content.classList.add('hidden');
-        });
-        // Activate target
-        if(activeNav) activeNav.className = "flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg transition-colors font-medium";
-        if(activeContent) activeContent.classList.remove('hidden');
-
-        // Optional: specific layout adjustments for POS
-        const mainContentArea = document.querySelector('.flex-1.overflow-auto.p-8');
-        if (activeContent === posManagement) {
-            mainContentArea.classList.remove('p-8');
-            mainContentArea.classList.add('p-0', 'bg-gray-100');
-            // Force reload POS iframe to ensure fresh data
-            const iframe = posManagement.querySelector('iframe');
-            if (iframe) iframe.contentWindow.location.reload();
-        } else {
-            mainContentArea.classList.add('p-8');
-            mainContentArea.classList.remove('p-0', 'bg-gray-100');
-        }
+        // Dispatch to new switchSection based on content id
+        const contentToSection = {
+            'menu-management': 'menu', 'combos-management': 'combos', 'settings-management': 'settings',
+            'seo-management': 'seo', 'table-management': 'tables', 'tunnel-management': 'tunnel',
+            'finance-report': 'finance', 'pos-management': 'pos', 'inbox-management': 'inbox'
+        };
+        const sec = contentToSection[activeContent?.id];
+        if (sec) switchSection(sec);
     }
+
+    // Init default section
+    switchSection('dashboard');
+
+    // ---- Start Cloud Sync (Background) ----
+    initCloudSync().then((hasUpdates) => {
+        console.log("[ADMIN] Cloud Sync completed. Updates found: " + hasUpdates);
+    });
 
     if (navMenu && navCombos && navSettings) {
         navMenu.addEventListener('click', (e) => {
@@ -1560,8 +1630,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 total: order.total,
                 address: order.address,
                 notes: order.notes,
-                status: 'pending',
-                time: new Date().toISOString()
+                status: 'pending'
             };
             inboxItems.unshift(newItem);
             saveInboxToStorage();
@@ -1597,8 +1666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 time: res.time,
                 guests: res.guests,
                 notes: res.notes,
-                status: 'pending',
-                time: new Date().toISOString()
+                status: 'pending'
             };
             inboxItems.unshift(newItem);
             saveInboxToStorage();

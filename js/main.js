@@ -448,8 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     time: resData.time,
                     guests: resData.guests,
                     notes: resData.notes,
-                    status: 'pending',
-                    time: new Date().toISOString()
+                    status: 'pending'
                 };
                 try {
                     const ls = JSON.parse(localStorage.getItem('kimi_inbox') || '[]');
@@ -474,7 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             customerName: resData.name,
                             customerPhone: resData.phone,
                             customerEmail: resData.email,
-                            pickupTime: `${resData.date} um ${resData.time}`,
+                            pickupDate: resData.date,
+                            pickupTime: resData.time,
                             itemCount: resData.guests + ' Gäste'
                         })
                     }).catch(() => {});
@@ -491,7 +491,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             customerName: resData.name,
                             customerPhone: resData.phone,
                             orderType: 'reservation',
-                            pickupTime: `${resData.date} um ${resData.time}`,
+                            pickupDate: resData.date,
+                            pickupTime: resData.time,
                             itemCount: resData.guests + ' Gäste',
                             resendApiKey: emailConfig.emailApiKey || ''
                         })
@@ -509,7 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             customerName: resData.name,
                             customerPhone: resData.phone,
                             customerEmail: resData.email,
-                            pickupTime: `${resData.date} um ${resData.time}`,
+                            pickupDate: resData.date,
+                            pickupTime: resData.time,
                             itemCount: resData.guests + ' Gäste',
                             notes: resData.notes,
                             gmailEnabled: gmailResConfig.gmailEnabled,
@@ -534,20 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
             }
         });
-
-        const dateInput = document.getElementById('res-date');
-        if (dateInput) {
-            const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
-            // Sau 22h thì mặc định là ngày mai
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            const defaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
-            
-            dateInput.min = todayStr;
-            dateInput.value = defaultDate;
-        }
     }
 });
 
@@ -762,13 +750,13 @@ if (checkoutForm) {
         const config = typeof getSettings === 'function' ? getSettings() : {};
         if (!dateInput || !timeSelect) return;
 
-        const selectedDate = new Date(dateInput.value);
+        const selectedDate = new Date(dateInput.value + 'T00:00:00');
         const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
         const dayKey = dayNames[selectedDate.getDay()];
-        
+
         const h1 = config[`hours${dayKey.charAt(0).toUpperCase() + dayKey.slice(1)}1`] || "11:00 - 15:00";
         const h2 = config[`hours${dayKey.charAt(0).toUpperCase() + dayKey.slice(1)}2`] || "17:00 - 22:00";
-        
+
         const parseHours = (str) => {
             if (!str || !str.includes('-')) return null;
             const parts = str.split('-').map(s => s.trim());
@@ -779,22 +767,30 @@ if (checkoutForm) {
         };
 
         const slots = [parseHours(h1), parseHours(h2)].filter(s => s !== null);
-        
+
         // Lưu lại giá trị hiện tại của timeSelect trước khi xóa options
         const previousTimeValue = timeSelect.value;
-        
-        timeSelect.innerHTML = '<option value="asap">Schnellstmöglich</option>';
-        
+
         const now = new Date();
         const isToday = dateInput.value === now.toISOString().split('T')[0];
         const currentMin = now.getHours() * 60 + now.getMinutes();
-        
-        if (noticeEl) {
-            let storeCurrentlyOpen = false;
+
+        // Prüfen ob Store gerade offen ist (nur heute relevant)
+        let storeCurrentlyOpen = false;
+        if (isToday) {
             slots.forEach(s => {
                 if (currentMin >= s.start && currentMin < s.end - 20) storeCurrentlyOpen = true;
             });
+        }
 
+        // Schnellstmöglich NUR wenn Store gerade offen
+        if (storeCurrentlyOpen) {
+            timeSelect.innerHTML = '<option value="asap">Schnellstmöglich</option>';
+        } else {
+            timeSelect.innerHTML = '';
+        }
+
+        if (noticeEl) {
             const masterEnabled = config.orderingEnabled !== false;
             if (masterEnabled && isOrder) {
                 noticeEl.classList.add('hidden');
@@ -804,6 +800,7 @@ if (checkoutForm) {
             }
         }
 
+        // Only add fixed time slots (no asap-skip logic for future dates)
         slots.forEach(s => {
             for (let m = s.start; m < s.end; m += 30) {
                 if (isToday && m < currentMin + 30) continue;
@@ -814,8 +811,7 @@ if (checkoutForm) {
             }
         });
 
-        // KHÔI PHỤC GIÁ TRỊ ĐÃ CHỌN TRƯỚC ĐÓ (nếu có trong danh sách slot mới)
-        // Nếu giờ cũ không có trong danh sách mới → giữ ASAP, ngược lại restore giờ cũ
+        // Restore previous selection if still valid, else select first available
         const allSlotValues = [];
         slots.forEach(s => {
             for (let m = s.start; m < s.end; m += 30) {
@@ -825,13 +821,14 @@ if (checkoutForm) {
                 allSlotValues.push(`${hh}:${mm}`);
             }
         });
+
         if (previousTimeValue && previousTimeValue !== 'asap' && allSlotValues.includes(previousTimeValue)) {
             timeSelect.value = previousTimeValue;
-        } else if (previousTimeValue === 'asap') {
+        } else if (storeCurrentlyOpen && previousTimeValue === 'asap') {
             timeSelect.value = 'asap';
-        } else {
-            // Mặc định ASAP
-            timeSelect.value = 'asap';
+        } else if (allSlotValues.length > 0) {
+            // Store geschlossen → earliest slot vorselektieren
+            timeSelect.value = allSlotValues[0];
         }
     };
 
@@ -848,23 +845,35 @@ if (checkoutForm) {
         return `${year}-${month}-${day}`;
     };
     const todayStr = getLocalDateStr(now);
-    // Sau 22h thì mặc định là ngày mai
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = getLocalDateStr(tomorrow);
-    const defaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
-    
+
+    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const todayKey = dayNames[now.getDay()];
+    const cfg = typeof getSettings === 'function' ? getSettings() : {};
+    const h1 = cfg[`hours${todayKey.charAt(0).toUpperCase() + todayKey.slice(1)}1`] || '';
+    const h2 = cfg[`hours${todayKey.charAt(0).toUpperCase() + todayKey.slice(1)}2`] || '';
+    const storeOpenToday = h1.includes('-') || h2.includes('-');
+
+    let defaultDate = todayStr;
+    if (!storeOpenToday) {
+        defaultDate = tomorrowStr;
+    } else if (now.getHours() >= 22) {
+        defaultDate = tomorrowStr;
+    }
+
     coDate.min = todayStr;
     coDate.value = defaultDate;
     updateOrderSlots(); // Cập nhật slots ngay
-    
+
     const rDate = document.getElementById('res-date');
     if (rDate) {
-        const rDefaultDate = now.getHours() >= 22 ? tomorrowStr : todayStr;
         rDate.min = todayStr;
-        rDate.value = rDefaultDate;
+        rDate.value = defaultDate;
         rDate.addEventListener('change', updateResSlots);
-        setTimeout(updateResSlots, 500);
+        rDate.addEventListener('input', updateResSlots);
+        setTimeout(updateResSlots, 100);
     }
 
     document.querySelectorAll('.cart-trigger').forEach(btn => {
@@ -989,7 +998,8 @@ if (checkoutForm) {
             deliveryFee: feeObj.fee.toFixed(2),
             distance: feeObj.distance.toFixed(1) + 'km',
             total: (currentTotal + feeObj.fee).toFixed(2),
-            cart: cartItemsForBackend
+            cart: cartItemsForBackend,
+            notes: document.getElementById('co-allergies').value
         };
 
         // DEBUG LOG
@@ -1014,8 +1024,8 @@ if (checkoutForm) {
             total: orderData.total,
             address: orderData.address,
             method: orderData.method,
-            status: 'pending',
-            time: new Date().toISOString()
+            notes: orderData.notes,
+            status: 'pending'
         };
         try {
             const ls = JSON.parse(localStorage.getItem('kimi_inbox') || '[]');
@@ -1059,6 +1069,7 @@ if (checkoutForm) {
                     pickupTime: pickupTimeStr,
                     total: orderData.total,
                     itemCount: itemCount,
+                    notes: orderData.notes,
                     items: orderData.cart.map(item => ({
                         name: item.name,
                         quantity: item.quantity,
@@ -1080,6 +1091,7 @@ if (checkoutForm) {
                 orderType: 'order',
                 pickupDate: orderData.pickupDate,
                 pickupTime: pickupTimeStr,
+                notes: orderData.notes,
                 items: orderData.cart.map(item => ({
                     name: item.name,
                     quantity: item.quantity,
@@ -1101,6 +1113,7 @@ if (checkoutForm) {
                 customerEmail: orderData.email,
                 pickupDate: orderData.pickupDate,
                 pickupTime: pickupTimeStr,
+                notes: orderData.notes,
                 items: orderData.cart.map(item => ({
                     name: item.name,
                     quantity: item.quantity,

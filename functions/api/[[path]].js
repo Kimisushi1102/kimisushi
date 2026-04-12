@@ -156,7 +156,9 @@ export async function onRequest(context) {
         customerName,
         customerPhone,
         orderType, // 'reservation' | 'order'
+        pickupDate,
         pickupTime,
+        notes,
         items,
         total,
         itemCount,
@@ -223,7 +225,11 @@ export async function onRequest(context) {
             </div>
             ${pickupTime ? `<div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
               <p style="margin: 0; color: #666; font-size: 14px;">${isReservation ? 'Gewünschte Zeit' : 'Abholzeit'}</p>
-              <p style="margin: 5px 0 0 0; font-size: 18px; color: #333;"><strong>${escapeHtml(pickupTime)}</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 18px; color: #333;"><strong>${pickupDate ? `${pickupDate.split('-').reverse().join('.')} um ${pickupTime} Uhr` : `${pickupTime} Uhr`}</strong></p>
+            </div>` : ''}
+            ${!isReservation && notes && notes.trim() ? `<div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #9a3412; font-size: 14px; font-weight: bold;">⚠️ Allergien oder besondere Wünsche</p>
+              <p style="margin: 5px 0 0 0; font-size: 15px; color: #333;">${escapeHtml(notes.trim())}</p>
             </div>` : ''}
             ${itemsList ? `<div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
               <p style="margin: 0 0 10px 0; font-weight: bold;">Ihre Bestellung:</p>
@@ -294,7 +300,11 @@ export async function onRequest(context) {
                 </div>
                 ${pickupTime ? `<div style="background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fecaca;">
                   <h3 style="margin: 0 0 10px 0; color: #e63946;">${isReservation ? '📅 Reservierungszeit' : '🕒 Abholzeit'}</h3>
-                  <p style="margin: 0; font-size: 20px; color: #333;"><strong>${escapeHtml(pickupTime)}</strong></p>
+                  <p style="margin: 0; font-size: 20px; color: #333;"><strong>${pickupDate ? `${pickupDate.split('-').reverse().join('.')} um ${pickupTime} Uhr` : `${pickupTime} Uhr`}</strong></p>
+                </div>` : ''}
+                ${!isReservation && notes && notes.trim() ? `<div style="background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fecaca;">
+                  <h3 style="margin: 0 0 10px 0; color: #e63946;">⚠️ Allergien / besondere Wünsche</h3>
+                  <p style="margin: 0; font-size: 16px; color: #b91c1c; font-weight: bold;">${escapeHtml(notes.trim())}</p>
                 </div>` : ''}
                 ${adminItemsText ? `<div style="background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fecaca;">
                   <h3 style="margin: 0 0 10px 0; color: #e63946;">📦 Bestellung</h3>
@@ -332,7 +342,7 @@ export async function onRequest(context) {
     // 9. Telegram Bot notification (reads token/chatId from request body)
     if (path === "/api/notify-admin" && request.method === "POST") {
       const data = await request.json();
-      const { botToken, chatId, orderType, customerName, customerPhone, customerEmail, pickupDate, pickupTime, total, itemCount, items } = data;
+      const { botToken, chatId, orderType, customerName, customerPhone, customerEmail, pickupDate, pickupTime, total, itemCount, notes, items } = data;
 
       if (!botToken || !chatId) {
         return new Response(JSON.stringify({ success: false, message: "Missing Telegram config" }), { status: 400, headers });
@@ -359,12 +369,13 @@ export async function onRequest(context) {
       telegramText += `📱 Tel: ${escapeHtml(customerPhone || '-')}\n`;
       telegramText += `📧 Email: ${escapeHtml(customerEmail || '-')}\n`;
       if (pickupTime) {
-        const timeLabel = pickupDate
-          ? `${pickupDate.split('-').reverse().join('.')} @ ${pickupTime}`
-          : pickupTime;
-        telegramText += `🕒 Zeit: ${escapeHtml(timeLabel)}\n`;
+        const fmtDate = pickupDate
+          ? `${pickupDate.split('-').reverse().join('.')} um ${pickupTime} Uhr`
+          : `${pickupTime} Uhr`;
+        telegramText += `🕒 Zeit: ${escapeHtml(fmtDate)}\n`;
       }
       if (itemCount) telegramText += `📦 Anzahl: ${escapeHtml(itemCount)}${isReservation ? ' Gäste' : ' Gerichte'}\n`;
+      if (!isReservation && notes && notes.trim()) telegramText += `⚠️ ALLERGIEN: ${escapeHtml(notes.trim())}\n`;
       if (itemsText) telegramText += itemsText;
       if (total) telegramText += `💰 <b>SUMME: ${escapeHtml(total)}€</b>\n`;
       telegramText += `━━━━━━━━━━━━━━━━━━\n`;

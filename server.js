@@ -78,6 +78,17 @@ function createGmailTransporter(gmailUser, gmailPassword) {
   });
 }
 
+// Sử dụng transporter với Gmail config từ request body
+async function createGmailTransporterWithConfig(gmailConfig) {
+  const user = gmailConfig?.gmailUser || process.env.GMAIL_USER;
+  const pass = gmailConfig?.gmailPassword || process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) return null;
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass }
+  });
+}
+
 // Hàm gửi email thông báo đơn hàng qua Gmail
 async function sendGmailNotification(orderData, gmailConfig) {
   const gmailUser = gmailConfig?.gmailUser || process.env.GMAIL_USER;
@@ -184,7 +195,7 @@ async function sendGmailNotification(orderData, gmailConfig) {
       <div style="background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #e5e7eb;">
         <h3 style="margin: 0 0 10px 0; color: #dc2626;">📦 Chi tiết đơn hàng</h3>
         ${itemsHtml}
-        ${orderData.total ? `<p style="margin: 15px 0 0 0; text-align: right; font-size: 18px;"><strong>Tổng cộng: <span style="color: #e63946; font-size: 20px;">${orderData.total}€</span></strong></p>` : ''}
+        ${orderData.total ? `<p style="margin: 15px 0 0 0; text-align: right; font-size: 18px;"><strong>Tổng cộng: <span style="color: #e63946; font-size: 20px;">${orderData.total.replace('.', ',')} €</span></strong></p>` : ''}
       </div>
       ` : ''}
 
@@ -199,7 +210,14 @@ async function sendGmailNotification(orderData, gmailConfig) {
     </div>
   `;
 
-  const transporter = createGmailTransporter();
+  const transporter = gmailConfig?.gmailPassword
+    ? await createGmailTransporterWithConfig(gmailConfig)
+    : createGmailTransporter();
+
+  if (!transporter) {
+    console.log('[GMAIL] No valid transporter, skipping.');
+    return { success: false, reason: 'No valid Gmail credentials' };
+  }
 
   try {
     const info = await transporter.sendMail({
@@ -358,7 +376,7 @@ app.post('/api/inbox', (req, res) => {
   const phone = item.phone || item.customerPhone || '-';
   
   let telegramMsg = isReservation 
-    ? `📅 <b>ĐẶT BÀN MỚI</b>\n\n👤 ${customerName}\n📞 ${phone}\n🕒 ${item.time || item.pickupTime || 'N/A'}`
+    ? `📅 <b>ĐẶT BÀN MỚI</b>\n\n👤 ${customerName}\n📞 ${phone}\n🕒 ${item.pickupTime || item.time || 'N/A'}`
     : `🍣 <b>ĐƠN HÀNG MỚI</b>\n\n👤 ${customerName}\n📞 ${phone}\n💰 ${item.total || 'N/A'}`;
   
   if (item.items && item.items.length > 0) {

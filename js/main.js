@@ -683,6 +683,8 @@ document.querySelectorAll('.cart-trigger').forEach(btn => {
             checkoutModal.classList.remove('opacity-0', 'pointer-events-none');
             lockScroll(true);
             updateCartUI();
+            // CẬP NHẬT TIME SLOTS NGAY KHI MODAL MỞ - đảm bảo giờ đã chọn được khôi phục
+            updateOrderSlots();
         } else {
             alert('Warenkorb ist leer!');
         }
@@ -777,6 +779,10 @@ if (checkoutForm) {
         };
 
         const slots = [parseHours(h1), parseHours(h2)].filter(s => s !== null);
+        
+        // Lưu lại giá trị hiện tại của timeSelect trước khi xóa options
+        const previousTimeValue = timeSelect.value;
+        
         timeSelect.innerHTML = '<option value="asap">Schnellstmöglich</option>';
         
         const now = new Date();
@@ -808,8 +814,25 @@ if (checkoutForm) {
             }
         });
 
-        // Set default to ASAP
-        timeSelect.value = 'asap';
+        // KHÔI PHỤC GIÁ TRỊ ĐÃ CHỌN TRƯỚC ĐÓ (nếu có trong danh sách slot mới)
+        // Nếu giờ cũ không có trong danh sách mới → giữ ASAP, ngược lại restore giờ cũ
+        const allSlotValues = [];
+        slots.forEach(s => {
+            for (let m = s.start; m < s.end; m += 30) {
+                if (isToday && m < currentMin + 30) continue;
+                const hh = Math.floor(m / 60).toString().padStart(2, '0');
+                const mm = (m % 60).toString().padStart(2, '0');
+                allSlotValues.push(`${hh}:${mm}`);
+            }
+        });
+        if (previousTimeValue && previousTimeValue !== 'asap' && allSlotValues.includes(previousTimeValue)) {
+            timeSelect.value = previousTimeValue;
+        } else if (previousTimeValue === 'asap') {
+            timeSelect.value = 'asap';
+        } else {
+            // Mặc định ASAP
+            timeSelect.value = 'asap';
+        }
     };
 
     const updateOrderSlots = () => updateDropdownSlots(coDate, coTime, shopNotice, true);
@@ -1019,6 +1042,7 @@ if (checkoutForm) {
                     customerName: orderData.name,
                     customerPhone: orderData.phone,
                     customerEmail: orderData.email,
+                    pickupDate: orderData.pickupDate,
                     pickupTime: pickupTimeStr,
                     total: orderData.total,
                     itemCount: itemCount,
@@ -1041,6 +1065,7 @@ if (checkoutForm) {
                 customerName: orderData.name,
                 customerPhone: orderData.phone,
                 orderType: 'order',
+                pickupDate: orderData.pickupDate,
                 pickupTime: pickupTimeStr,
                 items: orderData.cart.map(item => ({
                     name: item.name,
@@ -1061,6 +1086,7 @@ if (checkoutForm) {
                 customerName: orderData.name,
                 customerPhone: orderData.phone,
                 customerEmail: orderData.email,
+                pickupDate: orderData.pickupDate,
                 pickupTime: pickupTimeStr,
                 items: orderData.cart.map(item => ({
                     name: item.name,

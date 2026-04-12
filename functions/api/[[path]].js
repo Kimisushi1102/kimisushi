@@ -184,16 +184,26 @@ export async function onRequest(context) {
       const safeName = escapeHtml(customerName);
       const isReservation = orderType === 'reservation';
 
-      // Build items list for order
+      // Build items list for order (customer email)
       let itemsList = '';
+      let itemsSubtotal = 0;
       if (!isReservation && items && items.length > 0) {
         itemsList = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">';
-        itemsList += '<tr style="background: #f8f9fa;"><th style="padding: 8px; text-align: left;">Gericht</th><th style="padding: 8px; text-align: center;">Menge</th><th style="padding: 8px; text-align: right;">Preis</th></tr>';
+        itemsList += '<tr style="background: #f8f9fa;"><th style="padding: 8px; text-align: left;">Gericht</th><th style="padding: 8px; text-align: center;">Menge</th><th style="padding: 8px; text-align: right;">Preis</th><th style="padding: 8px; text-align: right;">Summe</th></tr>';
         items.forEach(item => {
-          itemsList += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name || '')}</td><td style="padding: 8px; text-align: center; border-bottom: 1px solid #eee;">${item.quantity || 1}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${item.price ? escapeHtml(item.price) + '€' : '-'}</td></tr>`;
+          const unitPrice = parseFloat(String(item.price || 0).replace('€', '').replace(',', '.').replace(/\s/g, '')) || 0;
+          const qty = parseInt(item.quantity) || 1;
+          const subtotal = unitPrice * qty;
+          itemsSubtotal += subtotal;
+          const fmtUnit = unitPrice.toFixed(2).replace('.', ',') + ' €';
+          const fmtSub = subtotal.toFixed(2).replace('.', ',') + ' €';
+          itemsList += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name || '')}</td><td style="padding: 8px; text-align: center; border-bottom: 1px solid #eee;">${qty}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${fmtUnit}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee; font-weight: bold;">${fmtSub}</td></tr>`;
         });
         itemsList += '</table>';
       }
+
+      const safeTotal = typeof total === 'number' ? total.toFixed(2).replace('.', ',') : (typeof total === 'string' ? total.replace(/€\s*$/, '').trim() : '0,00');
+      const safeItemsSubtotal = itemsSubtotal.toFixed(2).replace('.', ',');
 
       const emailContent = {
         from: "Sakura Sushi <onboarding@resend.dev>",
@@ -218,7 +228,8 @@ export async function onRequest(context) {
             ${itemsList ? `<div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
               <p style="margin: 0 0 10px 0; font-weight: bold;">Ihre Bestellung:</p>
               ${itemsList}
-              ${total ? `<p style="margin: 15px 0 0 0; text-align: right;"><strong>Gesamtbetrag: <span style="font-size: 20px; color: #e63946;">${escapeHtml(total)}€</span></strong></p>` : ''}
+              ${itemsSubtotal > 0 ? `<p style="margin: 10px 0 0 0; text-align: right; font-size: 14px; color: #666;">Zwischensumme: <strong>${safeItemsSubtotal} €</strong></p>` : ''}
+              ${safeTotal ? `<p style="margin: 5px 0 0 0; text-align: right;"><strong>Gesamtbetrag: <span style="font-size: 20px; color: #e63946;">${safeTotal} €</span></strong></p>` : ''}
             </div>` : ''}
             <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
               <p style="margin: 0; color: #333;">⏰ Bitte haben Sie etwas Geduld. Wir werden Ihre Bestellung so schnell wie möglich zubereiten.</p>
@@ -242,24 +253,33 @@ export async function onRequest(context) {
 
       // Gửi email thông báo cho ADMIN nếu có cấu hình
       let adminNotifySuccess = false;
+      let adminItemsText = '';
+      let adminItemsSubtotal = 0;
+      if (!isReservation && items && items.length > 0) {
+        adminItemsText = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0; background: #fff;">';
+        adminItemsText += '<tr style="background: #fee2e2;"><th style="padding: 8px; text-align: left;">🍽️ Gericht</th><th style="padding: 8px; text-align: center;">Menge</th><th style="padding: 8px; text-align: right;">Preis</th><th style="padding: 8px; text-align: right;">Summe</th></tr>';
+        items.forEach(item => {
+          const unitPrice = parseFloat(String(item.price || 0).replace('€', '').replace(',', '.').replace(/\s/g, '')) || 0;
+          const qty = parseInt(item.quantity) || 1;
+          const subtotal = unitPrice * qty;
+          adminItemsSubtotal += subtotal;
+          const fmtUnit = unitPrice.toFixed(2).replace('.', ',') + ' €';
+          const fmtSub = subtotal.toFixed(2).replace('.', ',') + ' €';
+          adminItemsText += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name || '')}</td><td style="padding: 8px; text-align: center; border-bottom: 1px solid #eee;">${qty}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${fmtUnit}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee; font-weight: bold;">${fmtSub}</td></tr>`;
+        });
+        adminItemsText += '</table>';
+      }
+      const safeAdminTotal = typeof total === 'number' ? total.toFixed(2).replace('.', ',') : (typeof total === 'string' ? total.replace(/€\s*$/, '').trim() : '0,00');
+      const safeAdminSubtotal = adminItemsSubtotal.toFixed(2).replace('.', ',');
+
       if (adminEmail && apiKey) {
         try {
-          let adminItemsText = '';
-          if (!isReservation && items && items.length > 0) {
-            adminItemsText = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0; background: #fff;">';
-            adminItemsText += '<tr style="background: #fee2e2;"><th style="padding: 8px; text-align: left;">🍽️ Gericht</th><th style="padding: 8px; text-align: center;">Menge</th><th style="padding: 8px; text-align: right;">Preis</th></tr>';
-            items.forEach(item => {
-              adminItemsText += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name || '')}</td><td style="padding: 8px; text-align: center; border-bottom: 1px solid #eee;">${item.quantity || 1}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #eee;">${item.price ? escapeHtml(item.price) + '€' : '-'}</td></tr>`;
-            });
-            adminItemsText += '</table>';
-          }
-
           const adminEmailContent = {
             from: "Sakura Sushi <onboarding@resend.dev>",
             to: [adminEmail],
             subject: isReservation
               ? `📅 NEUE RESERVIERUNG - ${safeName}`
-              : `🍣 NEUE BESTELLUNG - ${safeName} - ${total || '?'}€`,
+              : `🍣 NEUE BESTELLUNG - ${safeName} - ${safeAdminTotal} €`,
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 3px solid #e63946; padding: 30px; border-radius: 16px; background: #fef2f2;">
                 <div style="text-align: center; margin-bottom: 30px;">
@@ -279,7 +299,8 @@ export async function onRequest(context) {
                 ${adminItemsText ? `<div style="background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fecaca;">
                   <h3 style="margin: 0 0 10px 0; color: #e63946;">📦 Bestellung</h3>
                   ${adminItemsText}
-                  ${total ? `<p style="margin: 15px 0 0 0; text-align: right;"><strong>Gesamtbetrag: <span style="font-size: 24px; color: #e63946;">${escapeHtml(total)}€</span></strong></p>` : ''}
+                  ${adminItemsSubtotal > 0 ? `<p style="margin: 10px 0 0 0; text-align: right; font-size: 14px; color: #666;">Zwischensumme: <strong>${safeAdminSubtotal} €</strong></p>` : ''}
+                  ${safeAdminTotal ? `<p style="margin: 5px 0 0 0; text-align: right;"><strong>Gesamtbetrag: <span style="font-size: 24px; color: #e63946;">${safeAdminTotal} €</span></strong></p>` : ''}
                 </div>` : ''}
                 <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fcd34d;">
                   <p style="margin: 0; color: #92400e; font-size: 16px;">⚡ Bitte bearbeiten Sie diese Bestellung umgehend!</p>
@@ -311,7 +332,7 @@ export async function onRequest(context) {
     // 9. Telegram Bot notification (reads token/chatId from request body)
     if (path === "/api/notify-admin" && request.method === "POST") {
       const data = await request.json();
-      const { botToken, chatId, orderType, customerName, customerPhone, customerEmail, pickupTime, total, itemCount, items } = data;
+      const { botToken, chatId, orderType, customerName, customerPhone, customerEmail, pickupDate, pickupTime, total, itemCount, items } = data;
 
       if (!botToken || !chatId) {
         return new Response(JSON.stringify({ success: false, message: "Missing Telegram config" }), { status: 400, headers });
@@ -337,7 +358,12 @@ export async function onRequest(context) {
       telegramText += `👤 Kunde: ${escapeHtml(customerName || '-')}\n`;
       telegramText += `📱 Tel: ${escapeHtml(customerPhone || '-')}\n`;
       telegramText += `📧 Email: ${escapeHtml(customerEmail || '-')}\n`;
-      if (pickupTime) telegramText += `🕒 Zeit: ${escapeHtml(pickupTime)}\n`;
+      if (pickupTime) {
+        const timeLabel = pickupDate
+          ? `${pickupDate.split('-').reverse().join('.')} @ ${pickupTime}`
+          : pickupTime;
+        telegramText += `🕒 Zeit: ${escapeHtml(timeLabel)}\n`;
+      }
       if (itemCount) telegramText += `📦 Anzahl: ${escapeHtml(itemCount)}${isReservation ? ' Gäste' : ' Gerichte'}\n`;
       if (itemsText) telegramText += itemsText;
       if (total) telegramText += `💰 <b>SUMME: ${escapeHtml(total)}€</b>\n`;

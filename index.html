@@ -5,28 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Kimi Sushi | Frisches Sushi & Authentische Japanische Küche in Filderstadt</title>
     <meta name="description" content="Kimi Sushi Filderstadt: Genießen Sie frisches, hochwertiges Sushi und authentische japanische Spezialitäten. Täglich frisch zubereitet. Online-Reservierung & Bestellung.">
-    <meta name="keywords" content="Kimi Sushi, Sushi Filderstadt, Japanisches Restaurant Filderstadt, Sushi Lieferservice, Sushi mang về, Nhà hàng Nhật ở Filderstadt">
+    <meta name="keywords" content="Kimi Sushi, Sushi Filderstadt, Japanisches Restaurant Filderstadt, Sushi Lieferservice">
     <meta name="author" content="Kimi Sushi Team">
     <meta name="robots" content="index, follow">
-    
-    <!-- Canonical URL - Keep dynamic via main.js -->
-    <link rel="canonical" href="https://kimisushi.de"> 
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Kimi Sushi | Frisches Sushi & Authentische Japanische Küche in Filderstadt</title>
-    <meta name="description" content="Kimi Sushi Filderstadt: Genießen Sie frisches, hochwertiges Sushi und authentische japanische Spezialitäten. Täglich frisch zubereitet. Online-Reservierung & Bestellung.">
-    <meta name="keywords" content="Kimi Sushi, Sushi Filderstadt, Japanisches Restaurant Filderstadt, Sushi Lieferservice, Sushi mang về, Nhà hàng Nhật ở Filderstadt">
-    <meta name="author" content="Kimi Sushi Team">
-    <meta name="robots" content="index, follow">
-    
-    <!-- Canonical URL - Keep dynamic via main.js -->
-    <link rel="canonical" href="https://kimisushi.de"> 
-
-
-
-
-
+    <link rel="canonical" href="https://kimisushi.de">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -57,7 +39,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS (via CDN for standalone SPA) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Tailwind Configuration -->
@@ -67,12 +49,12 @@
                 extend: {
                     colors: {
                         brand: {
-                            red: '#8B0000',      // Weinrot
-                            dark: '#1C1C1C',     // Kohleschwarz
-                            cream: '#FAFAFA',    // Cremeweiß
-                            gray: '#F3F4F6',     // Helles Grau
-                            gold: '#C5A059',     // Helles Gold
-                            matcha: '#8A9A5B'    // Matcha-Grün
+                            red: '#8B0000',
+                            dark: '#1C1C1C',
+                            cream: '#FAFAFA',
+                            gray: '#F3F4F6',
+                            gold: '#C5A059',
+                            matcha: '#8A9A5B'
                         }
                     },
                     fontFamily: {
@@ -96,9 +78,6 @@
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
-    
-    <!-- Schema Markup -->
-    <!-- Dynamic JSON-LD will be injected here by main.js -->
 </head>
 <body class="bg-brand-cream text-brand-dark font-sans antialiased overflow-x-hidden selection:bg-brand-red selection:text-white">
 
@@ -169,7 +148,6 @@
 
     <!-- Hero Section -->
     <section class="relative min-h-[90vh] sm:min-h-screen flex items-center pt-20 overflow-hidden bg-brand-dark">
-        <!-- Background Image with Overlay -->
         <div class="absolute inset-0 z-0">
             <img src="images/hero_sushi.png" alt="Elegantes Sushi Arrangement" class="w-full h-full object-cover opacity-60 scale-105 hero-img-anim" id="site-hero-1">
             <div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-transparent"></div>
@@ -179,7 +157,7 @@
         <div class="container mx-auto px-4 md:px-6 lg:px-8 relative z-10 text-white mt-10 md:mt-0">
             <div class="max-w-2xl reveal-up">
                 <div class="flex items-center gap-2 mb-6">
-                    <span class="px-3 py-1 bg-brand-gold/20 text-brand-gold border border-brand-gold/30 rounded-full text-xs font-medium tracking-wide uppercase">Heute frisch geprollt</span>
+                    <span class="px-3 py-1 bg-brand-gold/20 text-brand-gold border border-brand-gold/30 rounded-full text-xs font-medium tracking-wide uppercase">Heute frisch zubereitet</span>
                 </div>
                 
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1] mb-6">
@@ -200,7 +178,6 @@
                     </a>
                 </div>
 
-                <!-- Badges -->
                 <div class="hidden md:flex items-center gap-8 mt-16 pt-8 border-t border-white/10">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-gold">
@@ -238,7 +215,6 @@
     <section id="about" class="py-20 md:py-32 bg-brand-cream relative">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row items-center gap-16">
-                <!-- Image -->
                 <div class="w-full lg:w-1/2 relative reveal-left">
                     <div class="aspect-[4/5] md:aspect-[3/4] overflow-hidden rounded-2xl relative z-10 shadow-soft">
                         <img src="images/restaurant_interior.png" id="site-about" alt="Restaurant Ambiente" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700">
@@ -250,7 +226,6 @@
                     </div>
                 </div>
 
-                <!-- Content -->
                 <div class="w-full lg:w-1/2 reveal-right">
                     <span class="text-brand-red font-medium tracking-widest uppercase text-sm mb-4 block">Über Kimi Sushi</span>
                     <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6 text-brand-dark">Tradition trifft auf Moderne.</h2>
@@ -261,7 +236,6 @@
                         Unser Geheimnis? Es gibt keines. Nur den kompromisslosen Fokus auf absolute Frische, Reiskörner in perfekter Temperatur und den Respekt vor jedem einzelnen Produkt, das unsere Küche verlässt.
                     </p>
 
-                    <!-- USPs -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="flex gap-4">
                             <div class="w-12 h-12 shrink-0 rounded-full bg-brand-red/5 flex items-center justify-center text-brand-red">
@@ -340,13 +314,11 @@
             <!-- Filter Tabs -->
             <div class="flex justify-center mb-12 reveal-up" style="transition-delay: 100ms;">
                 <div id="filter-tabs-container" class="flex items-center overflow-x-auto no-scrollbar scroll-smooth gap-2 md:gap-4 pb-4 px-4 max-w-full">
-                    <!-- Filter buttons injected dynamically via JS -->
                 </div>
             </div>
 
             <!-- Menu Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16" id="menu-grid">
-                <!-- Menu items injected dynamically via JS -->
             </div>
 
             <div class="text-center reveal-up">
@@ -357,7 +329,7 @@
         </div>
     </section>
 
-    <!-- Combos / Offers Section -->
+    <!-- Combos Section -->
     <section id="combos" class="py-20 md:py-32 bg-brand-dark text-white relative">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPgo8L3N2Zz4=')] opacity-50 z-0"></div>
         <div class="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
@@ -370,7 +342,6 @@
             </div>
 
             <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Combos will be injected here via JS -->
             </div>
         </div>
     </section>
@@ -386,18 +357,14 @@
                 <p class="text-gray-600 font-light max-w-sm">Treten Sie ein in eine Welt der Ruhe und des Genusses. Eine kleine japanische Oase mitten in der Stadt.</p>
             </div>
 
-            <!-- Masonry-like Grid -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-                <!-- Large Feature -->
                 <div class="md:col-span-8 md:row-span-2 h-64 md:h-[600px] rounded-2xl overflow-hidden group reveal-up relative">
                     <img src="images/restaurant_interior.png" alt="Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8 text-white font-serif text-2xl">Sushi Bar</div>
                 </div>
-                <!-- Small 1 -->
                 <div class="md:col-span-4 h-64 md:h-[288px] rounded-2xl overflow-hidden group reveal-up relative" style="transition-delay: 100ms;">
                     <img src="images/sashimi_platter.png" alt="Sushi Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                 </div>
-                <!-- Small 2 -->
                 <div class="md:col-span-4 h-64 md:h-[288px] rounded-2xl overflow-hidden group reveal-up relative" style="transition-delay: 200ms;">
                     <img src="images/dragon_roll.png" alt="Food Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                 </div>
@@ -424,7 +391,6 @@
                 </a>
             </div>
 
-            <!-- Review Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white p-8 rounded-2xl shadow-soft hover:-translate-y-2 transition-transform duration-300 reveal-up" style="transition-delay: 100ms;">
                     <div class="flex text-brand-gold mb-4 text-sm">
@@ -475,7 +441,6 @@
     <section id="reservation" class="py-20 md:py-32 bg-white relative">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="bg-brand-gray/30 rounded-3xl overflow-hidden shadow-soft flex flex-col lg:flex-row">
-                <!-- Image Side -->
                 <div class="w-full lg:w-2/5 p-8 md:p-12 bg-brand-dark text-white relative overflow-hidden flex flex-col justify-center">
                     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('images/hero_sushi.png');" id="site-hero-2"></div>
                     <div class="absolute inset-0 bg-brand-dark/80 mix-blend-multiply"></div>
@@ -507,34 +472,28 @@
                     </div>
                 </div>
 
-                <!-- Form Side -->
                 <div class="w-full lg:w-3/5 p-8 md:p-12 relative">
                     <form id="reservation-form" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Name -->
                             <div class="form-group">
                                 <label for="res-name" class="block text-sm font-medium text-gray-700 mb-2">Vollständiger Name *</label>
                                 <input type="text" id="res-name" name="name" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red transition-all bg-white" placeholder="Max Mustermann">
                                 <span class="error-msg text-red-500 text-xs mt-1 hidden">Bitte geben Sie Ihren Namen ein.</span>
                             </div>
-                            <!-- Email -->
                             <div class="form-group">
                                 <label for="res-email" class="block text-sm font-medium text-gray-700 mb-2">E-Mail Adresse *</label>
                                 <input type="email" id="res-email" name="email" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red transition-all bg-white" placeholder="mail@beispiel.de">
                                 <span class="error-msg text-red-500 text-xs mt-1 hidden">Gültige E-Mail erforderlich.</span>
                             </div>
-                            <!-- Phone -->
                             <div class="form-group md:col-span-2">
                                 <label for="res-phone" class="block text-sm font-medium text-gray-700 mb-2">Telefonnummer *</label>
                                 <input type="tel" id="res-phone" name="phone" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red transition-all bg-white" placeholder="+49 123 456789">
                                 <span class="error-msg text-red-500 text-xs mt-1 hidden">Gültige Telefonnummer erforderlich.</span>
                             </div>
-                            <!-- Date -->
                             <div class="form-group">
                                 <label for="res-date" class="block text-sm font-medium text-gray-700 mb-2">Datum *</label>
                                 <input type="date" id="res-date" name="date" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red transition-all bg-white">
                             </div>
-                            <!-- Time & Persons -->
                             <div class="grid grid-cols-2 gap-4 form-group">
                                 <div>
                                     <label for="res-time" class="block text-sm font-medium text-gray-700 mb-2">Uhrzeit *</label>
@@ -560,7 +519,6 @@
                             <textarea id="res-message" name="message" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red transition-all bg-white" placeholder="Allergien, besondere Wünsche..."></textarea>
                         </div>
 
-                        <!-- Success Statement (Hidden) -->
                         <div id="form-success" class="hidden bg-green-50 text-green-800 p-4 rounded-lg flex items-start gap-3">
                             <i class="ph-fill ph-check-circle text-green-600 text-xl mt-0.5"></i>
                             <div>
@@ -588,17 +546,14 @@
             </div>
             
             <div class="max-w-3xl mx-auto space-y-4">
-                <!-- FAQ Item 1 -->
                 <div class="bg-white rounded-xl shadow-soft p-6 reveal-up border border-gray-100">
                     <h4 class="font-serif font-bold text-lg text-brand-dark mb-2">Haben Sie auch vegetarische oder vegane Speisen?</h4>
                     <p class="text-gray-600 font-light text-sm">Ja, wir bieten eine breite Auswahl an rein pflanzlichen Gerichten an, darunter auch unser beliebtes "Veggie Delight" Kombi-Menü und diverse pflanzliche Rolls.</p>
                 </div>
-                <!-- FAQ Item 2 -->
                 <div class="bg-white rounded-xl shadow-soft p-6 reveal-up border border-gray-100 delivery-content hidden" style="transition-delay: 100ms;">
                     <h4 class="font-serif font-bold text-lg text-brand-dark mb-2">Bieten Sie einen Lieferservice an?</h4>
                     <p class="text-gray-600 font-light text-sm">Absolut! Wir liefern im Umkreis von 5 Kilometern mit unserem hauseigenen Kurierdienst, um sicherzustellen, dass Ihr Sushi in perfektem Zustand bei Ihnen ankommt.</p>
                 </div>
-                <!-- FAQ Item 3 -->
                 <div class="bg-white rounded-xl shadow-soft p-6 reveal-up border border-gray-100" style="transition-delay: 200ms;">
                     <h4 class="font-serif font-bold text-lg text-brand-dark mb-2">Kann man bei Ihnen mit Karte zahlen?</h4>
                     <p class="text-gray-600 font-light text-sm">Ja, wir akzeptieren alle gängigen EC- und Kreditkarten, sowie Apple Pay und Google Pay in unserem Restaurant.</p>
@@ -611,8 +566,6 @@
     <footer id="contact" class="bg-brand-dark text-white pt-20 pb-10 border-t border-white/5">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-                
-                <!-- Brand -->
                 <div class="space-y-6">
                     <a href="#" class="flex items-center gap-2">
                         <img src="" id="site-logo-img-2" class="h-10 hidden" alt="Logo">
@@ -628,7 +581,6 @@
                     </div>
                 </div>
 
-                <!-- Contact Info -->
                 <div>
                     <h4 class="font-serif text-lg font-bold mb-6 text-white">Kontakt</h4>
                     <ul class="space-y-4 text-sm text-white/70 font-light">
@@ -649,7 +601,6 @@
                     </ul>
                 </div>
 
-                <!-- Opening Hours -->
                 <div>
                     <h4 class="font-serif text-lg font-bold mb-6 text-white">Öffnungszeiten</h4>
                     <ul class="space-y-3 text-sm text-white/70 font-light">
@@ -705,7 +656,6 @@
                     </ul>
                 </div>
 
-                <!-- Quick Links -->
                 <div>
                     <h4 class="font-serif text-lg font-bold mb-6 text-white">Links</h4>
                     <ul class="space-y-3 text-sm text-white/70 font-light">
@@ -717,7 +667,6 @@
                         <li><a href="admin.html" class="text-white/20 hover:text-brand-gold transition-colors block mt-4 text-[10px] uppercase tracking-widest font-bold">Staff Login</a></li>
                     </ul>
                 </div>
-
             </div>
 
             <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/40 font-light">
@@ -754,17 +703,14 @@
             <button id="close-checkout" class="absolute top-4 right-4 text-gray-400 hover:text-brand-dark"><i class="ph ph-x text-2xl"></i></button>
             <h3 class="font-serif text-2xl font-bold mb-4 text-brand-dark">Kasse</h3>
             
-            <!-- Cart Items List -->
             <div id="checkout-cart-container" class="mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar border-b border-gray-100 pb-4">
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Ihre Bestellung</p>
                 <div id="cart-items-list" class="space-y-3">
-                    <!-- Items injected via JS -->
                     <div class="text-center py-4 text-gray-400 text-sm">Warenkorb ist leer</div>
                 </div>
             </div>
             
             <form id="checkout-form" class="space-y-4">
-                <!-- Method Selection (Show only if delivery is enabled in Admin) -->
                 <div id="method-selection-wrapper" class="mb-6 bg-gray-50 p-1 rounded-xl flex gap-1 border border-gray-100 delivery-content hidden">
                     <button type="button" class="method-btn active flex-1 py-2.5 px-4 rounded-lg text-xs font-black uppercase tracking-wider transition-all" data-method="pickup">
                         <i class="ph ph-storefront mr-1 text-sm"></i> Abholung
@@ -789,7 +735,6 @@
                     <input type="email" id="co-email" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-red focus:ring-1 focus:ring-brand-red outline-none" placeholder="mail@beispiel.de">
                 </div>
 
-                <!-- Delivery Additional Fields -->
                 <div id="delivery-fields" class="hidden space-y-4 pt-2 border-t border-gray-100 mt-4 animate-fade-in">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Lieferadresse *</label>
@@ -807,7 +752,6 @@
                     </div>
                 </div>
 
-                <!-- Date & Time Selection -->
                 <div id="checkout-summary-box" class="hidden p-4 rounded-xl mb-4 bg-brand-cream/50 border border-brand-gold/10 space-y-2 animate-fade-in">
                     <div class="flex justify-between items-center text-xs font-bold text-gray-500 uppercase">
                         <span>Bestellwert</span>
@@ -849,11 +793,9 @@
         </div>
     </div>
 
-    <!-- Request Received Modal -->
+    <!-- Status Modal -->
     <div id="status-modal" class="fixed inset-0 bg-brand-dark/80 backdrop-blur z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md mx-4 text-center">
-            
-            <!-- Success State (Immediate) -->
             <div id="status-success">
                 <i class="ph-fill ph-check-circle text-6xl text-green-500 mb-4 inline-block"></i>
                 <h3 class="font-serif text-2xl font-bold mb-2 text-brand-dark">Vielen Dank!</h3>
@@ -863,11 +805,10 @@
                 <div class="text-xs text-brand-dark/40 uppercase tracking-widest font-bold mb-6">Wir freuen uns auf Sie!</div>
                 <button class="btn-primary w-full justify-center shadow-md py-4" onclick="window.location.reload()">Zurück zur Startseite</button>
             </div>
-            
         </div>
     </div>
 
-    <script src="js/data.js?v=1.2"></script>
-    <script src="js/main.js?v=1.2"></script>
+    <script src="js/data.js?v=1.3"></script>
+    <script src="js/main.js?v=1.3"></script>
 </body>
 </html>

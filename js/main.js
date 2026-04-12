@@ -951,13 +951,27 @@ if (checkoutForm) {
             return {
                 id: item.id,
                 name: item.name,
-                price: formatPrice(unitPrice), // send formatted price string
-                unitPrice: unitPrice, // send numeric for calculations
+                price: formatPrice(unitPrice),
+                unitPrice: unitPrice,
                 quantity: item.quantity,
-                subtotal: formatPrice(unitPrice * item.quantity), // send formatted subtotal
+                subtotal: formatPrice(unitPrice * item.quantity),
                 image: item.image || ''
             };
         });
+
+        // pickupTime display: ASAP → berechne früheste Zeit | Fixed → zeige diese
+        let pickupTimeDisplay;
+        if (coTime.value === 'asap') {
+            const now = new Date();
+            const earliestMin = (now.getHours() * 60 + now.getMinutes()) + 30;
+            const hh = Math.floor(earliestMin / 60).toString().padStart(2, '0');
+            const mm = (earliestMin % 60).toString().padStart(2, '0');
+            pickupTimeDisplay = `Schnellstmöglich (ca. ${hh}:${mm} Uhr)`;
+        } else {
+            pickupTimeDisplay = coDate.value
+                ? `${coDate.value.split('-').reverse().join('.')} um ${coTime.value} Uhr`
+                : `${coTime.value} Uhr`;
+        }
 
         const orderData = {
             id: 'order_' + Date.now(),
@@ -966,7 +980,8 @@ if (checkoutForm) {
             email: document.getElementById('co-email').value,
             pickupDate: coDate.value,
             pickupTime: coTime.value,
-            items: cart.reduce((sum, item) => sum + item.quantity, 0),
+            pickupTimeDisplay: pickupTimeDisplay,
+            totalItemCount: cart.reduce((sum, item) => sum + item.quantity, 0),
             method: currentMethod,
             address: currentMethod === 'delivery' ? document.getElementById('co-address').value : 'Abholung / Vor Ort',
             floor: currentMethod === 'delivery' ? document.getElementById('co-floor').value : '',
@@ -974,8 +989,7 @@ if (checkoutForm) {
             deliveryFee: feeObj.fee.toFixed(2),
             distance: feeObj.distance.toFixed(1) + 'km',
             total: (currentTotal + feeObj.fee).toFixed(2),
-            cart: cartItemsForBackend,
-            cartRaw: JSON.parse(JSON.stringify(cart)) // DEBUG: raw cart
+            cart: cartItemsForBackend
         };
 
         // DEBUG LOG
@@ -994,9 +1008,12 @@ if (checkoutForm) {
             customerPhone: orderData.phone,
             pickupDate: orderData.pickupDate,
             pickupTime: orderData.pickupTime,
-            items: orderData.cart, // Use enriched cart
+            pickupTimeDisplay: orderData.pickupTimeDisplay,
+            items: orderData.cart,
+            totalItemCount: orderData.totalItemCount,
             total: orderData.total,
             address: orderData.address,
+            method: orderData.method,
             status: 'pending',
             time: new Date().toISOString()
         };
@@ -1024,12 +1041,8 @@ if (checkoutForm) {
         // Send Telegram notification to admin
         const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
         const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-        // pickupTime = "asap" = Schnellstmöglich, ngược lại hiển thị giờ cụ thể
-        const pickupTimeStr = orderData.pickupTime === 'asap' 
-            ? 'Schnellstmöglich'
-            : (orderData.pickupDate 
-                ? `${orderData.pickupDate.split('-').reverse().join('.')} @ ${orderData.pickupTime} Uhr`
-                : `${orderData.pickupTime} Uhr`);
+        // pickupTimeDisplay: ASAP → "ca. HH:MM" | Fixed → "Datum um HH:MM"
+        const pickupTimeStr = orderData.pickupTimeDisplay;
 
         if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
             fetch('/api/notify-admin', {
@@ -1113,6 +1126,10 @@ if (checkoutForm) {
         if (socket) {
             socket.emit('submit_order', orderData);
         }
+
+        // CLEAR CART after successful submission
+        cart = [];
+        updateCartUI();
 
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;

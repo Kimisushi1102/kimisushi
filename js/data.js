@@ -125,14 +125,20 @@ const defaultSettings = {
 };
 
 function getSettings() {
-    const stored = localStorage.getItem('kimi_settings');
-    if (stored) {
-        const storedObj = JSON.parse(stored);
-        return { ...defaultSettings, ...storedObj };
-    } else {
-        saveSettings(defaultSettings);
-        return defaultSettings;
+    try {
+        const stored = localStorage.getItem('kimi_settings');
+        if (stored) {
+            const storedObj = JSON.parse(stored);
+            if (storedObj && typeof storedObj === 'object') {
+                return { ...defaultSettings, ...storedObj };
+            }
+        }
+    } catch (e) {
+        console.warn('[DATA] getSettings: localStorage corrupt, using defaults.', e);
+        localStorage.removeItem('kimi_settings');
     }
+    saveSettings(defaultSettings);
+    return defaultSettings;
 }
 
 async function saveSettings(settingsObj) {
@@ -172,13 +178,18 @@ const defaultCombos = [
 ];
 
 function getCombos() {
-    const stored = localStorage.getItem('kimi_combos');
-    if (stored) {
-        return JSON.parse(stored);
-    } else {
-        saveCombos(defaultCombos);
-        return defaultCombos;
+    try {
+        const stored = localStorage.getItem('kimi_combos');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch (e) {
+        console.warn('[DATA] getCombos: localStorage corrupt, using defaults.', e);
+        localStorage.removeItem('kimi_combos');
     }
+    saveCombos(defaultCombos);
+    return defaultCombos;
 }
 
 async function saveCombos(combosArray) {

@@ -91,13 +91,20 @@ async function createGmailTransporterWithConfig(gmailConfig) {
 
 // Hàm gửi email thông báo đơn hàng qua Gmail
 async function sendGmailNotification(orderData, gmailConfig) {
+  // DEBUG: Always log what we're receiving
+  console.log('[GMAIL] Function called with gmailConfig:', JSON.stringify(gmailConfig));
+  console.log('[GMAIL] process.env.GMAIL_ENABLED:', process.env.GMAIL_ENABLED);
+  console.log('[GMAIL] process.env.GMAIL_USER:', process.env.GMAIL_USER ? 'SET' : 'NOT SET');
+
   const gmailUser = gmailConfig?.gmailUser || process.env.GMAIL_USER;
   const gmailNotifyEmail = gmailConfig?.gmailNotifyEmail || process.env.GMAIL_NOTIFY_EMAIL || gmailUser;
   const gmailEnabled = gmailConfig?.gmailEnabled || process.env.GMAIL_ENABLED === 'true';
   const gmailPassword = gmailConfig?.gmailPassword || process.env.GMAIL_APP_PASSWORD;
 
+  console.log('[GMAIL] Final gmailEnabled:', gmailEnabled, '| gmailUser:', gmailUser ? 'SET' : 'NOT SET', '| gmailPassword:', gmailPassword ? 'SET' : 'NOT SET');
+
   if (!gmailEnabled || !gmailUser || !gmailPassword) {
-    console.log('[GMAIL] Gmail not configured, skipping notification');
+    console.log('[GMAIL] Gmail not configured, skipping notification. gmailEnabled=', gmailEnabled, 'gmailUser=', !!gmailUser, 'gmailPassword=', !!gmailPassword);
     return { success: false, reason: 'Gmail not configured' };
   }
 
@@ -106,7 +113,8 @@ async function sendGmailNotification(orderData, gmailConfig) {
   const customerName = orderData.customerName || orderData.name || 'Khách hàng';
   const customerPhone = orderData.customerPhone || orderData.phone || '-';
   const customerEmail = orderData.customerEmail || orderData.email || '-';
-  const pickupTime = orderData.pickupTime || '-';
+  // Use display-friendly pickup time (set by frontend), fallback to raw value
+  const pickupTime = orderData.pickupTimeDisplay || orderData.pickupTime || '-';
 
   // DEBUG LOG - nhận được items gì?
   console.log('[GMAIL-BACKEND] Received items:', JSON.stringify(items));
@@ -130,11 +138,11 @@ async function sendGmailNotification(orderData, gmailConfig) {
     let orderSubtotal = 0;
     itemsHtml = `
       <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-family: Arial, sans-serif;">
-        <tr style="background: #f8f9fa;">
-          <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Món</th>
-          <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">SL</th>
-          <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">Đơn giá</th>
-          <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">Thành tiền</th>
+        <tr style="background: #8B0000;">
+          <th style="padding: 10px; text-align: left; color: white; border-bottom: 2px solid #ddd;">Gericht</th>
+          <th style="padding: 10px; text-align: center; color: white; border-bottom: 2px solid #ddd;">Menge</th>
+          <th style="padding: 10px; text-align: right; color: white; border-bottom: 2px solid #ddd;">Einzelpreis</th>
+          <th style="padding: 10px; text-align: right; color: white; border-bottom: 2px solid #ddd;">Gesamt</th>
         </tr>
     `;
     items.forEach(item => {
@@ -153,60 +161,63 @@ async function sendGmailNotification(orderData, gmailConfig) {
     });
     // Tổng cộng
     itemsHtml += `
-        <tr style="background: #fff3cd;">
-          <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px;">TỔNG CỘNG:</td>
-          <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 18px; color: #dc2626;">${fmt(orderSubtotal)}</td>
+        <tr style="background: #fef3c7;">
+          <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px;">Gesamtbetrag:</td>
+          <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 18px; color: #8B0000;">${fmt(orderSubtotal)}</td>
         </tr>
     `;
     itemsHtml += '</table>';
   } else if (!isReservation) {
-    itemsHtml = '<p style="color: #999; font-style: italic;">Không có thông tin món ăn.</p>';
+    itemsHtml = '<p style="color: #999; font-style: italic;">Keine Bestelldetails vorhanden.</p>';
   }
 
   // Nội dung email thông báo
   const subject = isReservation
-    ? `📅 ĐẶT BÀN MỚI - ${customerName}`
-    : `🍣 ĐƠN HÀNG MỚI - ${customerName}`;
+    ? `Neue Tischreservierung - ${customerName}`
+    : `Neue Bestellung - ${customerName} - ${new Date().toLocaleDateString('de-DE')}`;
 
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 3px solid ${isReservation ? '#22c55e' : '#e63946'}; padding: 20px; border-radius: 12px;">
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 3px solid ${isReservation ? '#22c55e' : '#8B0000'}; padding: 20px; border-radius: 12px;">
       <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="color: ${isReservation ? '#22c55e' : '#e63946'}; font-size: 24px; margin: 0;">
-          ${isReservation ? '📅 ĐẶT BÀN MỚI' : '🍣 ĐƠN HÀNG MỚI'}
+        <h1 style="color: ${isReservation ? '#22c55e' : '#8B0000'}; font-size: 24px; margin: 0;">
+          ${isReservation ? 'Neue Tischreservierung' : 'Neue Bestellung'}
         </h1>
-        <p style="color: #666; margin: 5px 0 0 0;">${new Date().toLocaleString('vi-VN', { timeZone: 'Europe/Berlin' })}</p>
+        <p style="color: #666; margin: 5px 0 0 0;">${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
       </div>
 
       <div style="background: #f0f9ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-        <h3 style="margin: 0 0 10px 0; color: #1e40af;">👤 Thông tin khách hàng</h3>
-        <p style="margin: 5px 0;"><strong>Tên:</strong> ${customerName}</p>
-        <p style="margin: 5px 0;"><strong>Điện thoại:</strong> ${customerPhone}</p>
-        <p style="margin: 5px 0;"><strong>Email:</strong> ${customerEmail}</p>
+        <h3 style="margin: 0 0 10px 0; color: #1e40af;">Kundendaten</h3>
+        <p style="margin: 5px 0;"><strong>Name:</strong> ${customerName}</p>
+        <p style="margin: 5px 0;"><strong>Telefon:</strong> ${customerPhone}</p>
+        <p style="margin: 5px 0;"><strong>E-Mail:</strong> ${customerEmail}</p>
+        ${orderData.address ? `<p style="margin: 5px 0;"><strong>Adresse:</strong> ${orderData.address}</p>` : ''}
+        ${orderData.method ? `<p style="margin: 5px 0;"><strong>Art:</strong> ${orderData.method === 'delivery' ? 'Lieferung' : 'Abholung'}</p>` : ''}
       </div>
 
       ${pickupTime && pickupTime !== '-' ? `
       <div style="background: #fef9c3; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-        <h3 style="margin: 0 0 5px 0; color: #a16207;">🕒 ${isReservation ? 'Thời gian đặt bàn' : 'Thời gian nhận hàng'}</h3>
+        <h3 style="margin: 0 0 5px 0; color: #a16207;">Abholzeit</h3>
         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #333;">${pickupTime}</p>
       </div>
       ` : ''}
 
       ${itemsHtml ? `
       <div style="background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #e5e7eb;">
-        <h3 style="margin: 0 0 10px 0; color: #dc2626;">📦 Chi tiết đơn hàng</h3>
+        <h3 style="margin: 0 0 10px 0; color: #8B0000;">Bestelldetails</h3>
         ${itemsHtml}
-        ${orderData.total ? `<p style="margin: 15px 0 0 0; text-align: right; font-size: 18px;"><strong>Tổng cộng: <span style="color: #e63946; font-size: 20px;">${orderData.total.replace('.', ',')} €</span></strong></p>` : ''}
+        ${orderData.deliveryFee && parseFloat(orderData.deliveryFee) > 0 ? `<p style="margin: 5px 0; text-align: right;"><strong>Liefergebühr:</strong> ${orderData.deliveryFee} €</p>` : ''}
+        ${orderData.total ? `<p style="margin: 15px 0 0 0; text-align: right; font-size: 18px;"><strong>Gesamtbetrag: <span style="color: #8B0000; font-size: 20px;">${orderData.total.replace('.', ',')} €</span></strong></p>` : ''}
       </div>
       ` : ''}
 
       <div style="background: #fef3c7; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
         <p style="margin: 0; color: #92400e; font-size: 14px;">
-          ⚡ Vui lòng xử lý đơn này ngay!
+          Bitte diese Bestellung umgehend bearbeiten!
         </p>
       </div>
 
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-      <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Hệ thống tự động</p>
+      <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Automatisiertes System</p>
     </div>
   `;
 
@@ -366,24 +377,78 @@ app.post('/api/inbox', (req, res) => {
   }
 
   // Gửi thông báo Gmail tự động khi có đơn mới
-  sendGmailNotification(item).catch(err => {
-    console.error('[AUTO-GMAIL] Error:', err);
-  });
-  
+  // Always use env vars as fallback (they are reliably set from .env)
+  const gmailCfg = {
+    gmailEnabled: item.gmailEnabled || process.env.GMAIL_ENABLED === 'true',
+    gmailUser: item.gmailUser || process.env.GMAIL_USER,
+    gmailPassword: item.gmailPassword || process.env.GMAIL_APP_PASSWORD,
+    gmailNotifyEmail: item.gmailNotifyEmail || process.env.GMAIL_NOTIFY_EMAIL || process.env.GMAIL_USER
+  };
+  if (item.type !== 'reservation' && gmailCfg.gmailEnabled && gmailCfg.gmailUser && gmailCfg.gmailPassword) {
+    sendGmailNotification(item, gmailCfg).catch(err => {
+      console.error('[AUTO-GMAIL] Error:', err);
+    });
+  }
+
   // Gửi thông báo Telegram tự động khi có đơn mới
   const isReservation = item.type === 'reservation';
-  const customerName = item.name || item.customerName || 'Khách hàng';
+  const customerName = item.name || item.customerName || '-';
   const phone = item.phone || item.customerPhone || '-';
-  
-  let telegramMsg = isReservation 
-    ? `📅 <b>ĐẶT BÀN MỚI</b>\n\n👤 ${customerName}\n📞 ${phone}\n🕒 ${item.pickupTime || item.time || 'N/A'}`
-    : `🍣 <b>ĐƠN HÀNG MỚI</b>\n\n👤 ${customerName}\n📞 ${phone}\n💰 ${item.total || 'N/A'}`;
-  
-  if (item.items && item.items.length > 0) {
-    telegramMsg += '\n\n📦 <b>Chi tiết:</b>';
-    item.items.forEach(i => {
-      telegramMsg += `\n• ${i.name} x${i.quantity}`;
-    });
+  const customerEmail = item.email || item.customerEmail || '-';
+  const pickupDate = item.pickupDate || '-';
+  const pickupDisplay = item.pickupTimeDisplay || item.pickupTime || '-';
+  const status = item.status || 'neu';
+
+  let telegramMsg;
+
+  if (isReservation) {
+    telegramMsg =
+`📅 NEUE TISCHRESERVIERUNG
+
+━━━━━━━━━━━━━━━
+👤 Kunde: ${customerName}
+📞 Telefon: ${phone}
+📧 E-Mail: ${customerEmail}
+━━━━━━━━━━━━━━━
+🗓 Datum: ${pickupDate}
+🕒 Uhrzeit: ${pickupDisplay}
+👥 Gäste: ${item.guests || '-'}
+📝 Anmerkung: ${item.notes || '-'}
+━━━━━━━━━━━━━━━
+Status: ${status.toUpperCase()}`;
+  } else {
+    const total = item.total ? `${item.total.replace('.', ',')} €` : '-';
+    const method = item.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
+    const address = item.address && item.address !== 'Abholung / Vor Ort' ? item.address : '-';
+
+    let itemsDetail = '';
+    if (item.items && item.items.length > 0) {
+      item.items.forEach(i => {
+        const price = i.price ? ` (${i.price})` : '';
+        itemsDetail += `\n  ▸ ${i.name} x${i.quantity}${price}`;
+      });
+    }
+
+    telegramMsg =
+`🍣 NEUE BESTELLUNG
+
+━━━━━━━━━━━━━━━
+👤 Kunde: ${customerName}
+📞 Telefon: ${phone}
+📧 E-Mail: ${customerEmail}
+━━━━━━━━━━━━━━━
+📦 Bestellnummer: ${item.id || '-'}
+🗓 Datum: ${pickupDate}
+🕒 Abholzeit: ${pickupDisplay}
+━━━━━━━━━━━━━━━
+${method}
+${item.method === 'delivery' ? `📍 Adresse: ${address}` : ''}
+━━━━━━━━━━━━━━━
+📋 Bestellte Artikel:${itemsDetail || '\n  (keine Details)'}
+━━━━━━━━━━━━━━━
+💰 Gesamtbetrag: ${total}
+━━━━━━━━━━━━━━━
+Status: ${status.toUpperCase()}`;
   }
   
   sendTelegramMessage(telegramMsg);

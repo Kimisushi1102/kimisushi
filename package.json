@@ -2,9 +2,10 @@
   "name": "kimi-sushi-system",
   "version": "1.0.0",
   "description": "Integrated POS and Ordering System for Kimi Sushi",
-  "main": "backend/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node server.js",
+    "dev": "node server.js",
     "prod": "pm2 start ecosystem.config.js",
     "build:pos": "cd Kimi_Billing_App && npm run build && xcopy /E /I /Y dist ..\\billing",
     "build:all": "npm run build:pos"

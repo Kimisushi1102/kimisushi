@@ -302,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderMenu(filterValue = 'all') {
         if (!menuGrid) return;
-        
+
         const menu = activeMenu;
-        menuGrid.innerHTML = ''; 
+        menuGrid.innerHTML = '';
 
         [...menu].reverse().forEach(item => {
             if (filterValue !== 'all' && item.category !== filterValue) return;
@@ -312,29 +312,29 @@ document.addEventListener('DOMContentLoaded', () => {
             let badgeHtml = '';
             if (item.tag) {
                 if (item.tag === 'Bestseller') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-brand-dark text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Bestseller</span>`;
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-gold text-brand-dark text-xs font-semibold px-3 py-1 rounded-full">Bestseller</span>`;
                 } else if (item.tag === 'Empfehlung') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-gold text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Empfehlung</span>`;
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-elevated backdrop-blur border border-brand-border-gold/30 text-brand-ivory text-xs font-semibold px-3 py-1 rounded-full">Empfehlung</span>`;
                 } else if (item.tag === 'Neu') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-red text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Neu</span>`;
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-elevated backdrop-blur border border-brand-border-gold/30 text-brand-ivory text-xs font-semibold px-3 py-1 rounded-full">Neu</span>`;
                 }
             }
 
             const itemHtml = `
-                <div class="menu-item rounded-2xl bg-brand-gray/30 border border-gray-100 overflow-hidden hover-card group reveal-up active" data-category="${item.category}">
-                    <div class="relative h-56 overflow-hidden bg-brand-dark">
-                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90">
+                <div class="menu-item rounded-2xl bg-brand-elevated border border-brand-border-gold/50 overflow-hidden hover-card group reveal-up active transition-all duration-400" data-category="${item.category}">
+                    <div class="relative h-56 overflow-hidden">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80">
                         ${badgeHtml}
                     </div>
                     <div class="p-6 flex flex-col h-[calc(100%-14rem)]">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif font-bold text-xl text-brand-dark">${item.name}</h3>
-                            <span class="text-brand-red font-semibold whitespace-nowrap ml-2">${item.price}</span>
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-serif font-bold text-xl text-brand-ivory">${item.name}</h3>
+                            <span class="text-brand-gold font-semibold whitespace-nowrap ml-2">${item.price}</span>
                         </div>
-                        <p class="text-gray-500 text-sm mb-4 font-light line-clamp-3 flex-grow">${item.description}</p>
-                        <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-100">
-                            <span class="text-xs text-gray-400 font-medium">${item.pieces || ''}</span>
-                            <button class="add-to-cart-btn w-8 h-8 rounded-full bg-brand-dark text-white flex items-center justify-center hover:bg-brand-red transition-colors" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
+                        <p class="text-brand-ivory/50 text-sm mb-5 font-light line-clamp-3 flex-grow leading-relaxed">${item.description}</p>
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-brand-border-gold/20">
+                            <span class="text-xs text-brand-ivory/35 font-medium">${item.pieces || ''}</span>
+                            <button class="add-to-cart-btn w-9 h-9 rounded-full flex items-center justify-center" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
                                 <i class="ph ph-plus"></i>
                             </button>
                         </div>
@@ -373,46 +373,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         combos.forEach((c, idx) => {
             let tagHtml = '';
-            let wrapperClasses = "bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors group reveal-up active";
-            let colorType = "brand-gold";
-            let textStyles = "text-white/80 font-light text-sm";
-            let priceClasses = "text-4xl font-bold text-brand-gold";
-            let btnClasses = "w-full py-3 px-6 rounded-lg bg-white/10 text-white font-medium hover:bg-white/20 transition-colors";
-            
+            let wrapperClasses = "combo-card p-8 rounded-2xl";
+            let colorType = "text-[#C9A15D]";
+            let textStyles = "";
+            let priceClasses = "text-4xl font-bold text-[#D9B36A]";
+            let btnClasses = "combo-cart-btn w-full py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-300";
+
             if (c.tag && c.tag !== "") {
-                tagHtml = `<div class="absolute top-0 right-8 transform -translate-y-1/2 bg-brand-gold text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.tag}</div>`;
-                wrapperClasses = "bg-gradient-to-b from-brand-red/80 to-brand-red/20 border border-brand-red/50 rounded-2xl p-8 relative transform md:-translate-y-4 shadow-2xl group reveal-up active";
-                colorType = "brand-gold";
-                priceClasses = "text-4xl font-bold text-white";
-                btnClasses = "w-full py-3 px-6 rounded-lg bg-white text-brand-dark font-semibold hover:bg-brand-gray transition-colors shadow-lg";
-                textStyles = "text-white/90 font-light text-sm";
-            }
-            
-            if (c.name.toLowerCase().includes('veggie') || c.name.toLowerCase().includes('vegan')) {
-                colorType = "brand-matcha";
-                priceClasses = "text-4xl font-bold text-brand-matcha";
+                tagHtml = `<div class="absolute -top-3 right-7 z-10">
+                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">${c.tag}</span>
+                </div>`;
+                wrapperClasses = "combo-card-featured p-8 rounded-2xl relative";
+                colorType = "text-[#6B4A1E]";
+                priceClasses = "text-4xl font-bold text-[#120C08]";
+                btnClasses = "combo-cart-btn-featured w-full py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-300";
             }
 
-            const oldPriceHtml = c.oldPrice ? `<span class="text-white/50 line-through text-sm">${c.oldPrice}</span>` : '';
-            
-            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3"><i class="ph ph-check text-${colorType} mt-0.5"></i> ${i}</li>`).join('');
+            if (c.name.toLowerCase().includes('veggie') || c.name.toLowerCase().includes('vegan')) {
+                colorType = "text-[#5A7040]";
+            }
+
+            const oldPriceHtml = c.oldPrice ? `<span class="text-[rgba(42,27,15,0.35)] opacity-70 line-through text-lg ml-1">${c.oldPrice}</span>` : '';
+
+            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
 
             const comboHtml = `
                 <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
                     ${tagHtml}
                     <h3 class="font-serif text-2xl font-bold mb-2">${c.name}</h3>
-                    <p class="${c.tag ? 'text-white/70 border-white/20' : 'text-white/50 border-white/10'} text-sm mb-6 pb-6 border-b">${c.subtitle}</p>
-                    
-                    <div class="flex items-baseline gap-2 mb-8">
+                    <p class="text-sm mb-6 pb-6 border-b font-light leading-relaxed">${c.subtitle}</p>
+
+                    <div class="flex items-baseline gap-3 mb-6">
                         <span class="${priceClasses}">${c.price}</span>
                         ${oldPriceHtml}
                     </div>
 
-                    <ul class="space-y-4 mb-8 ${textStyles}">
+                    <ul class="space-y-3.5 mb-8">
                         ${itemsListHtml}
                     </ul>
 
-                    <button class="${btnClasses} add-to-cart-btn" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png">In den Warenkorb</button>
+                    <button class="${btnClasses}" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png">
+                        <span class="flex items-center justify-center gap-2">
+                            <i class="ph ph-shopping-cart-simple"></i> In den Warenkorb
+                        </span>
+                    </button>
                 </div>
             `;
             combosGrid.insertAdjacentHTML('beforeend', comboHtml);

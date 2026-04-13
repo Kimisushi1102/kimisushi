@@ -1,4 +1,4 @@
-/* Sakura Sushi Custom Styles */
+/* Sakura Sushi Custom Styles - Midnight Navy Premium Theme */
 
 /* Base Styles & Utility Classes */
 html {
@@ -20,17 +20,17 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: #1C1C1C;
+    background: #0a0e14;
 }
 ::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
-    border-radius: 4px;
+    background: #2a3545;
+    border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #8B0000;
+    background: #D6B273;
 }
 
 /* Typography Enhancements */
@@ -38,81 +38,133 @@ body {
     letter-spacing: -0.02em;
 }
 
-/* Buttons */
+/* ========================================
+   TYPOGRAPHY - Exact Palette
+   ======================================== */
+
+.font-serif {
+    color: #F7F3EA;
+}
+
+p, li {
+    color: #C8C1B5;
+}
+
+.text-brand-ivory\/50,
+.text-brand-ivory\/45,
+.text-brand-ivory\/40 {
+    color: #C8C1B5 !important;
+}
+
+.text-brand-ivory\/35 {
+    color: #C8C1B5 !important;
+    opacity: 0.85;
+}
+
+.text-brand-ivory\/30 {
+    color: #C8C1B5 !important;
+    opacity: 0.7;
+}
+
+.text-brand-ivory\/25 {
+    color: #C8C1B5 !important;
+    opacity: 0.6;
+}
+
+/* ========================================
+   BUTTONS - Primary Gold #D6B273
+   ======================================== */
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background-color: #8B0000;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
+    background: #D6B273;
+    color: #121A24;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border: 1px solid rgba(214, 178, 115, 0.5);
+    letter-spacing: 0.02em;
 }
 
 .btn-primary:hover {
-    background-color: #6a0000;
-    box-shadow: 0 4px 14px 0 rgba(139, 0, 0, 0.39);
-    transform: translateY(-2px);
+    background: #E0B96E;
+    box-shadow: 0 4px 20px rgba(214, 178, 115, 0.4), 0 0 30px rgba(214, 178, 115, 0.12);
+    transform: translateY(-1px);
+    border-color: rgba(214, 178, 115, 0.7);
 }
 
 .btn-secondary {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background-color: transparent;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
+    background: transparent;
+    color: #C8C1B5;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.375rem;
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    border: 1px solid;
+    border: 1px solid rgba(214, 178, 115, 0.4);
 }
 
 .btn-secondary:hover {
-    transform: translateY(-2px);
+    border-color: rgba(214, 178, 115, 0.65);
+    color: #E0B96E;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(214, 178, 115, 0.15);
+    background: rgba(214, 178, 115, 0.06);
 }
 
 .btn-outline {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background-color: transparent;
-    color: #1C1C1C;
+    background: transparent;
+    color: #C8C1B5;
     padding: 0.75rem 2rem;
     border-radius: 9999px;
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(214, 178, 115, 0.4);
 }
 
 .btn-outline:hover {
-    border-color: #1C1C1C;
-    background-color: #1C1C1C;
-    color: white;
+    border-color: rgba(214, 178, 115, 0.65);
+    color: #E0B96E;
+    background: rgba(214, 178, 115, 0.07);
+    box-shadow: 0 4px 20px rgba(214, 178, 115, 0.12);
 }
 
 /* Filter Buttons */
 .filter-btn {
-    border: 1px solid #e5e7eb;
-    color: #4b5563;
-    background: white;
+    border: 1px solid rgba(214, 178, 115, 0.35);
+    color: #C8C1B5;
+    opacity: 0.6;
+    background: rgba(36, 52, 71, 0.35);
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .filter-btn:hover {
-    border-color: #d1d5db;
-    background: #f9fafb;
+    border-color: rgba(214, 178, 115, 0.6);
+    color: #F7F3EA;
+    background: rgba(36, 52, 71, 0.6);
 }
 
 .filter-btn.active {
-    background-color: #1C1C1C;
-    color: white;
-    border-color: #1C1C1C;
-    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+    background: rgba(214, 178, 115, 0.18);
+    color: #E0B96E;
+    border-color: rgba(214, 178, 115, 0.6);
+    box-shadow: 0 2px 12px rgba(214, 178, 115, 0.18), inset 0 1px 0 rgba(214, 178, 115, 0.2);
 }
 
 /* Animations */
@@ -125,7 +177,7 @@ body {
     animation: slowZoom 20s ease-out forwards;
 }
 
-/* Scroll Revel Animations */
+/* Scroll Reveal Animations */
 .reveal-up {
     opacity: 0;
     transform: translateY(30px);
@@ -161,12 +213,12 @@ body {
 
 /* Header Sticky State */
 .header-scrolled {
-    background-color: rgba(28, 28, 28, 0.95);
-    backdrop-filter: blur(8px);
+    background-color: rgba(18, 26, 36, 0.96);
+    backdrop-filter: blur(18px);
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
-    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 1px 0 rgba(214, 178, 115, 0.15), 0 4px 24px rgba(0, 0, 0, 0.4);
+    border-bottom-color: rgba(214, 178, 115, 0.15) !important;
 }
 
 /* Menu Item Filtering */
@@ -181,8 +233,9 @@ body {
 /* Form Styles */
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: 0.2s;
+    filter: invert(0.7);
 }
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
@@ -196,7 +249,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 [data-tooltip] {
     position: relative;
     cursor: help;
-    border-bottom: 1px dotted #9ca3af;
+    border-bottom: 1px dotted rgba(247, 243, 234, 0.2);
     display: inline-block;
 }
 
@@ -206,8 +259,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%) translateY(-4px);
-    background-color: #1C1C1C;
-    color: white;
+    background-color: #1B2129;
+    color: rgba(247, 243, 234, 0.9);
     padding: 0.4rem 0.75rem;
     border-radius: 0.375rem;
     font-size: 0.75rem;
@@ -217,10 +270,505 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     pointer-events: none;
     transition: all 0.2s ease;
     z-index: 50;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(214, 178, 115, 0.1);
 }
 
 [data-tooltip]:hover::after {
     opacity: 1;
     transform: translateX(-50%) translateY(-8px);
+}
+
+/* ========================================
+   CARD ELEVATION - Exact Color Palette
+   Background: #121A24
+   Normal Food Cards: #243447
+   Featured Menu Set Cards: #2B3B4F
+   ======================================== */
+
+/* Menu Card - #243447 */
+.menu-card {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.45) !important;
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.menu-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    transition: box-shadow 0.4s ease;
+    pointer-events: none;
+}
+
+.menu-card:hover {
+    background: #2A3C50 !important;
+    border-color: rgba(214, 178, 115, 0.65) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 28px 56px rgba(0, 0, 0, 0.55), 0 0 45px rgba(214, 178, 115, 0.1);
+}
+
+.menu-card:hover::after {
+    box-shadow: inset 0 1px 0 rgba(214, 178, 115, 0.3), 0 0 25px rgba(214, 178, 115, 0.08);
+}
+
+/* Combo Card - Normal (rich dark premium) */
+.combo-card {
+    background: linear-gradient(160deg, #1A1F29 0%, #232A36 100%) !important;
+    border: 1px solid rgba(212, 175, 120, 0.28) !important;
+    border-radius: 1.25rem;
+    overflow: visible;
+    transition: all 0.4s ease;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.combo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 120, 0.45) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.combo-card:hover {
+    background: linear-gradient(160deg, #1F2430 0%, #28303D 100%) !important;
+    border-color: rgba(212, 175, 120, 0.45) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 35px rgba(212, 175, 120, 0.08);
+}
+
+.combo-card:hover::before {
+    opacity: 1;
+}
+
+/* Normal Card Text */
+.combo-card h3,
+.combo-card .combo-title {
+    color: #F8F3EA !important;
+}
+
+.combo-card p,
+.combo-card .combo-subtitle {
+    color: rgba(248, 243, 234, 0.78) !important;
+}
+
+.combo-card .combo-price {
+    color: #D9B36A !important;
+}
+
+.combo-card li,
+.combo-card .combo-item-text {
+    color: rgba(236, 226, 208, 0.78) !important;
+}
+
+.combo-card .ph-check-circle {
+    color: #C9A15D !important;
+}
+
+.combo-card .border-b {
+    border-color: rgba(212, 175, 120, 0.18) !important;
+}
+
+/* Combo Card - Featured Highlight (elegant champagne gold gradient) */
+.combo-card-featured {
+    background: linear-gradient(135deg, #E8D3A4 0%, #D7B97A 45%, #C59E5C 100%) !important;
+    border: 1px solid rgba(255, 240, 210, 0.35) !important;
+    border-radius: 1.25rem;
+    overflow: visible;
+    transition: all 0.4s ease;
+    position: relative;
+    box-shadow: 0 18px 40px rgba(197, 158, 92, 0.22);
+}
+
+.combo-card-featured::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 248, 235, 0.85) 50%, transparent 100%);
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.combo-card-featured::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1.25rem;
+    box-shadow: inset 0 0 45px rgba(255, 248, 235, 0.1), 0 0 55px rgba(197, 158, 92, 0.12);
+    pointer-events: none;
+}
+
+.combo-card-featured:hover {
+    background: linear-gradient(135deg, #ECD9AE 0%, #DCC285 45%, #CEAA65 100%) !important;
+    border-color: rgba(255, 248, 235, 0.5) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px rgba(197, 158, 92, 0.28), 0 0 65px rgba(197, 158, 92, 0.15);
+}
+
+.combo-card-featured:hover::before {
+    opacity: 1;
+}
+
+/* Featured Card Text Colors */
+.combo-card-featured h3,
+.combo-card-featured .combo-title {
+    color: #2A1B0F !important;
+}
+
+.combo-card-featured p,
+.combo-card-featured .combo-subtitle {
+    color: rgba(42, 27, 15, 0.72) !important;
+}
+
+.combo-card-featured .combo-price {
+    color: #120C08 !important;
+}
+
+.combo-card-featured li,
+.combo-card-featured .combo-item-text {
+    color: rgba(42, 27, 15, 0.82) !important;
+}
+
+.combo-card-featured .ph-check-circle {
+    color: #6B4A1E !important;
+}
+
+.combo-card-featured .line-through {
+    color: rgba(42, 27, 15, 0.35) !important;
+}
+
+.combo-card-featured .border-b {
+    border-color: rgba(107, 74, 30, 0.18) !important;
+}
+
+/* Review Card - #243447 */
+.review-card {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.45) !important;
+    border-radius: 1.25rem;
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.review-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(214, 178, 115, 0.55) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.review-card:hover {
+    background: #2A3C50 !important;
+    border-color: rgba(214, 178, 115, 0.6) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 28px 56px rgba(0, 0, 0, 0.5), 0 0 40px rgba(214, 178, 115, 0.08);
+}
+
+.review-card:hover::before {
+    opacity: 1;
+}
+
+/* FAQ Card - #243447 */
+.faq-card {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.45) !important;
+    border-radius: 0.875rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.faq-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(214, 178, 115, 0.5) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.faq-card:hover {
+    background: #2A3C50 !important;
+    border-color: rgba(214, 178, 115, 0.6) !important;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), 0 0 30px rgba(214, 178, 115, 0.06);
+}
+
+.faq-card:hover::before {
+    opacity: 1;
+}
+
+/* ========================================
+   CARD CONTENT - #F7F3EA / #C8C1B5
+   ======================================== */
+
+.menu-card h3,
+.combo-card h3,
+.review-card h4,
+.faq-card h4 {
+    color: #F7F3EA !important;
+}
+
+.menu-card .text-brand-gold,
+.combo-card .text-brand-gold {
+    color: #E0B96E !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.menu-card p,
+.combo-card p,
+.review-card p {
+    color: #C8C1B5 !important;
+}
+
+/* ========================================
+   ICON BOXES
+   ======================================== */
+
+.icon-glow {
+    position: relative;
+}
+
+.icon-glow::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at center, rgba(214, 178, 115, 0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.icon-glow:hover::after {
+    opacity: 1;
+}
+
+.feature-icon-box {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.5) !important;
+}
+
+/* ========================================
+   BADGE BOX - "12+ Jahre"
+   ======================================== */
+
+.badge-highlight {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.55) !important;
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(214, 178, 115, 0.08) !important;
+}
+
+/* ========================================
+   FORM INPUTS
+   ======================================== */
+
+.dark-input {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.45) !important;
+    color: #F7F3EA !important;
+    transition: all 0.3s ease;
+}
+
+.dark-input::placeholder {
+    color: #C8C1B5;
+    opacity: 0.4;
+}
+
+.dark-input:focus {
+    border-color: rgba(214, 178, 115, 0.65) !important;
+    box-shadow: 0 0 0 3px rgba(214, 178, 115, 0.12), 0 0 24px rgba(214, 178, 115, 0.08) !important;
+    background: #2A3C50 !important;
+}
+
+.cart-badge {
+    transition: all 0.3s ease;
+}
+
+/* ========================================
+   AMBIENT LIGHT & PREMIUM EFFECTS
+   ======================================== */
+
+.glow-top {
+    position: relative;
+}
+
+.glow-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(214, 178, 115, 0.45) 30%, rgba(214, 178, 115, 0.55) 50%, rgba(214, 178, 115, 0.45) 70%, transparent 100%);
+}
+
+.card-inner-glow {
+    position: relative;
+}
+
+.card-inner-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 8px;
+    right: 8px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(214, 178, 115, 0.55) 50%, transparent 100%);
+    opacity: 0.7;
+    transition: opacity 0.4s ease;
+}
+
+.card-inner-glow:hover::before {
+    opacity: 1;
+}
+
+.reservation-card {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), 0 0 60px rgba(214, 178, 115, 0.08);
+}
+
+.social-icon {
+    transition: all 0.3s ease;
+    position: relative;
+    background: #243447 !important;
+}
+
+.social-icon:hover {
+    box-shadow: 0 0 18px rgba(214, 178, 115, 0.2);
+    border-color: rgba(214, 178, 115, 0.55) !important;
+    color: #E0B96E;
+}
+
+.add-to-cart-btn {
+    background: #243447 !important;
+    border: 1px solid rgba(214, 178, 115, 0.5) !important;
+    color: #F7F3EA !important;
+}
+
+.add-to-cart-btn:hover {
+    box-shadow: 0 0 18px rgba(214, 178, 115, 0.3);
+    border-color: rgba(214, 178, 115, 0.65) !important;
+    color: #121A24 !important;
+    background: #D6B273 !important;
+}
+
+#back-to-top:hover {
+    box-shadow: 0 4px 24px rgba(214, 178, 115, 0.4), 0 0 30px rgba(214, 178, 115, 0.15);
+}
+
+#checkout-box,
+#status-modal > div {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 80px rgba(214, 178, 115, 0.06);
+}
+
+#cart-toast {
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.55), 0 0 30px rgba(214, 178, 115, 0.08);
+}
+
+.quality-divider {
+    background: linear-gradient(180deg, rgba(214, 178, 115, 0.25) 0%, transparent 100%);
+}
+
+#gallery .group {
+    border-color: rgba(214, 178, 115, 0.4) !important;
+}
+
+#gallery .group:hover {
+    border-color: rgba(214, 178, 115, 0.55) !important;
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55), 0 0 35px rgba(214, 178, 115, 0.12);
+}
+
+.premium-glow {
+    position: relative;
+}
+
+.premium-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(214, 178, 115, 0.55) 50%, transparent 100%);
+    border-radius: 100% 100% 0 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.premium-glow:hover::before {
+    opacity: 1;
+}
+
+/* ========================================
+   COMBO CARD BUTTONS
+   ======================================== */
+
+/* Normal Card Button */
+.combo-cart-btn {
+    background: #B8945A !important;
+    border: none !important;
+    color: #1A120A !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.combo-cart-btn:hover {
+    background: #C9A15D !important;
+    color: #1A120A !important;
+    box-shadow: 0 4px 18px rgba(185, 148, 90, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Featured Card Button */
+.combo-cart-btn-featured {
+    background: #2A1608 !important;
+    border: none !important;
+    color: #EED9AE !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.combo-cart-btn-featured:hover {
+    background: #3A2110 !important;
+    color: #F0E0BA !important;
+    box-shadow: 0 4px 22px rgba(42, 22, 8, 0.4), 0 0 25px rgba(197, 158, 92, 0.12);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   OVERALL CARD ELEVATION
+   ======================================== */
+
+.bg-brand-elevated {
+    background: #243447 !important;
+}
+
+.review-card .bg-brand-elevated {
+    background: #2B3B4F !important;
+    border-color: rgba(214, 178, 115, 0.5) !important;
 }

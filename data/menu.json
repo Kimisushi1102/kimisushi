@@ -82,17 +82,20 @@
     "tag": "Neu"
   },
   {
-    "id": "10",
-    "name": "Salmon Teriyaki",
-    "price": "12,90 €",
-    "category": "Hot",
-    "description": "Gegrillter Lachs mit Teriyaki-Sauce",
-    "image": "images/salmon_teriyaki.png"
+    "id": "1776081949290",
+    "code": "test 99",
+    "name": "test",
+    "price": "9.90",
+    "category": "Appetizer",
+    "image": "",
+    "description": "",
+    "tag": "",
+    "pieces": ""
   },
   {
-    "id": "1776081127254",
-    "code": "test 99",
-    "name": "test00",
+    "id": "1776082272564",
+    "code": "test 994",
+    "name": "444",
     "price": "9.90",
     "category": "Nigiri",
     "image": "",

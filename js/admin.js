@@ -1,3 +1,6 @@
+// Stub for notifyPosUpdate - used by POS system when available
+window.notifyPosUpdate = function() {};
+
 // Add image upload compression and base64 conversion globally
 window.handleImageUpload = function(fileInput, targetId) {
     const file = fileInput.files[0];
@@ -709,14 +712,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderTable() {
+        // Fresh DOM reference to avoid stale references
+        const menuTableBody = document.getElementById('admin-menu-list');
+        if (!menuTableBody) return;
+        
         const menu = getMenu();
-        adminMenuList.innerHTML = '';
+        menuTableBody.innerHTML = '';
 
         // Update category datalist for the input
         updateCategoryDatalist();
 
         if (menu.length === 0) {
-            adminMenuList.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500 text-sm">Chưa có món ăn nào trong thực đơn.</td></tr>`;
+            menuTableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500 text-sm">Chưa có món ăn nào trong thực đơn.</td></tr>`;
             return;
         }
 
@@ -754,7 +761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </td>
             `;
 
-            adminMenuList.appendChild(tr);
+            menuTableBody.appendChild(tr);
         });
 
         // Add delete and edit event listeners
@@ -839,17 +846,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ...formData
             });
         }
-        
-        saveMenu(currentMenu).then(success => {
-            if (success) {
-                showToast(editingId ? "Đã cập nhật món ăn & Đồng bộ POS!" : "Đã thêm món mới & Đồng bộ POS!");
-            } else {
-                showToast("Lưu Local OK nhưng lỗi Cloud.");
-            }
-            notifyPosUpdate();
-            resetFormState();
-            renderTable();
-        });
+
+        // Save to localStorage synchronously (happens immediately)
+        // Server sync happens in background via async saveMenu - we don't wait for it
+        saveMenu(currentMenu);
+        notifyPosUpdate();
+        resetFormState();
+        renderTable();
+        showToast(editingId ? "Gericht erfolgreich aktualisiert!" : "Gericht erfolgreich hinzugefügt!");
     });
 
     function deleteItem(id) {

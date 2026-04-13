@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sectionDashboard = document.getElementById('section-dashboard');
     const sectionAnalytics = document.getElementById('section-analytics');
     const sectionOrders = document.getElementById('section-orders');
-    const sectionHours = document.getElementById('section-website-hours');
+    const sectionHours = document.getElementById('section-hours');
     const sectionMedia = document.getElementById('section-media');
     const sectionActivity = document.getElementById('section-activity');
 
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const allSections = [sectionDashboard, sectionAnalytics, sectionOrders, sectionHours, menuManagement, combosManagement, settingsManagement, seoManagement, tableManagement, tunnelManagement, financeReport, posManagement, inboxManagement, sectionMedia, sectionActivity];
         const allNavs = [navDashboard, navAnalytics, navOrders, navHours, navMenu, navCombos, navSettings, navSeo, navTables, navTunnel, navFinance, navPos, navInbox, navMedia, navActivity];
         allSections.forEach(s => s && s.classList.add('hidden'));
-        allNavs.forEach(n => n && (n.className = 'flex items-center gap-3 px-4 py-3 text-white/50 hover:bg-white/5 hover:text-white rounded-lg transition-colors'));
+        allNavs.forEach(n => n && (n.className = 'sidebar-nav-item nav-item'));
 
         const sectionMap = {
             'dashboard': [sectionDashboard, navDashboard],
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const pair = sectionMap[section];
         if (pair) {
             pair[0] && pair[0].classList.remove('hidden');
-            if (pair[1]) pair[1].className = 'flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg transition-colors';
+            if (pair[1]) pair[1].className = 'sidebar-nav-item nav-item active';
         }
 
         // Init modules on first view

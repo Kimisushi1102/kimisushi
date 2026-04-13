@@ -174,8 +174,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (section === 'seo' && typeof window.initSEOManagement === 'function') window.initSEOManagement();
         if (section === 'dashboard') initDashboardQuickView();
         if (section === 'media') initMediaGallery();
+        if (section === 'hours') initHoursManagement();
     };
 
+    function initHoursManagement() {
+        const config = getSettings();
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        
+        days.forEach(d => {
+            const el1 = document.getElementById('set-h-' + d.toLowerCase() + '-1');
+            const el2 = document.getElementById('set-h-' + d.toLowerCase() + '-2');
+            const configKey1 = 'hours' + d + '1';
+            const configKey2 = 'hours' + d + '2';
+            if (el1) el1.value = config[configKey1] || '';
+            if (el2) el2.value = config[configKey2] || '';
+        });
+        
+        const summaryEl = document.getElementById('hours-summary');
+        if (summaryEl) summaryEl.value = config.hoursSummary || '';
+    }
+    
     function initDashboardQuickView() {
         fetch('/api/analytics').then(r => r.json()).then(data => {
             const today = new Date().toISOString().split('T')[0];
@@ -198,6 +216,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!container) return;
         const images = ['images/hero_sushi.png','images/gallery-1.jpg','images/salmon_nigiri.png','images/dragon_roll.png','images/gyoza.png','images/miso_soup.png','images/tuna_nigiri.png','images/california_roll.png'];
         container.innerHTML = images.map(src => `<div class="border rounded-lg p-2 text-center bg-gray-50"><img src="${src}" class="w-full h-24 object-cover rounded mb-1" onerror="this.style.display='none'"><span class="text-xs text-gray-500 truncate block">${src.split('/').pop()}</span></div>`).join('');
+    }
+
+    // Öffnungszeiten save button
+    const saveHoursBtn = document.getElementById('save-hours');
+    if (saveHoursBtn) {
+        saveHoursBtn.addEventListener('click', async () => {
+            const config = getSettings();
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            days.forEach(d => {
+                const val1 = (document.getElementById('set-h-' + d + '-1') || {}).value || '';
+                const val2 = (document.getElementById('set-h-' + d + '-2') || {}).value || '';
+                config['hours' + d.charAt(0).toUpperCase() + d.slice(1) + '1'] = val1;
+                config['hours' + d.charAt(0).toUpperCase() + d.slice(1) + '2'] = val2;
+            });
+            config.hoursSummary = (document.getElementById('hours-summary') || {}).value || '';
+            
+            await saveSettings(config);
+            showToast('Öffnungszeiten gespeichert!');
+        });
     }
 
     // Nav click bindings for new items
@@ -1282,7 +1319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `sakura_pos_backup_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.json`;
+        a.download = `kimi_sushi_backup_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

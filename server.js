@@ -278,7 +278,7 @@ async function sendGmailNotification(orderData, gmailConfig) {
       </div>
 
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0 12px;">
-      <p style="font-size: 11px; color: #aaa; text-align: center; margin: 0;">Sakura Sushi — Automatisiertes Benachrichtigungssystem</p>
+      <p style="font-size: 11px; color: #aaa; text-align: center; margin: 0;">Kimi Sushi — Automatisiertes Benachrichtigungssystem</p>
     </div>
   `;
 
@@ -293,7 +293,7 @@ async function sendGmailNotification(orderData, gmailConfig) {
 
   try {
     const info = await transporter.sendMail({
-      from: `"Sakura Sushi" <${gmailUser}>`,
+      from: `"Kimi Sushi" <${gmailUser}>`,
       to: gmailNotifyEmail,
       subject: subject,
       html: htmlContent
@@ -637,8 +637,41 @@ const menuData = loadMenuData();
 const combosData = loadCombosData();
 let settingsData = {};
 
+// Default settings if no file exists
+const defaultSettings = {
+    brandName: "Kimi Sushi",
+    logoImage: "",
+    heroImage: "images/hero_sushi.png",
+    aboutImage: "images/gallery-1.jpg",
+    phone: "+49 123 4567890",
+    email: "hallo@kimisushi.de",
+    address: "Bernhäuser Hauptstraße 27, 70794 Filderstadt",
+    seoTitle: "Kimi Sushi | Frisches Sushi & Authentische Japanische Küche",
+    seoDescription: "Genießen Sie frisches, hochwertiges Sushi bei Kimi Sushi in Filderstadt.",
+    seoKeywords: "Kimi Sushi, Sushi Filderstadt, japanisches Restaurant",
+    hoursSummary: "Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00",
+    hoursMon1: "11:00 - 15:00", hoursMon2: "17:00 - 22:00",
+    hoursTue1: "11:00 - 15:00", hoursTue2: "17:00 - 22:00",
+    hoursWed1: "11:00 - 15:00", hoursWed2: "17:00 - 22:00",
+    hoursThu1: "11:00 - 15:00", hoursThu2: "17:00 - 22:00",
+    hoursFri1: "11:00 - 15:00", hoursFri2: "17:00 - 22:00",
+    hoursSat1: "11:00 - 15:00", hoursSat2: "17:00 - 22:00",
+    hoursSun1: "17:00 - 22:00", hoursSun2: "",
+    deliveryEnabled: false,
+    taxRate1: "19", taxRate2: "7"
+};
+
 if (fs.existsSync(SETTINGS_FILE)) {
-    try { settingsData = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')); } catch(e) {}
+    try { 
+        const loaded = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+        if (loaded && typeof loaded === 'object') {
+            settingsData = { ...defaultSettings, ...loaded };
+        }
+    } catch(e) {
+        settingsData = defaultSettings;
+    }
+} else {
+    settingsData = defaultSettings;
 }
 
 // Menu API
@@ -890,7 +923,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('');
   console.log('===========================================');
-  console.log('🍣 Sakura Sushi Server đang chạy!');
+  console.log('🍣 Kimi Sushi Server đang chạy!');
   console.log(`🌐 http://localhost:${PORT}`);
   console.log('===========================================');
   console.log('');

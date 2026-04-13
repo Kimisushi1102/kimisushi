@@ -1047,33 +1047,61 @@
                 <!-- ===================== SECTION: HOURS ===================== -->
                 <div id="section-hours" class="admin-section">
                     <div class="section-header">
-                        <h1 class="section-title">Giờ mở cửa</h1>
-                        <p class="section-subtitle">Cấu hình giờ hoạt động của nhà hàng</p>
+                        <h1 class="section-title">Öffnungszeiten</h1>
+                        <p class="section-subtitle">Konfiguration der täglichen Öffnungszeiten</p>
                     </div>
                     <div class="card max-w-3xl">
                         <div class="card-header">
-                            <h3 class="font-bold text-[#1C1C1C]">Lịch trình theo ngày</h3>
+                            <h3 class="font-bold text-[#1C1C1C]">Wochenplan</h3>
                         </div>
                         <div class="card-body">
-                            <div class="space-y-4">
+                            <div class="space-y-3">
                                 <div class="grid grid-cols-3 gap-4 font-bold text-xs text-gray-400 mb-2 pb-2 border-b">
-                                    <span>Ngày</span><span>Ca 1</span><span>Ca 2</span>
+                                    <span>Tag</span><span>Schicht 1</span><span>Schicht 2</span>
                                 </div>
-                                ${['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'].map((d,i) => {
-                                    const keys = ['mon','tue','wed','thu','fri','sat','sun'];
-                                    return `<div class="grid grid-cols-3 gap-4 items-center">
-                                        <label class="font-semibold text-gray-700">${d}</label>
-                                        <input type="text" id="hours-${keys[i]}1" placeholder="11:00 - 15:00" class="form-input text-sm">
-                                        <input type="text" id="hours-${keys[i]}2" placeholder="17:00 - 22:00" class="form-input text-sm">
-                                    </div>`;
-                                }).join('')}
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Montag</label>
+                                    <input type="text" id="set-h-mon-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-mon-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Dienstag</label>
+                                    <input type="text" id="set-h-tue-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-tue-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Mittwoch</label>
+                                    <input type="text" id="set-h-wed-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-wed-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Donnerstag</label>
+                                    <input type="text" id="set-h-thu-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-thu-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Freitag</label>
+                                    <input type="text" id="set-h-fri-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-fri-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Samstag</label>
+                                    <input type="text" id="set-h-sat-1" placeholder="11:00 - 15:00" class="form-input text-sm">
+                                    <input type="text" id="set-h-sat-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 items-center">
+                                    <label class="font-semibold text-gray-700">Sonntag</label>
+                                    <input type="text" id="set-h-sun-1" placeholder="Ruhetag" class="form-input text-sm">
+                                    <input type="text" id="set-h-sun-2" placeholder="17:00 - 22:00" class="form-input text-sm">
+                                </div>
                             </div>
                             <div class="mt-6 pt-6 border-t">
-                                <label class="form-label">Tóm tắt (hiển thị trên website)</label>
-                                <input type="text" id="hours-summary" placeholder="Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00" class="form-input">
+                                <label class="form-label">Zusammenfassung (wird auf der Website angezeigt)</label>
+                                <input type="text" id="hours-summary" placeholder="Mo-Fr: 11:00-15:00 & 17:00-22:00 | Sa-So: 17:00-22:00" class="form-input">
+                                <p class="text-xs text-gray-400 mt-2">Diese Zusammenfassung wird auf der Kunden-Website angezeigt.</p>
                             </div>
                             <button id="save-hours" class="btn btn-primary mt-6">
-                                <i class="ph ph-floppy-disk"></i> Lưu giờ mở cửa
+                                <i class="ph ph-floppy-disk"></i> Öffnungszeiten speichern
                             </button>
                         </div>
                     </div>
@@ -1215,7 +1243,7 @@
                                     </div>
                                     <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border">
                                         <p class="italic mb-1">Liebe/r <strong>[Name]</strong>,</p>
-                                        <p class="mb-1">vielen Dank für Ihre Reservierung bei <strong>Sakura Sushi</strong>!</p>
+                                        <p class="mb-1">vielen Dank für Ihre Reservierung bei <strong>Kimi Sushi</strong>!</p>
                                         <p class="mb-1">Wir freuen uns, Sie am <strong>[Datum]</strong> um <strong>[Uhrzeit]</strong> bei uns begrüßen zu dürfen.</p>
                                         <p class="mb-1">Ihre Reservierung ist hiermit <strong>bestätigt</strong>.</p>
                                         <p class="mt-2 font-semibold text-green-700">Wir freuen uns auf Ihren Besuch!</p>
@@ -1232,7 +1260,7 @@
                                     </div>
                                     <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border">
                                         <p class="italic mb-1">Hallo <strong>[Name]</strong>,</p>
-                                        <p class="mb-1">wir haben Ihre Bestellung bei <strong>Sakura Sushi</strong> erhalten. Vielen Dank!</p>
+                                        <p class="mb-1">wir haben Ihre Bestellung bei <strong>Kimi Sushi</strong> erhalten. Vielen Dank!</p>
                                         <p class="mb-1">Ihre Bestellung wird in ca. <strong>[X]</strong> Minuten fertig zubereitet sein.</p>
                                         <p class="mb-1">Sie können Ihre Bestellung dann bei uns <strong>abholen</strong>.</p>
                                         <p class="mt-2 font-semibold text-amber-700">Wir wünschen einen guten Appetit!</p>
@@ -1249,10 +1277,10 @@
                                     </div>
                                     <div class="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border">
                                         <p class="italic mb-1">Sehr geehrte/r <strong>[Name]</strong>,</p>
-                                        <p class="mb-1">vielen Dank für Ihre Reservierungsanfrage bei <strong>Sakura Sushi</strong>.</p>
+                                        <p class="mb-1">vielen Dank für Ihre Reservierungsanfrage bei <strong>Kimi Sushi</strong>.</p>
                                         <p class="mb-1">Leider müssen wir Ihnen mitteilen, dass wir für den gewünschten Zeitpunkt bereits <strong>ausgebucht</strong> sind.</p>
                                         <p class="mb-1">Wir würden uns freuen, Sie zu einem <strong>anderen Zeitpunkt</strong> bei uns begrüßen zu dürfen.</p>
-                                        <p class="mt-2 text-red-600">Mit freundlichen Grüßen,<br>Ihr Sakura Sushi Team</p>
+                                        <p class="mt-2 text-red-600">Mit freundlichen Grüßen,<br>Ihr Kimi Sushi Team</p>
                                     </div>
                                 </div>
 
@@ -1816,7 +1844,7 @@
                                 <h3 class="text-sm font-bold text-gray-800 pt-4 border-t">Đồng bộ đám mây</h3>
                                 <div>
                                     <label class="form-label">Cloudflare Worker URL</label>
-                                    <input type="text" id="siteDomain" class="form-input" placeholder="https://sakura-worker.hoang.workers.dev">
+                                    <input type="text" id="siteDomain" class="form-input" placeholder="https://kimi-worker.hoang.workers.dev">
                                     <p class="text-xs text-gray-400 mt-1">Dán link Worker để đồng bộ dữ liệu đa thiết bị.</p>
                                 </div>
                                 
@@ -1874,7 +1902,7 @@
                                 <h3 class="text-sm font-bold text-gray-800 pb-2 border-b">Meta Tags</h3>
                                 <div>
                                     <label class="form-label">Title Tag</label>
-                                    <input type="text" id="seo-title" required class="form-input" placeholder="VD: Sakura Sushi | Authentic Japanese">
+                                    <input type="text" id="seo-title" required class="form-input" placeholder="VD: Kimi Sushi | Authentic Japanese">
                                 </div>
                                 <div>
                                     <label class="form-label">Meta Description</label>
@@ -1886,7 +1914,7 @@
                                 </div>
                                 <div>
                                     <label class="form-label">Author</label>
-                                    <input type="text" id="seo-author" class="form-input" placeholder="VD: Sakura Sushi Team">
+                                    <input type="text" id="seo-author" class="form-input" placeholder="VD: Kimi Sushi Team">
                                 </div>
                                 
                                 <h3 class="text-sm font-bold text-gray-800 pt-4 pb-2 border-b">Dữ liệu GEO</h3>
@@ -1946,7 +1974,7 @@
                                     <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black shrink-0">2</div>
                                     <div>
                                         <h4 class="font-bold mb-1">Tạo Tunnel</h4>
-                                        <p class="text-sm text-gray-500">Vào Zero Trust → Networks → Tunnels → Create Tunnel, đặt tên "Sakura-POS".</p>
+                                        <p class="text-sm text-gray-500">Vào Zero Trust → Networks → Tunnels → Create Tunnel, đặt tên "KimiPOS".</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4">
@@ -1967,7 +1995,7 @@
                                     <div>
                                         <h4 class="font-bold mb-1">Cấu hình Public Hostname</h4>
                                         <ul class="text-sm text-gray-500 space-y-1 ml-4 list-disc">
-                                            <li>Hostname: Tên miền của bạn (VD: sakurasushi.com)</li>
+                                            <li>Hostname: Tên miền của bạn (VD: kimisushi.de)</li>
                                             <li>Service Type: HTTP</li>
                                             <li>URL: localhost:3000</li>
                                         </ul>

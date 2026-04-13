@@ -23,10 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 0.1 Load Dynamic Settings ---
-    if (typeof getSettings === 'function') {
-        const config = getSettings();
-        
+    // --- 0.1 Load Settings (Server First, then localStorage, then defaults) ---
+    async function loadSettingsForWebsite() {
         const updateText = (id, text) => {
             const el = document.getElementById(id);
             if(el && text) el.textContent = text;
@@ -35,7 +33,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const el = document.getElementById(id);
             if(el && text) el.href = pf + text.replace(/\s+/g, '');
         };
-
+        
+        // 1. Load defaults first (for immediate display)
+        let config = typeof getSettings === 'function' ? getSettings() : {};
+        
+        // 2. Try to fetch from server (Server = Primary Source)
+        try {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const serverConfig = await res.json();
+                // Merge server config with defaults (server wins)
+                config = { ...config, ...serverConfig };
+                // Sync to localStorage for offline use
+                if (typeof saveSettings === 'function') {
+                    saveSettings(config);
+                }
+            }
+        } catch (e) {
+            console.log("[WEBSITE] Server nicht erreichbar, verwende lokale Daten.");
+        }
+        
+        // 3. Apply to UI
         updateText('site-brand-1', config.brandName);
         updateText('site-brand-2', config.brandName);
         
@@ -45,18 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLink('site-phone-link-1', 'tel:', config.phone);
         updateLink('site-phone-link-2', 'tel:', config.phone);
         
-        // Sync with Live Server if available
-        fetch('/api/settings').then(r => r.json()).then(liveConfig => {
-            Object.assign(config, liveConfig);
-            applyConfigToUI(config);
-        }).catch(err => console.log("Standard configuration active."));
-
-        function applyConfigToUI(config) {
-            updateText('site-brand-1', config.brandName);
-            updateText('site-brand-2', config.brandName);
-            // ... apply rest of settings ...
-        }
-
         updateText('site-email', config.email);
         updateLink('site-email-link', 'mailto:', config.email);
 
@@ -107,7 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('site-logo-icon-2')?.classList.remove('hidden');
             document.getElementById('site-logo-img-2')?.classList.add('hidden');
         }
-
+        
+        // SEO Title
+        if (config.seoTitle) {
+            document.title = config.seoTitle;
+        }
+        
         // --- 0.5 Delivery Visibility ---
         document.querySelectorAll('.delivery-content').forEach(el => {
             if (config.deliveryEnabled === true) {
@@ -116,7 +127,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.classList.add('hidden');
             }
         });
+        
+        return config;
     }
+    
+    // Start loading settings
+    loadSettingsForWebsite();
+    
+    // --- 4. Load Menu (Server First, then localStorage, then defaults) ---
+    async function loadMenuForWebsite() {
+        // 1. Load from localStorage first
+        let menu = typeof getMenu === 'function' ? getMenu() : [];
+        
+        // 2. Try to fetch from server
+        try {
+            const res = await fetch('/api/menu');
+            if (res.ok) {
+                const serverMenu = await res.json();
+                if (serverMenu && Array.isArray(serverMenu) && serverMenu.length > 0) {
+                    menu = serverMenu;
+                    // Sync to localStorage
+                    if (typeof saveMenu === 'function') {
+                        saveMenu(menu);
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("[WEBSITE] Menu Server nicht erreichbar, verwende lokale Daten.");
+        }
+        
+        return menu;
+    }
+    
+    // Load menu after settings
+    (async () => {
+        activeMenu = await loadMenuForWebsite();
+        renderCategoryFilters();
+        renderMenu();
+        
+        // Also sync combos if needed
+        try {
+            const res = await fetch('/api/combos');
+            if (res.ok) {
+                const serverCombos = await res.json();
+                if (serverCombos && Array.isArray(serverCombos) && serverCombos.length > 0 && typeof saveCombos === 'function') {
+                    saveCombos(serverCombos);
+                }
+            }
+        } catch (e) {}
+    })();
+    
     // --- 1. Mobile Menu Toggle ---
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const closeMenuBtn = document.getElementById('close-menu-btn');

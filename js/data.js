@@ -159,7 +159,7 @@ const defaultCombos = [
     },
     {
         id: "c2",
-        name: "Sakura Premium",
+        name: "Kimi Sushi Premium",
         subtitle: "Ideal für 2 Personen",
         price: "45,00 €",
         oldPrice: "52,50 €",

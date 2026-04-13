@@ -34,5 +34,14 @@
     "oldPrice": "",
     "tag": "Chef&#39;s Choice",
     "items": "abcxyz"
+  },
+  {
+    "id": "combo_1776080165935",
+    "name": "Omakase2",
+    "subtitle": "Für 2 Personen",
+    "price": "30 € / pro Persone",
+    "oldPrice": "",
+    "tag": "Chef&#39;s Choice",
+    "items": ""
   }
 ]

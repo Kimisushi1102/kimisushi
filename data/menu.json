@@ -88,5 +88,16 @@
     "category": "Hot",
     "description": "Gegrillter Lachs mit Teriyaki-Sauce",
     "image": "images/salmon_teriyaki.png"
+  },
+  {
+    "id": "1776081127254",
+    "code": "test 99",
+    "name": "test00",
+    "price": "9.90",
+    "category": "Nigiri",
+    "image": "",
+    "description": "",
+    "tag": "",
+    "pieces": ""
   }
 ]

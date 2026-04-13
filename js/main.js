@@ -165,13 +165,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCategoryFilters();
         renderMenu();
         
-        // Also sync combos if needed
+        // Load combos from server (server is primary source)
         try {
             const res = await fetch('/api/combos');
             if (res.ok) {
                 const serverCombos = await res.json();
-                if (serverCombos && Array.isArray(serverCombos) && serverCombos.length > 0 && typeof saveCombos === 'function') {
-                    saveCombos(serverCombos);
+                if (serverCombos && Array.isArray(serverCombos) && serverCombos.length > 0) {
+                    // Save to localStorage for offline use
+                    if (typeof saveCombos === 'function') {
+                        saveCombos(serverCombos);
+                    }
+                    // Re-render combos with server data
+                    if (typeof renderCombos === 'function') {
+                        renderCombos();
+                    }
                 }
             }
         } catch (e) {}

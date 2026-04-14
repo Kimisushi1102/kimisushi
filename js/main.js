@@ -12,14 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 0. Scroll & UI Failsafe ---
     // Ensure body scroll is never stuck on load
     document.body.style.overflow = '';
-    
+
+    let scrollPosition = 0;
     const lockScroll = (lock) => {
         if (lock) {
+            scrollPosition = window.scrollY;
             document.body.style.overflow = 'hidden';
-            document.body.style.paddingRight = '8px'; // Prevent layout shift from scrollbar
+            document.body.style.top = `-${scrollPosition}px`;
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
         } else {
             document.body.style.overflow = '';
-            document.body.style.paddingRight = '0';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, scrollPosition);
         }
     };
 
@@ -198,19 +205,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function toggleMenu() {
-        if (mobileMenu.classList.contains('translate-x-full')) {
+        const isOpening = mobileMenu.classList.contains('translate-x-full');
+        if (isOpening) {
+            // Hint browser to promote this element to its own compositor layer
+            mobileMenu.style.willChange = 'transform';
+            // Force browser to recalculate layout before animating
+            mobileMenu.getBoundingClientRect();
             mobileMenu.classList.remove('translate-x-full');
             lockScroll(true);
         } else {
             mobileMenu.classList.add('translate-x-full');
             lockScroll(false);
+            // Remove will-change after transition completes to free GPU memory
+            mobileMenu.addEventListener('transitionend', () => {
+                mobileMenu.style.willChange = '';
+            }, { once: true });
         }
     }
 
     if (mobileMenuBtn && closeMenuBtn && mobileMenu) {
         mobileMenuBtn.addEventListener('click', toggleMenu);
         closeMenuBtn.addEventListener('click', toggleMenu);
-        
+
         mobileLinks.forEach(link => {
             link.addEventListener('click', toggleMenu);
         });

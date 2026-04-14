@@ -10,9 +10,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar,
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;

@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, viewport-fit=cover">
     <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +16,12 @@
     <link rel="stylesheet" href="css/styles.css?v=1.1">
     <style>
         body { overscroll-behavior-y: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll::-webkit-scrollbar,
+        .hide-scroll { display: none; }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .safe-pt { padding-top: env(safe-area-inset-top); }
         
@@ -31,12 +36,18 @@
         }
         .touch-active:active { transform: scale(0.96); filter: brightness(0.95); }
         .category-sidebar-btn { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
-        
+
         /* Iframe Specific Styles */
         .is-iframed #pos-header { display: none !important; }
         .is-iframed #pos-body { padding-top: 0 !important; }
         .is-iframed nav.lg\:hidden { display: none !important; }
         .is-iframed .mobile-tab-view { bottom: 0 !important; }
+
+        /* Safe area padding for scrollable zones */
+        .safe-scroll-area { padding-bottom: env(safe-area-inset-bottom); }
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe { padding-bottom: max(24px, env(safe-area-inset-bottom)) !important; }
+        }
     </style>
     <script>
         if (window.self !== window.top) {
@@ -94,7 +105,7 @@
                 </button>
             </div>
             
-            <div id="table-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-24">
+            <div id="table-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-24 pb-safe">
                 <!-- If empty, show emergency button -->
                 <div id="emergency-empty" class="col-span-full py-20 flex flex-col items-center gap-6">
                     <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center animate-bounce">
@@ -134,7 +145,7 @@
                             <span class="text-[8px] font-black uppercase">Món lẻ</span>
                         </button>
                     </div>
-                    <div id="menu-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 pb-32 content-start">
+                    <div id="menu-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 pb-32 content-start pb-safe">
                         <!-- Items injected via JS -->
                     </div>
                 </div>
@@ -275,7 +286,7 @@
                         <button onclick="addCash(50)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">50 €</button>
                         <button onclick="addCash(100)" class="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black">100 €</button>
                     </div>
-                    <input type="number" id="cash-received" oninput="calculateChange()" placeholder="Nhập số tiền..." class="w-full mt-2 bg-white border border-gray-200 rounded-2xl p-4 text-xl font-black text-center outline-none focus:border-brand-red">
+                    <input type="number" id="cash-received" oninput="calculateChange()" placeholder="Nhập số tiền..." class="w-full mt-2 bg-white border border-gray-200 rounded-2xl p-4 text-xl font-black text-center outline-none focus:border-brand-red" min="0">
                 </div>
                 <button onclick="finalizeCheckout()" class="w-full bg-brand-red text-white py-6 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition flex items-center justify-center gap-4">
                     <i class="ph-fill ph-printer"></i> ABSCHLIESSEN & DRUCKEN
@@ -489,7 +500,7 @@
             zones.forEach(z => {
                 const btn = document.createElement('button');
                 const isActive = currentZone === z;
-                btn.className = `px-4 py-2 rounded-xl font-black text-[10px] uppercase whitespace-nowrap transition active:scale-95 ${isActive ? 'bg-brand-dark text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
+                btn.className = `px-4 py-3 min-h-[44px] rounded-xl font-black text-[10px] uppercase whitespace-nowrap transition active:scale-95 ${isActive ? 'bg-brand-dark text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
                 btn.textContent = z;
                 btn.onclick = () => {
                     currentZone = z;
@@ -576,7 +587,7 @@
                 const btn = document.createElement('button');
                 const isActive = currentCategory === cat;
                 
-                btn.className = `w-12 h-24 shrink-0 rounded-2xl font-black text-[10px] uppercase transition active:scale-90 flex items-center justify-center category-sidebar-btn relative ${isActive ? 'bg-brand-red text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
+                btn.className = `w-12 min-w-[3rem] h-24 shrink-0 rounded-2xl font-black text-[10px] uppercase transition active:scale-90 flex items-center justify-center category-sidebar-btn relative ${isActive ? 'bg-brand-red text-white shadow-lg' : 'bg-white border border-gray-100 text-gray-400'}`;
                 btn.innerHTML = `
                     <span>${cat}</span>
                     ${isManagementMode && cat !== 'Tất cả' ? `<i onclick="event.stopPropagation(); quickDeleteCategory('${cat}')" class="ph-bold ph-x-circle absolute -top-1 -right-1 text-red-500 bg-white rounded-full z-10 text-lg shadow-sm"></i>` : ''}
@@ -979,9 +990,12 @@
         }
 
         function calculateChange() {
+            const input = document.getElementById('cash-received');
+            const raw = parseFloat(input.value);
+            if (isNaN(raw) || raw < 0) { input.value = ''; }
             const totalStr = document.getElementById('modal-total').textContent.replace(' €', '').replace(',', '.');
             const total = parseFloat(totalStr) || 0;
-            const received = parseFloat(document.getElementById('cash-received').value) || 0;
+            const received = parseFloat(input.value) || 0;
             const change = received - total;
             const el = document.getElementById('change-amount');
             if (change < 0) {

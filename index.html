@@ -88,6 +88,23 @@
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* iOS safe area for fixed bottom elements */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            body { padding-bottom: env(safe-area-inset-bottom) !important; }
+            footer#contact { padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important; }
+        }
+        /* Combo card item text wrap */
+        .combo-card li,
+        .combo-card .combo-item-text,
+        .combo-card-featured li,
+        .combo-card-featured .combo-item-text,
+        .combo-card-vegetarian li,
+        .combo-card-vegetarian .combo-item-text {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+    </style>
 </head>
 <body class="bg-brand-dark text-brand-ivory font-sans antialiased overflow-x-hidden selection:bg-brand-gold selection:text-brand-dark">
 
@@ -136,7 +153,7 @@
         </div>
 
         <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu" class="fixed inset-0 bg-brand-dark text-brand-ivory z-40 transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:hidden pt-24 px-8 flex flex-col border-l border-brand-border-gold/20">
+        <div id="mobile-menu" class="fixed inset-0 bg-brand-dark text-brand-ivory z-50 transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:hidden pt-24 px-8 flex flex-col border-l border-brand-border-gold/20 will-change-transform overflow-hidden">
             <nav class="flex flex-col gap-8 text-2xl font-serif">
                 <a href="#about" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Über uns</a>
                 <a href="#menu" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Speisekarte</a>
@@ -722,7 +739,7 @@
             <button id="close-checkout" class="absolute top-3 right-3 text-brand-ivory/30 hover:text-brand-gold transition-colors duration-300"><i class="ph ph-x text-xl"></i></button>
             <h3 class="font-serif text-lg font-bold mb-3 text-brand-ivory pr-6">Kasse</h3>
 
-            <div id="checkout-cart-container" class="mb-3 max-h-36 overflow-y-auto pr-1 checkout-scrollbar border-b border-brand-border-gold/10 pb-3">
+            <div id="checkout-cart-container" class="mb-3 max-h-60 overflow-y-auto pr-1 checkout-scrollbar border-b border-brand-border-gold/10 pb-3">
                 <p class="text-[10px] font-bold text-brand-ivory/30 uppercase tracking-[0.15em] mb-2">Ihre Bestellung</p>
                 <div id="cart-items-list" class="space-y-1"></div>
             </div>

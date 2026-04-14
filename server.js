@@ -715,6 +715,45 @@ app.post('/api/combos', (req, res) => {
   res.json({ success: true, count: combosData.length });
 });
 
+// ========== FAQ API ==========
+const FAQ_FILE = path.join(__dirname, 'data', 'faq.json');
+
+let faqData = [];
+try {
+    if (fs.existsSync(FAQ_FILE)) {
+        faqData = JSON.parse(fs.readFileSync(FAQ_FILE, 'utf8'));
+    }
+} catch (e) {
+    console.log('[DATA] Load FAQ error:', e.message);
+}
+
+function saveFaqData(data) {
+    try {
+        fs.writeFileSync(FAQ_FILE, JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.log('[DATA] Save FAQ error:', e.message);
+    }
+}
+
+app.get('/api/faq', (req, res) => {
+    const visible = faqData
+        .filter(f => f.isVisible)
+        .sort((a, b) => a.order - b.order);
+    res.json(visible);
+});
+
+app.get('/api/faq/all', (req, res) => {
+    res.json([...faqData].sort((a, b) => a.order - b.order));
+});
+
+app.post('/api/faq', (req, res) => {
+    faqData.length = 0;
+    faqData.push(...req.body);
+    saveFaqData(faqData);
+    logActivity('admin', 'faq_update', `Updated ${faqData.length} FAQ items`);
+    res.json({ success: true, count: faqData.length });
+});
+
 // ========== ADMIN AUTH API ==========
 const crypto = require('crypto');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
@@ -736,7 +775,7 @@ function logActivity(user, action, details) {
       user: user || 'system',
       action,
       details,
-      ip: req ? req.ip : 'unknown'
+      ip: 'server'
     });
     if (log.length > 1000) log = log.slice(0, 1000);
     fs.writeFileSync(path.join(__dirname, 'data', 'activity_log.json'), JSON.stringify(log, null, 2));

@@ -409,6 +409,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 4.4. Render FAQ ---
+    const faqList = document.getElementById('faq-list');
+
+    function renderFAQ(items) {
+        if (!faqList) return;
+        if (!items || items.length === 0) {
+            faqList.innerHTML = '<p class="text-brand-ivory/30 text-center text-sm p-8">Noch keine Fragen vorhanden.</p>';
+            return;
+        }
+        faqList.innerHTML = items.map((item, idx) => `
+            <div class="faq-card p-5 md:p-7 reveal-up border border-brand-border-gold/20 cursor-pointer select-none" data-id="${item.id}" style="transition-delay: ${idx * 60}ms;">
+                <div class="faq-question flex justify-between items-start gap-4">
+                    <h4 class="font-serif font-bold text-base md:text-lg text-brand-ivory/90 leading-snug">${item.question}</h4>
+                    <i class="ph ph-caret-down faq-icon text-brand-gold text-lg shrink-0 mt-0.5 transition-transform duration-300"></i>
+                </div>
+                <div class="faq-answer overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                    <p class="text-brand-ivory/35 font-light text-sm leading-relaxed pt-3 md:pt-4">${item.answer}</p>
+                </div>
+            </div>
+        `).join('');
+
+        // Re-observe new FAQ cards with IntersectionObserver so they animate in
+        if (typeof revealObserver !== 'undefined' && revealObserver) {
+            faqList.querySelectorAll('.reveal-up').forEach(el => {
+                if (!el.classList.contains('active')) {
+                    revealObserver.observe(el);
+                }
+            });
+        }
+
+        // Accordion interaction
+        faqList.querySelectorAll('.faq-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const answer = card.querySelector('.faq-answer');
+                const icon = card.querySelector('.faq-icon');
+                const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+
+                // Close all
+                faqList.querySelectorAll('.faq-answer').forEach(a => {
+                    a.style.maxHeight = '0px';
+                    a.style.opacity = '0';
+                });
+                faqList.querySelectorAll('.faq-icon').forEach(i => {
+                    i.style.transform = 'rotate(0deg)';
+                });
+
+                // Toggle current
+                if (!isOpen) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    answer.style.opacity = '1';
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    }
+
+    // Fetch FAQ from server
+    fetch('/api/faq')
+        .then(r => r.json())
+        .then(data => renderFAQ(data))
+        .catch(() => renderFAQ([]));
+
 
     // --- 4.5. Render Combos ---
     const combosGrid = document.getElementById('combos-grid');

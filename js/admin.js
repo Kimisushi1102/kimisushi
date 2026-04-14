@@ -135,14 +135,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sectionHours = document.getElementById('section-hours');
     const sectionMedia = document.getElementById('section-media');
     const sectionActivity = document.getElementById('section-activity');
+    const sectionFaq = document.getElementById('section-faq');
+    const navFaq = document.getElementById('nav-faq');
 
     // Khởi tạo biến lưu trữ bàn để tránh lỗi undefined khi thêm bàn
     window.allTablesEditor = getTables();
 
     // Global switchSection for new modules
     window.switchSection = function(section) {
-        const allSections = [sectionDashboard, sectionAnalytics, sectionOrders, sectionHours, menuManagement, combosManagement, settingsManagement, seoManagement, tableManagement, tunnelManagement, financeReport, posManagement, inboxManagement, sectionMedia, sectionActivity];
-        const allNavs = [navDashboard, navAnalytics, navOrders, navHours, navMenu, navCombos, navSettings, navSeo, navTables, navTunnel, navFinance, navPos, navInbox, navMedia, navActivity];
+        const allSections = [sectionDashboard, sectionAnalytics, sectionOrders, sectionHours, menuManagement, combosManagement, settingsManagement, seoManagement, tableManagement, tunnelManagement, financeReport, posManagement, inboxManagement, sectionMedia, sectionActivity, sectionFaq];
+        const allNavs = [navDashboard, navAnalytics, navOrders, navHours, navMenu, navCombos, navSettings, navSeo, navTables, navTunnel, navFinance, navPos, navInbox, navMedia, navActivity, navFaq];
         allSections.forEach(s => s && s.classList.add('hidden'));
         allNavs.forEach(n => n && (n.className = 'sidebar-nav-item nav-item'));
 
@@ -161,7 +163,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             'pos': [posManagement, navPos],
             'inbox': [inboxManagement, navInbox],
             'media': [sectionMedia, navMedia],
-            'activity': [sectionActivity, navActivity]
+            'activity': [sectionActivity, navActivity],
+            'faq': [sectionFaq, navFaq]
         };
 
         const pair = sectionMap[section];
@@ -178,6 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (section === 'dashboard') initDashboardQuickView();
         if (section === 'media') initMediaGallery();
         if (section === 'hours') initHoursManagement();
+        if (section === 'faq' && typeof window.loadFaq === 'function') window.loadFaq();
     };
 
     function initHoursManagement() {
@@ -241,9 +245,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Nav click bindings for new items
-    [navDashboard, navAnalytics, navOrders, navHours, navMedia, navActivity].forEach((nav, i) => {
+    [navDashboard, navAnalytics, navOrders, navHours, navMedia, navActivity, navFaq].forEach((nav, i) => {
         if (!nav) return;
-        const sections = ['dashboard', 'analytics', 'orders', 'hours', 'media', 'activity'];
+        const sections = ['dashboard', 'analytics', 'orders', 'hours', 'media', 'activity', 'faq'];
         nav.addEventListener('click', e => { e.preventDefault(); switchSection(sections[i]); });
     });
 
@@ -1726,4 +1730,201 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (bellSound) bellSound.play().catch(() => {});
         });
     }
+
+    // ========== FAQ MANAGEMENT ==========
+    let faqData = [];
+
+    window.loadFaq = async function () {
+        try {
+            const res = await fetch('/api/faq/all');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            faqData = data;
+            renderFaqTable();
+        } catch (e) {
+            console.error('[FAQ] Load error:', e);
+            showToast('Lỗi tải FAQ: ' + e.message);
+        }
+    };
+
+    function renderFaqTable() {
+        const tbody = document.getElementById('faq-tbody');
+        const empty = document.getElementById('faq-empty');
+        const badge = document.getElementById('faq-count-badge');
+        if (!tbody) return;
+
+        if (faqData.length === 0) {
+            tbody.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
+            if (badge) badge.textContent = '0 FAQ';
+            return;
+        }
+
+        if (empty) empty.classList.add('hidden');
+        if (badge) badge.textContent = faqData.length + ' FAQ';
+
+        const sorted = [...faqData].sort((a, b) => a.order - b.order);
+        tbody.innerHTML = sorted.map((item, idx) => `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <td class="py-3 pl-4 pr-2 text-gray-500">${idx + 1}</td>
+                <td class="py-3 px-2">
+                    <div class="font-medium text-gray-100 leading-snug">${window._adminEscapeHtml(item.question)}</div>
+                    <div class="text-xs text-gray-500 mt-0.5 md:hidden">${window._adminTruncate(item.answer, 60)}</div>
+                </td>
+                <td class="py-3 px-2 text-gray-400 text-xs hidden md:table-cell">
+                    ${window._adminTruncate(item.answer, 80)}
+                </td>
+                <td class="py-3 px-2 text-center">
+                    <input type="number" value="${item.order}" min="1" max="999"
+                           class="w-12 bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1 text-center text-sm text-gray-200 outline-none focus:border-violet-500 transition-colors"
+                           onchange="updateFaqOrder('${item.id}', this.value)">
+                </td>
+                <td class="py-3 px-2 text-center">
+                    <button onclick="toggleFaqVisibility('${item.id}')"
+                            class="w-10 h-6 rounded-full relative transition-colors ${item.isVisible ? 'bg-green-500' : 'bg-gray-600'}">
+                        <span class="block w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${item.isVisible ? 'left-5' : 'left-1'}"></span>
+                    </button>
+                </td>
+                <td class="py-3 px-2 text-center">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="openFaqModal('${item.id}')"
+                                class="w-8 h-8 rounded-lg hover:bg-blue-500/20 flex items-center justify-center text-blue-400 transition-colors" title="Sửa">
+                            <i class="ph ph-pencil-simple"></i>
+                        </button>
+                        <button onclick="deleteFaq('${item.id}')"
+                                class="w-8 h-8 rounded-lg hover:bg-red-500/20 flex items-center justify-center text-red-400 transition-colors" title="Xóa">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.openFaqModal = function (id) {
+        const modal = document.getElementById('faq-modal');
+        const title = document.getElementById('faq-modal-title');
+        if (!modal) return;
+
+        document.getElementById('faq-question').value = '';
+        document.getElementById('faq-answer').value = '';
+        document.getElementById('faq-order').value = '10';
+        document.getElementById('faq-visible').checked = true;
+        window._editingFaqId = null;
+
+        if (id) {
+            const item = faqData.find(f => f.id === id);
+            if (item) {
+                window._editingFaqId = id;
+                title.textContent = 'Sửa FAQ';
+                document.getElementById('faq-question').value = item.question || '';
+                document.getElementById('faq-answer').value = item.answer || '';
+                document.getElementById('faq-order').value = item.order || 10;
+                document.getElementById('faq-visible').checked = item.isVisible !== false;
+            }
+        } else {
+            title.textContent = 'Thêm FAQ';
+        }
+
+        modal.classList.add('show');
+    };
+
+    window.closeFaqModal = function () {
+        const modal = document.getElementById('faq-modal');
+        if (modal) modal.classList.remove('show');
+    };
+
+    window.saveFaq = async function () {
+        const question = document.getElementById('faq-question').value.trim();
+        const answer = document.getElementById('faq-answer').value.trim();
+        const order = parseInt(document.getElementById('faq-order').value) || 10;
+        const isVisible = document.getElementById('faq-visible').checked;
+
+        if (!question || !answer) {
+            showToast('Vui lòng nhập đầy đủ câu hỏi và câu trả lời!');
+            return;
+        }
+
+        try {
+            if (window._editingFaqId) {
+                const idx = faqData.findIndex(f => f.id === window._editingFaqId);
+                if (idx !== -1) {
+                    faqData[idx] = {
+                        ...faqData[idx],
+                        question,
+                        answer,
+                        order,
+                        isVisible,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+            } else {
+                faqData.push({
+                    id: 'faq_' + Date.now(),
+                    question,
+                    answer,
+                    order,
+                    isVisible,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+            }
+
+            await saveFaqToServer();
+            renderFaqTable();
+            closeFaqModal();
+            showToast(window._editingFaqId ? 'Đã cập nhật FAQ!' : 'Đã thêm FAQ mới!');
+        } catch (e) {
+            showToast('Lỗi lưu FAQ: ' + e.message);
+        }
+    };
+
+    window.deleteFaq = async function (id) {
+        if (!confirm('Xóa FAQ này?')) return;
+        faqData = faqData.filter(f => f.id !== id);
+        await saveFaqToServer();
+        renderFaqTable();
+        showToast('Đã xóa FAQ!');
+    };
+
+    window.toggleFaqVisibility = async function (id) {
+        const item = faqData.find(f => f.id === id);
+        if (!item) return;
+        item.isVisible = !item.isVisible;
+        item.updatedAt = new Date().toISOString();
+        await saveFaqToServer();
+        renderFaqTable();
+    };
+
+    window.updateFaqOrder = async function (id, val) {
+        const item = faqData.find(f => f.id === id);
+        if (!item) return;
+        item.order = parseInt(val) || 1;
+        await saveFaqToServer();
+        renderFaqTable();
+    };
+
+    async function saveFaqToServer() {
+        const res = await fetch('/api/faq', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(faqData)
+        });
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error('Server error: ' + err);
+        }
+        return await res.json();
+    }
+
+    window._adminEscapeHtml = function (str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+
+    window._adminTruncate = function (str, len) {
+        if (!str) return '';
+        return str.length > len ? str.substring(0, len) + '…' : str;
+    };
 });

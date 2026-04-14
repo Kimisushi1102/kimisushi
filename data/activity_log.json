@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "id": "log_1776210707981",
+    "timestamp": "2026-04-14T23:51:47.981Z",
+    "user": "admin",
+    "action": "UPDATE_SETTINGS",
+    "details": {
+      "section": "general"
+    },
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210287723",
+    "timestamp": "2026-04-14T23:44:47.723Z",
+    "user": "admin",
+    "action": "UPDATE_SETTINGS",
+    "details": {
+      "section": "general"
+    },
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210284313",
+    "timestamp": "2026-04-14T23:44:44.313Z",
+    "user": "admin",
+    "action": "faq_update",
+    "details": "Updated 2 FAQ items",
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210265307",
+    "timestamp": "2026-04-14T23:44:25.307Z",
+    "user": "admin",
+    "action": "UPDATE_SETTINGS",
+    "details": {
+      "section": "general"
+    },
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210259984",
+    "timestamp": "2026-04-14T23:44:19.984Z",
+    "user": "admin",
+    "action": "faq_update",
+    "details": "Updated 1 FAQ items",
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210253531",
+    "timestamp": "2026-04-14T23:44:13.531Z",
+    "user": "admin",
+    "action": "faq_update",
+    "details": "Updated 0 FAQ items",
+    "ip": "server"
+  },
+  {
+    "id": "log_1776210245442",
+    "timestamp": "2026-04-14T23:44:05.442Z",
+    "user": "admin",
+    "action": "UPDATE_SETTINGS",
+    "details": {
+      "section": "general"
+    },
+    "ip": "server"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "faq_1776210259981",
+    "question": "a3dsfsdf",
+    "answer": "r23rédff",
+    "order": 1,
+    "isVisible": true,
+    "createdAt": "2026-04-14T23:44:19.981Z",
+    "updatedAt": "2026-04-14T23:44:19.981Z"
+  },
+  {
+    "id": "faq_1776210284308",
+    "question": "44123123",
+    "answer": "dử23",
+    "order": 2,
+    "isVisible": true,
+    "createdAt": "2026-04-14T23:44:44.308Z",
+    "updatedAt": "2026-04-14T23:44:44.308Z"
+  }
+]

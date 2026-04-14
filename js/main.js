@@ -898,12 +898,8 @@ if (checkoutForm) {
             });
         }
 
-        // Schnellstmöglich NUR wenn Store gerade offen
-        if (storeCurrentlyOpen) {
-            timeSelect.innerHTML = '<option value="asap">Schnellstmöglich</option>';
-        } else {
-            timeSelect.innerHTML = '';
-        }
+        // Always add "So schnell wie möglich" as first option for pickup orders
+        timeSelect.innerHTML = '<option value="asap">So schnell wie möglich</option>';
 
         if (noticeEl) {
             const masterEnabled = config.orderingEnabled !== false;
@@ -939,7 +935,8 @@ if (checkoutForm) {
 
         if (previousTimeValue && previousTimeValue !== 'asap' && allSlotValues.includes(previousTimeValue)) {
             timeSelect.value = previousTimeValue;
-        } else if (storeCurrentlyOpen && previousTimeValue === 'asap') {
+        } else if (!previousTimeValue || previousTimeValue === 'asap') {
+            // Default: always select "asap" if no valid previous selection
             timeSelect.value = 'asap';
         } else if (allSlotValues.length > 0) {
             // Store geschlossen → earliest slot vorselektieren
@@ -1083,14 +1080,10 @@ if (checkoutForm) {
             };
         });
 
-        // pickupTime display: ASAP → berechne früheste Zeit | Fixed → zeige diese
+        // pickupTime display: ASAP → "So schnell wie möglich" | Fixed → zeige diese
         let pickupTimeDisplay;
         if (coTime.value === 'asap') {
-            const now = new Date();
-            const earliestMin = (now.getHours() * 60 + now.getMinutes()) + 30;
-            const hh = Math.floor(earliestMin / 60).toString().padStart(2, '0');
-            const mm = (earliestMin % 60).toString().padStart(2, '0');
-            pickupTimeDisplay = `Schnellstmöglich (ca. ${hh}:${mm} Uhr)`;
+            pickupTimeDisplay = 'So schnell wie möglich';
         } else {
             pickupTimeDisplay = coDate.value
                 ? `${coDate.value.split('-').reverse().join('.')} um ${coTime.value} Uhr`

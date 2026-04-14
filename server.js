@@ -128,7 +128,9 @@ async function sendGmailNotification(orderData, gmailConfig) {
   const pickupDateRaw = orderData.pickupDate || orderData.date || '-';
   const pickupTimeRaw = orderData.pickupTime || orderData.time || '-';
   const pickupDate = pickupDateRaw !== '-' ? pickupDateRaw : '-';
-  const pickupTimeDisplay = pickupTimeRaw !== '-' ? `${pickupTimeRaw} Uhr` : '-';
+  const pickupTimeDisplay = pickupTimeRaw === 'asap'
+    ? 'So schnell wie möglich'
+    : (pickupTimeRaw !== '-' ? `${pickupTimeRaw} Uhr` : '-');
   const total = orderData.total || '-';
   const deliveryFee = orderData.deliveryFee || '0';
   const address = orderData.address || '-';
@@ -560,30 +562,39 @@ Status: ${status.toUpperCase()}`;
     let itemsDetail = '';
     if (item.items && item.items.length > 0) {
       item.items.forEach(i => {
-        const price = i.price ? ` (${i.price})` : '';
-        itemsDetail += `\n  ▸ ${i.name} x${i.quantity}${price}`;
+        const qty = i.quantity || 1;
+        const price = i.price ? ` — ${i.price}` : '';
+        itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
+      });
+    } else if (item.cart && item.cart.length > 0) {
+      item.cart.forEach(i => {
+        const qty = i.quantity || 1;
+        const price = i.price ? ` — ${i.price}` : '';
+        itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
       });
     }
 
     const orderDate = item.date || item.pickupDate || '-';
     const orderTime = item.time || item.pickupTime || item.pickupTimeDisplay || '-';
+    const timeDisplay = orderTime === 'asap' ? 'So schnell wie möglich' : orderTime;
 
     telegramMsg =
 `🍣 NEUE BESTELLUNG
 
 ━━━━━━━━━━━━━━━
+📋 BESTELL-NR.: ${item.id || '-'}
+━━━━━━━━━━━━━━━
 👤 Kunde: ${customerName}
 📞 Telefon: ${phone}
 📧 E-Mail: ${customerEmail}
 ━━━━━━━━━━━━━━━
-📦 Bestellnummer: ${item.id || '-'}
-🗓 Datum: ${orderDate !== '-' ? orderDate.split('-').reverse().join('.') : '-'}
-🕒 Abholzeit: ${orderTime}
-━━━━━━━━━━━━━━━
-${method}
+🏪 Bestellart: ${method}
 ${item.method === 'delivery' ? `📍 Adresse: ${address}` : ''}
 ━━━━━━━━━━━━━━━
-${item.notes && item.notes.trim() ? `⚠️ ALLERGIEN / WÜNSCHE:\n${item.notes.trim()}\n━━━━━━━━━━━━━━━\n` : ''}📋 Bestellte Artikel:${itemsDetail || '\n  (keine Details)'}
+🗓 Datum: ${orderDate !== '-' ? orderDate.split('-').reverse().join('.') : '-'}
+🕒 Abholzeit: ${timeDisplay}
+━━━━━━━━━━━━━━━
+${item.notes && item.notes.trim() ? `⚠️ ALLERGIEN / WÜNSCHE:\n  ${item.notes.trim()}\n━━━━━━━━━━━━━━━\n` : ''}📋 Bestellte Artikel:${itemsDetail || '\n  (keine Details)'}
 ━━━━━━━━━━━━━━━
 💰 Gesamtbetrag: ${total}
 ━━━━━━━━━━━━━━━
@@ -908,26 +919,66 @@ io.on('connection', (socket) => {
 
   socket.on('submit_order', (order) => {
     console.log('[SOCKET] New order received:', order.id);
-    // Broadcast to all admins
     io.emit('admin_new_order', order);
 
-    // Send Telegram notification
-    const itemsSource = order.items || order.cart || [];
-    const itemLines = itemsSource.map(i => {
-      const name  = i.name  || i.itemName  || i.productName || 'N/A';
-      const qty   = i.quantity || i.qty || i.amount || 1;
-      const price = i.price || i.itemPrice || i.productPrice || '?';
-      return `• ${name} x${qty} — ${price}`;
-    }).join('\n');
+    // ---------- BUILD TELEGRAM MESSAGE ----------
+    const customerName = order.customerName || order.name || '-';
+    const phone        = order.customerPhone || order.phone || '-';
+    const email        = order.customerEmail || order.email || '-';
+    const orderId      = order.id || '-';
+    const pickupDate   = order.pickupDate || '-';
+    const pickupTime   = order.pickupTime || order.pickupTimeDisplay || '-';
+    const pickupDisplay = pickupTime === 'asap' ? 'So schnell wie möglich' : pickupTime;
+    const method       = order.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
+    const address      = order.address && order.address !== 'Abholung / Vor Ort' ? order.address : null;
+    const notes        = (order.notes || '').trim();
+    const total        = order.total ? `${order.total.replace('.', ',')} €` : '-';
+    const itemCount    = order.itemCount || (order.cart ? order.cart.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0) : (order.items ? order.items.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0) : '-'));
+
+    const itemsSource  = order.items || order.cart || [];
+    let itemsDetail    = '';
+    if (itemsSource.length > 0) {
+      itemsSource.forEach(i => {
+        const name  = i.name || '-';
+        const qty   = parseInt(i.quantity) || 1;
+        const price = i.price ? ` — ${i.price}` : '';
+        itemsDetail += `\n  ▸ ${name} x${qty}${price}`;
+      });
+    } else {
+      itemsDetail = '\n  (keine Details)';
+    }
+
+    const formattedDate = pickupDate !== '-' && pickupDate !== ''
+      ? pickupDate.split('-').reverse().join('.')
+      : '-';
+
     const telegramMsg =
-      `<b>🍣 Đơn hàng mới!</b>\n\n` +
-      `<b>Khách hàng:</b> ${order.customerName || order.name || 'N/A'}\n` +
-      `<b>📞 Điện thoại:</b> ${order.customerPhone || order.phone || 'N/A'}\n` +
-      `<b>📧 Email:</b> ${order.customerEmail || order.email || 'N/A'}\n` +
-      `<b>📦 Món:</b>\n${itemLines || 'N/A'}\n` +
-      `<b>💰 Tổng:</b> ${order.total}€\n` +
-      `<b>⏰ ${order.pickupDate || ''} ${order.pickupTime || ''}</b>\n` +
-      `<b>📍 ${order.address || order.method || 'N/A'}</b>`;
+`🍣 NEUE BESTELLUNG
+
+━━━━━━━━━━━━━━━
+📋 BESTELL-NR.: ${orderId}
+━━━━━━━━━━━━━━━
+👤 Kunde: ${customerName}
+📞 Telefon: ${phone}
+📧 E-Mail: ${email}
+━━━━━━━━━━━━━━━
+🏪 Bestellart: ${method}
+${address ? `📍 Adresse: ${address}` : ''}
+━━━━━━━━━━━━━━━
+🗓 Datum: ${formattedDate}
+🕒 Abholzeit: ${pickupDisplay}
+━━━━━━━━━━━━━━━
+${notes ? `⚠️ ALLERGIEN / WÜNSCHE:
+  ${notes}
+━━━━━━━━━━━━━━━
+` : ''}📋 Bestellte Artikel:${itemsDetail}
+━━━━━━━━━━━━━━━
+🛒 Anzahl: ${itemCount} Gerichte
+━━━━━━━━━━━━━━━
+💰 Gesamtbetrag: ${total}
+━━━━━━━━━━━━━━━
+Status: NEU`;
+
     sendTelegramMessage(telegramMsg);
   });
 

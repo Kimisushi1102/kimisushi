@@ -338,17 +338,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const itemHtml = `
                 <div class="menu-item rounded-2xl bg-brand-elevated border border-brand-border-gold/50 overflow-hidden hover-card group reveal-up active transition-all duration-400" data-category="${item.category}">
-                    <div class="relative h-56 overflow-hidden">
+                    <div class="relative h-36 md:h-56 overflow-hidden">
                         <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80">
                         ${badgeHtml}
                     </div>
-                    <div class="p-6 flex flex-col h-[calc(100%-14rem)]">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-serif font-bold text-xl text-brand-ivory">${item.name}</h3>
+                    <div class="p-4 md:p-6 flex flex-col h-[calc(100%-9rem)] md:h-[calc(100%-14rem)]">
+                        <div class="flex justify-between items-start mb-2 md:mb-3">
+                            <h3 class="font-serif font-bold text-base md:text-xl text-brand-ivory">${item.name}</h3>
                             <span class="text-brand-gold font-semibold whitespace-nowrap ml-2">${item.price}</span>
                         </div>
-                        <p class="text-brand-ivory/50 text-sm mb-5 font-light line-clamp-3 flex-grow leading-relaxed">${item.description}</p>
-                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-brand-border-gold/20">
+                        <p class="text-brand-ivory/50 text-xs md:text-sm mb-3 md:mb-5 font-light line-clamp-2 md:line-clamp-3 flex-grow leading-relaxed">${item.description}</p>
+                        <div class="flex justify-between items-center mt-auto pt-3 md:pt-4 border-t border-brand-border-gold/20">
                             <span class="text-xs text-brand-ivory/35 font-medium">${item.pieces || ''}</span>
                             <button class="add-to-cart-btn w-9 h-9 rounded-full flex items-center justify-center" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
                                 <i class="ph ph-plus"></i>
@@ -375,6 +375,37 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Server offline, using cached menu data.");
             renderCategoryFilters();
             renderMenu('all');
+        });
+    }
+
+    // --- 4.1. See Full Menu Button ---
+    const seeFullMenuBtn = document.getElementById('see-full-menu-btn');
+    if (seeFullMenuBtn) {
+        seeFullMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // 1. Reuse the existing filter logic: set Alle active and render all
+            const alleBtn = filterTabsContainer ? filterTabsContainer.querySelector('[data-filter="all"]') : null;
+            if (alleBtn) {
+                const allBtns = filterTabsContainer.querySelectorAll('.filter-btn');
+                allBtns.forEach(b => b.classList.remove('active'));
+                alleBtn.classList.add('active');
+                if (menuGrid) {
+                    menuGrid.style.opacity = '0';
+                    setTimeout(() => {
+                        renderMenu('all');
+                        menuGrid.style.opacity = '1';
+                    }, 300);
+                }
+            }
+
+            // 2. Smooth scroll to menu section
+            const menuSection = document.getElementById('menu');
+            if (menuSection) {
+                setTimeout(() => {
+                    menuSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+            }
         });
     }
 

@@ -14,19 +14,18 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 function sendTelegramMessage(message) {
-  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || 
+  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' ||
       !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
-    console.log('[TELEGRAM] Not configured, skipping message');
+    console.warn('[TELEGRAM] Config missing — skipping notification');
     return;
   }
-  
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
   const data = JSON.stringify({
     chat_id: TELEGRAM_CHAT_ID,
     text: message,
     parse_mode: 'HTML'
   });
-  
+
   const options = {
     hostname: 'api.telegram.org',
     port: 443,
@@ -37,15 +36,28 @@ function sendTelegramMessage(message) {
       'Content-Length': Buffer.byteLength(data)
     }
   };
-  
+
   const req = https.request(options, (res) => {
-    console.log('[TELEGRAM] Message sent, status:', res.statusCode);
+    let body = '';
+    res.on('data', (chunk) => { body += chunk; });
+    res.on('end', () => {
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed.ok) {
+          console.log('[TELEGRAM] Message sent successfully. chat_id:', parsed.result.chat.id, '| msg_id:', parsed.result.message_id);
+        } else {
+          console.error('[TELEGRAM] API error — code:', parsed.error_code, '| description:', parsed.description);
+        }
+      } catch (e) {
+        console.error('[TELEGRAM] Failed to parse response:', body);
+      }
+    });
   });
-  
+
   req.on('error', (e) => {
-    console.error('[TELEGRAM] Error:', e.message);
+    console.error('[TELEGRAM] Network error:', e.message);
   });
-  
+
   req.write(data);
   req.end();
 }
@@ -898,6 +910,25 @@ io.on('connection', (socket) => {
     console.log('[SOCKET] New order received:', order.id);
     // Broadcast to all admins
     io.emit('admin_new_order', order);
+
+    // Send Telegram notification
+    const itemsSource = order.items || order.cart || [];
+    const itemLines = itemsSource.map(i => {
+      const name  = i.name  || i.itemName  || i.productName || 'N/A';
+      const qty   = i.quantity || i.qty || i.amount || 1;
+      const price = i.price || i.itemPrice || i.productPrice || '?';
+      return `• ${name} x${qty} — ${price}`;
+    }).join('\n');
+    const telegramMsg =
+      `<b>🍣 Đơn hàng mới!</b>\n\n` +
+      `<b>Khách hàng:</b> ${order.customerName || order.name || 'N/A'}\n` +
+      `<b>📞 Điện thoại:</b> ${order.customerPhone || order.phone || 'N/A'}\n` +
+      `<b>📧 Email:</b> ${order.customerEmail || order.email || 'N/A'}\n` +
+      `<b>📦 Món:</b>\n${itemLines || 'N/A'}\n` +
+      `<b>💰 Tổng:</b> ${order.total}€\n` +
+      `<b>⏰ ${order.pickupDate || ''} ${order.pickupTime || ''}</b>\n` +
+      `<b>📍 ${order.address || order.method || 'N/A'}</b>`;
+    sendTelegramMessage(telegramMsg);
   });
 
   socket.on('submit_reservation', (res) => {

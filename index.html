@@ -718,102 +718,99 @@
 
     <!-- Checkout Modal -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-brand-elevated p-10 rounded-2xl w-full max-w-md mx-4 relative transform scale-95 transition-transform duration-300 border border-brand-border-gold/20" id="checkout-box" style="box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 80px rgba(214,178,115,0.04);">
-            <button id="close-checkout" class="absolute top-5 right-5 text-brand-ivory/30 hover:text-brand-gold transition-colors duration-300"><i class="ph ph-x text-2xl"></i></button>
-            <h3 class="font-serif text-2xl font-bold mb-6 text-brand-ivory">Kasse</h3>
+        <div class="bg-brand-elevated p-5 rounded-2xl w-full max-w-md mx-4 relative transform scale-95 transition-transform duration-300 border border-brand-border-gold/20 overflow-y-auto max-h-[95vh]" id="checkout-box" style="box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 80px rgba(214,178,115,0.04);">
+            <button id="close-checkout" class="absolute top-3 right-3 text-brand-ivory/30 hover:text-brand-gold transition-colors duration-300"><i class="ph ph-x text-xl"></i></button>
+            <h3 class="font-serif text-lg font-bold mb-3 text-brand-ivory pr-6">Kasse</h3>
 
-            <div id="checkout-cart-container" class="mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar border-b border-brand-border-gold/10 pb-6">
-                <p class="text-xs font-bold text-brand-ivory/30 uppercase tracking-[0.15em] mb-4">Ihre Bestellung</p>
-                <div id="cart-items-list" class="space-y-3">
-                    <div class="text-center py-6 text-brand-ivory/25 text-sm">Warenkorb ist leer</div>
-                </div>
+            <div id="checkout-cart-container" class="mb-3 max-h-36 overflow-y-auto pr-1 checkout-scrollbar border-b border-brand-border-gold/10 pb-3">
+                <p class="text-[10px] font-bold text-brand-ivory/30 uppercase tracking-[0.15em] mb-2">Ihre Bestellung</p>
+                <div id="cart-items-list" class="space-y-1"></div>
             </div>
 
-            <form id="checkout-form" class="space-y-5">
-                <div id="method-selection-wrapper" class="mb-6 bg-brand-dark p-1 rounded-xl flex gap-1 border border-brand-border-gold/10">
-                    <button type="button" class="method-btn active flex-1 py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all" data-method="pickup">
-                        <i class="ph ph-storefront mr-1 text-sm"></i> Abholung
+            <form id="checkout-form" class="space-y-3">
+                <div id="method-selection-wrapper" class="mb-3 bg-brand-dark p-1 rounded-xl flex gap-1 border border-brand-border-gold/10">
+                    <button type="button" class="method-btn active flex-1 py-2 px-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all" data-method="pickup">
+                        <i class="ph ph-storefront mr-0.5 text-xs"></i> Abholung
                     </button>
-                    <button type="button" class="method-btn flex-1 py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all" data-method="delivery">
-                        <i class="ph ph-moped mr-1 text-sm"></i> Lieferung
+                    <button type="button" class="method-btn flex-1 py-2 px-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all" data-method="delivery">
+                        <i class="ph ph-moped mr-0.5 text-xs"></i> Lieferung
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Ihr Name *</label>
-                        <input type="text" id="co-name" required class="w-full px-5 py-4 rounded-lg dark-input text-sm">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Ihr Name *</label>
+                        <input type="text" id="co-name" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Telefonnummer *</label>
-                        <input type="tel" id="co-phone" required class="w-full px-5 py-4 rounded-lg dark-input text-sm">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Telefon *</label>
+                        <input type="tel" id="co-phone" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">E-Mail Adresse *</label>
-                    <input type="email" id="co-email" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="mail@beispiel.de">
+                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">E-Mail *</label>
+                    <input type="email" id="co-email" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="mail@beispiel.de">
                 </div>
 
-                <div id="delivery-fields" class="hidden space-y-4 pt-4 border-t border-brand-border-gold/10">
+                <div id="delivery-fields" class="hidden space-y-2 pt-2 border-t border-brand-border-gold/10">
                     <div>
-                        <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Lieferadresse *</label>
-                        <input type="text" id="co-address" class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="Straße, Hausnummer...">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Lieferadresse *</label>
+                        <input type="text" id="co-address" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="Straße, Hausnummer...">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Etage / Wohnung</label>
-                            <input type="text" id="co-floor" class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="z.B. 3. Etage">
+                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Etage / Whg.</label>
+                            <input type="text" id="co-floor" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="z.B. 3. OG">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Name an der Klingel</label>
-                            <input type="text" id="co-bell" class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="z.B. Schmidt">
+                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Klingelname</label>
+                            <input type="text" id="co-bell" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="z.B. Schmidt">
                         </div>
                     </div>
                 </div>
 
-                <div id="checkout-summary-box" class="hidden p-5 rounded-xl mb-4 bg-brand-dark border border-brand-border-gold/10 space-y-3">
-                    <div class="flex justify-between items-center text-xs font-bold text-brand-ivory/30 uppercase">
+                <div id="checkout-summary-box" class="hidden p-3 rounded-xl mb-2 bg-brand-dark border border-brand-border-gold/10 space-y-1.5">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-brand-ivory/30 uppercase">
                         <span>Bestellwert</span>
                         <span id="co-subtotal">0,00 €</span>
                     </div>
-                    <div class="flex justify-between items-center text-xs font-bold text-brand-ivory/30 uppercase">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-brand-ivory/30 uppercase">
                         <span>Liefergebühr (<span id="co-distance-text">0.0km</span>)</span>
                         <span id="co-delivery-fee">Gratis</span>
                     </div>
-                    <div class="flex justify-between items-center pt-3 border-t border-brand-border-gold/10 font-black text-brand-ivory">
+                    <div class="flex justify-between items-center pt-1.5 border-t border-brand-border-gold/10 font-black text-brand-ivory">
                         <span>GESAMT</span>
                         <span id="co-total">0,00 €</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Abholdatum *</label>
-                        <input type="date" id="co-date" required class="w-full px-5 py-4 rounded-lg dark-input text-sm">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Abholdatum *</label>
+                        <input type="date" id="co-date" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Abholzeit *</label>
-                        <select id="co-time" required class="w-full px-5 py-4 rounded-lg dark-input text-sm">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Abholzeit *</label>
+                        <select id="co-time" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                             <option value="asap">Schnellstmöglich</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-brand-ivory/40 mb-3 tracking-wide">Allergien oder besondere Wünsche</label>
-                    <textarea id="co-allergies" name="allergies" rows="3" class="w-full px-5 py-4 rounded-lg dark-input text-sm resize-none" placeholder="Zum Beispiel: keine Mayonnaise, ohne Wasabi, Allergie gegen Garnelen"></textarea>
-                    <p class="text-xs text-brand-ivory/25 mt-2 leading-relaxed">Bitte informieren Sie uns über Allergien oder Unverträglichkeiten.</p>
+                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Allergien / Wünsche</label>
+                    <textarea id="co-allergies" name="allergies" rows="1" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm resize-none" placeholder="Z.B. keine Mayo..."></textarea>
                 </div>
 
-                <div id="shop-closed-notice" class="hidden p-4 rounded-xl bg-brand-dark border border-brand-border-gold/10 text-brand-ivory/50 text-xs font-medium italic">
-                    <i class="ph-fill ph-info mr-2"></i> Wir haben aktuell geschlossen. Bitte wählen Sie eine Abholzeit innerhalb unserer Öffnungszeiten.
+                <div id="shop-closed-notice" class="hidden p-2.5 rounded-xl bg-brand-dark border border-brand-border-gold/10 text-brand-ivory/50 text-[10px] font-medium">
+                    <i class="ph-fill ph-info mr-1"></i> Geschlossen – bitte Abholzeit in Öffnungszeiten wählen.
                 </div>
 
-                <div class="bg-brand-dark p-5 rounded-xl border border-brand-border-gold/10 flex justify-between items-center mt-6">
-                    <span class="text-brand-ivory/40 text-sm font-medium">Bestellung: <span id="co-count" class="font-bold text-brand-ivory/70">0</span> Gerichte</span>
+                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border-gold/10 flex justify-between items-center mt-2">
+                    <span class="text-brand-ivory/40 text-[11px] font-medium">Bestellung: <span id="co-count" class="font-bold text-brand-ivory/70">0</span> Gerichte</span>
                 </div>
 
-                <button type="submit" class="w-full btn-primary justify-center mt-6 py-4">Kostenpflichtig Bestellen</button>
+                <button type="submit" class="w-full btn-primary justify-center mt-3 py-3.5">Kostenpflichtig Bestellen</button>
             </form>
         </div>
     </div>

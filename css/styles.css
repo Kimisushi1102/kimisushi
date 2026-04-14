@@ -33,6 +33,12 @@ body {
     background: #D6B273;
 }
 
+/* Checkout Cart Scrollbar */
+.checkout-scrollbar::-webkit-scrollbar { width: 4px; }
+.checkout-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.checkout-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 120, 0.25); border-radius: 2px; }
+.checkout-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 120, 0.45); }
+
 /* Typography Enhancements */
 .headline-text {
     letter-spacing: -0.02em;
@@ -452,6 +458,69 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 .combo-card-featured .border-b {
     border-color: rgba(107, 74, 30, 0.18) !important;
+}
+
+/* Combo Card - Vegetarian (deep teal luxury) */
+.combo-card-vegetarian {
+    background: linear-gradient(135deg, #103B3C 0%, #145051 45%, #1B6663 100%) !important;
+    border: 1px solid rgba(141, 216, 202, 0.18) !important;
+    border-radius: 1.25rem;
+    overflow: visible;
+    transition: all 0.4s ease;
+    position: relative;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.combo-card-vegetarian::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(141, 216, 202, 0.35) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.combo-card-vegetarian:hover {
+    background: linear-gradient(135deg, #124244 0%, #175B5C 45%, #207473 100%) !important;
+    border-color: rgba(141, 216, 202, 0.32) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45), 0 0 40px rgba(27, 102, 99, 0.12);
+}
+
+.combo-card-vegetarian:hover::before {
+    opacity: 1;
+}
+
+/* Vegetarian Card Text Colors */
+.combo-card-vegetarian h3,
+.combo-card-vegetarian .combo-title {
+    color: #F2FBF9 !important;
+}
+
+.combo-card-vegetarian p,
+.combo-card-vegetarian .combo-subtitle {
+    color: rgba(242, 251, 249, 0.76) !important;
+}
+
+.combo-card-vegetarian .combo-price {
+    color: #9ADBCF !important;
+}
+
+.combo-card-vegetarian li,
+.combo-card-vegetarian .combo-item-text {
+    color: rgba(230, 248, 245, 0.72) !important;
+}
+
+.combo-card-vegetarian .ph-check-circle {
+    color: #86CEC0 !important;
+}
+
+.combo-card-vegetarian .border-b {
+    border-color: rgba(142, 216, 202, 0.14) !important;
 }
 
 /* Review Card - #243447 */

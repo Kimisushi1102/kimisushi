@@ -118,7 +118,7 @@ const defaultSettings = {
     emailEnabled: true,
     emailApiKey: "re_GrFdNdk5_HuP5HF87sAvNXGU9uHyiwt79",
     // Gmail SMTP Settings (for admin notifications)
-    gmailEnabled: false,
+    gmailEnabled: true,
     gmailUser: "",
     gmailPassword: "",
     gmailNotifyEmail: "",

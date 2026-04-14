@@ -375,31 +375,55 @@ document.addEventListener('DOMContentLoaded', () => {
             let tagHtml = '';
             let wrapperClasses = "combo-card p-8 rounded-2xl";
             let colorType = "text-[#C9A15D]";
-            let textStyles = "";
             let priceClasses = "text-4xl font-bold text-[#D9B36A]";
             let btnClasses = "combo-cart-btn w-full py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-300";
 
-            if (c.tag && c.tag !== "") {
-                tagHtml = `<div class="absolute -top-3 right-7 z-10">
-                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">${c.tag}</span>
-                </div>`;
+            const hasVeggieTag = c.tag && c.tag !== "" && c.tag.toLowerCase() === "veggie";
+            const hasChefTag = c.tag && c.tag !== "" && c.tag.toLowerCase().includes('chef');
+            const hasAnyTag = c.tag && c.tag !== "";
+
+            if (hasVeggieTag) {
+                wrapperClasses = "combo-card-vegetarian p-8 rounded-2xl relative";
+                colorType = "text-[#86CEC0]";
+                priceClasses = "text-4xl font-bold text-[#9ADBCF]";
+            } else if (hasChefTag) {
                 wrapperClasses = "combo-card-featured p-8 rounded-2xl relative";
                 colorType = "text-[#6B4A1E]";
                 priceClasses = "text-4xl font-bold text-[#120C08]";
                 btnClasses = "combo-cart-btn-featured w-full py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-300";
             }
 
-            if (c.name.toLowerCase().includes('veggie') || c.name.toLowerCase().includes('vegan')) {
-                colorType = "text-[#5A7040]";
+            let badgesHtml = '';
+
+            if (hasChefTag && hasVeggieTag) {
+                badgesHtml = `
+                    <div class="absolute -top-3 right-7 z-10 flex gap-2">
+                        <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">Chef's Choice</span>
+                    </div>
+                    <div class="absolute -top-3 right-[calc(7rem+0.5rem)] z-10">
+                        <span class="inline-block px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style="background:#123C3D;color:#DDF5F0;border:1px solid rgba(141,216,202,0.28);box-shadow:0 6px 18px rgba(0,0,0,0.22);">Veggie</span>
+                    </div>`;
+            } else if (hasChefTag) {
+                badgesHtml = `<div class="absolute -top-3 right-7 z-10">
+                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">Chef's Choice</span>
+                </div>`;
+            } else if (hasVeggieTag) {
+                badgesHtml = `<div class="absolute -top-3 right-7 z-10">
+                    <span class="inline-block px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style="background:#123C3D;color:#DDF5F0;border:1px solid rgba(141,216,202,0.28);box-shadow:0 6px 18px rgba(0,0,0,0.22);">Veggie</span>
+                </div>`;
+            } else if (hasAnyTag) {
+                badgesHtml = `<div class="absolute -top-3 right-7 z-10">
+                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">${c.tag}</span>
+                </div>`;
             }
 
-            const oldPriceHtml = c.oldPrice ? `<span class="text-[rgba(42,27,15,0.35)] opacity-70 line-through text-lg ml-1">${c.oldPrice}</span>` : '';
+            const oldPriceHtml = c.oldPrice ? `<span class="opacity-70 line-through text-lg ml-1" style="color: ${hasVeggieTag ? 'rgba(242,251,249,0.35)' : 'rgba(42,27,15,0.35)'}">${c.oldPrice}</span>` : '';
 
             const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
 
             const comboHtml = `
                 <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
-                    ${tagHtml}
+                    ${badgesHtml}
                     <h3 class="font-serif text-2xl font-bold mb-2">${c.name}</h3>
                     <p class="text-sm mb-6 pb-6 border-b font-light leading-relaxed">${c.subtitle}</p>
 
@@ -528,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('kimi_inbox', JSON.stringify(ls));
                 } catch(e) {}
                 try {
-                    fetch('/api/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inboxItem) }).catch(() => {});
+                    fetch('/api/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inboxItem) }).catch(err => console.error('[RESERVATION] Inbox save failed:', err));
                 } catch(e) {}
 
                 // Send Telegram notification to admin
@@ -548,10 +572,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             pickupTime: resData.time,
                             itemCount: resData.guests + ' Gäste'
                         })
-                    }).catch(() => {});
+                    }).catch(err => console.error('[RESERVATION] Telegram notify failed:', err));
+                } else {
+                    console.warn('[RESERVATION] Telegram not configured');
                 }
 
-                // Send email notification to admin (Gmail)
+                // Send email notification to admin (Resend)
                 const emailConfig = typeof getSettings === 'function' ? getSettings() : {};
                 if (emailConfig.emailEnabled && emailConfig.emailApiKey) {
                     fetch('/api/notify-order', {
@@ -567,10 +593,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             itemCount: resData.guests + ' Gäste',
                             resendApiKey: emailConfig.emailApiKey || ''
                         })
-                    }).catch(() => {});
+                    }).catch(err => console.error('[RESERVATION] Email confirm failed:', err));
                 }
 
-                // Send Gmail notification to admin (khi khach dat ban)
+                // Send Gmail notification to admin
                 const gmailResConfig = typeof getSettings === 'function' ? getSettings() : {};
                 if (gmailResConfig.gmailEnabled && gmailResConfig.gmailUser && gmailResConfig.gmailPassword) {
                     fetch('/api/gmail-notify', {
@@ -590,7 +616,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             gmailPassword: gmailResConfig.gmailPassword,
                             gmailNotifyEmail: gmailResConfig.gmailNotifyEmail
                         })
-                    }).catch(() => {});
+                    }).catch(err => console.error('[RESERVATION] Gmail notify failed:', err));
+                } else {
+                    console.warn('[RESERVATION] Gmail not configured: enabled=', gmailResConfig.gmailEnabled, 'user=', !!gmailResConfig.gmailUser, 'password=', !!gmailResConfig.gmailPassword);
                 }
 
                 if (socket) {
@@ -652,22 +680,19 @@ function updateCartUI() {
                 const unitPrice = parsePrice(item.price);
                 const subtotal = unitPrice * item.quantity;
                 return `
-                <div class="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0 group">
-                    <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover">
+                <div class="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-white/5 transition-colors">
+                    <img src="${item.image}" alt="${item.name}" class="w-8 h-8 rounded object-cover shrink-0">
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-sm font-bold text-brand-dark truncate">${item.name}</h4>
-                        <p class="text-xs text-gray-400">${formatPrice(unitPrice)} / Stück</p>
+                        <h4 class="text-[11px] font-bold text-brand-ivory/80 truncate leading-tight">${item.name}</h4>
                     </div>
-                    <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
-                        <button type="button" onclick="window.changeQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-red rounded shadow-sm transition-all"><i class="ph ph-minus text-xs"></i></button>
-                        <span class="text-xs font-black min-w-[20px] text-center">${item.quantity}</span>
-                        <button type="button" onclick="window.changeQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-red rounded shadow-sm transition-all"><i class="ph ph-plus text-xs"></i></button>
+                    <div class="flex items-center gap-1 bg-white/5 rounded p-0.5 shrink-0">
+                        <button type="button" onclick="window.changeQuantity('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center text-brand-ivory/40 hover:text-brand-red rounded transition-all"><i class="ph ph-minus text-[10px]"></i></button>
+                        <span class="text-[11px] font-bold min-w-[16px] text-center text-brand-ivory/80">${item.quantity}</span>
+                        <button type="button" onclick="window.changeQuantity('${item.id}', 1)" class="w-5 h-5 flex items-center justify-center text-brand-ivory/40 hover:text-brand-red rounded transition-all"><i class="ph ph-plus text-[10px]"></i></button>
                     </div>
-                    <div class="text-right min-w-[60px]">
-                        <span class="text-xs font-bold text-brand-red">${formatPrice(subtotal)}</span>
-                    </div>
-                    <button type="button" onclick="window.removeFromCart('${item.id}')" class="text-gray-300 hover:text-red-500 transition-colors mr-1">
-                        <i class="ph ph-trash text-lg"></i>
+                    <span class="text-[11px] font-bold text-brand-gold shrink-0 min-w-[46px] text-right">${formatPrice(subtotal)}</span>
+                    <button type="button" onclick="window.removeFromCart('${item.id}')" class="text-brand-ivory/15 hover:text-red-400 transition-colors shrink-0">
+                        <i class="ph ph-trash text-[13px]"></i>
                     </button>
                 </div>`;
             }).join('');
@@ -699,12 +724,15 @@ window.removeFromCart = (id) => {
 
 document.body.addEventListener('click', (e) => {
     const targetBtn = e.target.closest('.add-to-cart-btn');
-    
-    if (targetBtn) {
-        const id = targetBtn.dataset.id;
-        const name = targetBtn.dataset.name;
-        const price = targetBtn.dataset.price;
-        const image = targetBtn.dataset.image;
+    const comboBtn = e.target.closest('.combo-cart-btn, .combo-cart-btn-featured');
+
+    const cartBtn = targetBtn || comboBtn;
+
+    if (cartBtn) {
+        const id = cartBtn.dataset.id;
+        const name = cartBtn.dataset.name;
+        const price = cartBtn.dataset.price;
+        const image = cartBtn.dataset.image;
 
         const existingItem = cart.find(i => i.id === id);
         if (existingItem) {
@@ -1104,25 +1132,19 @@ if (checkoutForm) {
             if (ls.length > 200) ls.splice(200);
             localStorage.setItem('kimi_inbox', JSON.stringify(ls));
         } catch(e) {}
-        try {
-            // DEBUG LOG - what is being sent
-            console.log('[CHECKOUT] Sending to /api/inbox:', JSON.stringify(inboxItem));
-            fetch('/api/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inboxItem) }).catch(() => {});
-        } catch(e) {}
 
         if (!orderData.pickupTime) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
             return alert("Bitte wählen Sie eine Abholzeit.");
         }
-        
+
         checkoutModal.classList.add('opacity-0', 'pointer-events-none');
         statusModal.classList.remove('opacity-0', 'pointer-events-none');
-        
+
         // Send Telegram notification to admin
         const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
         const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-        // pickupTimeDisplay: ASAP → "ca. HH:MM" | Fixed → "Datum um HH:MM"
         const pickupTimeStr = orderData.pickupTimeDisplay;
 
         if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
@@ -1147,7 +1169,9 @@ if (checkoutForm) {
                         price: item.price
                     }))
                 })
-            }).catch(() => {});
+            }).catch(err => console.error('[CHECKOUT] Telegram notify failed:', err));
+        } else {
+            console.warn('[CHECKOUT] Telegram not configured: token=', !!tgConfig.telegramBotToken, 'chatId=', !!tgConfig.telegramChatId);
         }
 
         // Send email confirmation to customer
@@ -1172,9 +1196,9 @@ if (checkoutForm) {
                 itemCount: itemCount,
                 resendApiKey: emailConfig.emailApiKey || ''
             })
-        }).catch(() => {});
+        }).catch(err => console.error('[CHECKOUT] Email confirm failed:', err));
 
-        // Send Gmail notification to admin (khi khach dat hang)
+        // Send Gmail notification to admin
         const gmailConfig = typeof getSettings === 'function' ? getSettings() : {};
         if (gmailConfig.gmailEnabled && gmailConfig.gmailUser && gmailConfig.gmailPassword) {
             const gmailPayload = {
@@ -1198,13 +1222,15 @@ if (checkoutForm) {
                 gmailPassword: gmailConfig.gmailPassword,
                 gmailNotifyEmail: gmailConfig.gmailNotifyEmail
             };
-            // DEBUG LOG - Gmail payload
-            console.log('[CHECKOUT] Gmail payload:', JSON.stringify(gmailPayload));
             fetch('/api/gmail-notify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(gmailPayload)
-            }).catch(() => {});
+            }).then(res => {
+                if (!res.ok) throw new Error('Gmail API returned ' + res.status);
+            }).catch(err => console.error('[CHECKOUT] Gmail notify failed:', err));
+        } else {
+            console.warn('[CHECKOUT] Gmail not configured: enabled=', gmailConfig.gmailEnabled, 'user=', !!gmailConfig.gmailUser, 'password=', !!gmailConfig.gmailPassword);
         }
 
         if (socket) {

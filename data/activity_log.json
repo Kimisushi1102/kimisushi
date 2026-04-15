@@ -1,5 +1,15 @@
 [
   {
+    "id": "log_1776248900783",
+    "timestamp": "2026-04-15T10:28:20.786Z",
+    "user": "admin",
+    "action": "UPDATE_SETTINGS",
+    "details": {
+      "section": "general"
+    },
+    "ip": "server"
+  },
+  {
     "id": "log_1776211577842",
     "timestamp": "2026-04-15T00:06:17.842Z",
     "user": "admin",

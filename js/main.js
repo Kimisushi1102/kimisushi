@@ -665,70 +665,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch(e) {}
 
                 // Send Telegram notification to admin
-                const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
-                if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
-                    fetch('/api/notify-admin', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            botToken: tgConfig.telegramBotToken,
-                            chatId: tgConfig.telegramChatId,
-                            orderType: 'reservation',
-                            customerName: resData.name,
-                            customerPhone: resData.phone,
-                            customerEmail: resData.email,
-                            pickupDate: resData.date,
-                            pickupTime: resData.time,
-                            itemCount: resData.guests + ' Gäste'
-                        })
-                    }).catch(err => console.error('[RESERVATION] Telegram notify failed:', err));
-                } else {
-                    console.warn('[RESERVATION] Telegram not configured');
-                }
+                fetch('/api/notify-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderType: 'reservation',
+                        customerName: resData.name,
+                        customerPhone: resData.phone,
+                        customerEmail: resData.email,
+                        pickupDate: resData.date,
+                        pickupTime: resData.time,
+                        itemCount: resData.guests + ' Gäste'
+                    })
+                }).catch(err => console.error('[RESERVATION] Telegram notify failed:', err));
 
-                // Send email notification to admin (Resend)
-                const emailConfig = typeof getSettings === 'function' ? getSettings() : {};
-                if (emailConfig.emailEnabled && emailConfig.emailApiKey) {
-                    fetch('/api/notify-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            customerEmail: resData.email,
-                            customerName: resData.name,
-                            customerPhone: resData.phone,
-                            orderType: 'reservation',
-                            pickupDate: resData.date,
-                            pickupTime: resData.time,
-                            itemCount: resData.guests + ' Gäste',
-                            resendApiKey: emailConfig.emailApiKey || ''
-                        })
-                    }).catch(err => console.error('[RESERVATION] Email confirm failed:', err));
-                }
+                // Send email notification to admin
+                fetch('/api/notify-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerEmail: resData.email,
+                        customerName: resData.name,
+                        customerPhone: resData.phone,
+                        orderType: 'reservation',
+                        pickupDate: resData.date,
+                        pickupTime: resData.time,
+                        itemCount: resData.guests + ' Gäste'
+                    })
+                }).catch(err => console.error('[RESERVATION] Email confirm failed:', err));
 
                 // Send Gmail notification to admin
-                const gmailResConfig = typeof getSettings === 'function' ? getSettings() : {};
-                if (gmailResConfig.gmailEnabled && gmailResConfig.gmailUser && gmailResConfig.gmailPassword) {
-                    fetch('/api/gmail-notify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            orderType: 'reservation',
-                            customerName: resData.name,
-                            customerPhone: resData.phone,
-                            customerEmail: resData.email,
-                            pickupDate: resData.date,
-                            pickupTime: resData.time,
-                            itemCount: resData.guests + ' Gäste',
-                            notes: resData.notes,
-                            gmailEnabled: gmailResConfig.gmailEnabled,
-                            gmailUser: gmailResConfig.gmailUser,
-                            gmailPassword: gmailResConfig.gmailPassword,
-                            gmailNotifyEmail: gmailResConfig.gmailNotifyEmail
-                        })
-                    }).catch(err => console.error('[RESERVATION] Gmail notify failed:', err));
-                } else {
-                    console.warn('[RESERVATION] Gmail not configured: enabled=', gmailResConfig.gmailEnabled, 'user=', !!gmailResConfig.gmailUser, 'password=', !!gmailResConfig.gmailPassword);
-                }
+                fetch('/api/gmail-notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderType: 'reservation',
+                        customerName: resData.name,
+                        customerPhone: resData.phone,
+                        customerEmail: resData.email,
+                        pickupDate: resData.date,
+                        pickupTime: resData.time,
+                        itemCount: resData.guests + ' Gäste',
+                        notes: resData.notes
+                    })
+                }).catch(err => console.error('[RESERVATION] Gmail notify failed:', err));
 
                 if (socket) {
                     socket.emit('submit_reservation', resData);
@@ -1244,40 +1224,32 @@ if (checkoutForm) {
         checkoutModal.classList.add('opacity-0', 'pointer-events-none');
         statusModal.classList.remove('opacity-0', 'pointer-events-none');
 
-        // Send Telegram notification to admin
-        const tgConfig = typeof getSettings === 'function' ? getSettings() : {};
         const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
         const pickupTimeStr = orderData.pickupTimeDisplay;
 
-        if (tgConfig.telegramBotToken && tgConfig.telegramChatId) {
-            fetch('/api/notify-admin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    botToken: tgConfig.telegramBotToken,
-                    chatId: tgConfig.telegramChatId,
-                    orderType: 'order',
-                    customerName: orderData.name,
-                    customerPhone: orderData.phone,
-                    customerEmail: orderData.email,
-                    pickupDate: orderData.pickupDate,
-                    pickupTime: pickupTimeStr,
-                    total: orderData.total,
-                    itemCount: itemCount,
-                    notes: orderData.notes,
-                    items: orderData.cart.map(item => ({
-                        name: item.name,
-                        quantity: item.quantity,
-                        price: item.price
-                    }))
-                })
-            }).catch(err => console.error('[CHECKOUT] Telegram notify failed:', err));
-        } else {
-            console.warn('[CHECKOUT] Telegram not configured: token=', !!tgConfig.telegramBotToken, 'chatId=', !!tgConfig.telegramChatId);
-        }
+        // Send Telegram notification to admin
+        fetch('/api/notify-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                orderType: 'order',
+                customerName: orderData.name,
+                customerPhone: orderData.phone,
+                customerEmail: orderData.email,
+                pickupDate: orderData.pickupDate,
+                pickupTime: pickupTimeStr,
+                total: orderData.total,
+                itemCount: itemCount,
+                notes: orderData.notes,
+                items: orderData.cart.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            })
+        }).catch(err => console.error('[CHECKOUT] Telegram notify failed:', err));
 
         // Send email confirmation to customer
-        const emailConfig = typeof getSettings === 'function' ? getSettings() : {};
         fetch('/api/notify-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1295,45 +1267,35 @@ if (checkoutForm) {
                     price: item.price
                 })),
                 total: orderData.total,
-                itemCount: itemCount,
-                resendApiKey: emailConfig.emailApiKey || ''
+                itemCount: itemCount
             })
         }).catch(err => console.error('[CHECKOUT] Email confirm failed:', err));
 
         // Send Gmail notification to admin
-        const gmailConfig = typeof getSettings === 'function' ? getSettings() : {};
-        if (gmailConfig.gmailEnabled && gmailConfig.gmailUser && gmailConfig.gmailPassword) {
-            const gmailPayload = {
-                orderType: 'order',
-                customerName: orderData.name,
-                customerPhone: orderData.phone,
-                customerEmail: orderData.email,
-                pickupDate: orderData.pickupDate,
-                pickupTime: pickupTimeStr,
-                notes: orderData.notes,
-                items: orderData.cart.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                total: orderData.total,
-                itemCount: itemCount,
-                address: orderData.address,
-                gmailEnabled: gmailConfig.gmailEnabled,
-                gmailUser: gmailConfig.gmailUser,
-                gmailPassword: gmailConfig.gmailPassword,
-                gmailNotifyEmail: gmailConfig.gmailNotifyEmail
-            };
-            fetch('/api/gmail-notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(gmailPayload)
-            }).then(res => {
-                if (!res.ok) throw new Error('Gmail API returned ' + res.status);
-            }).catch(err => console.error('[CHECKOUT] Gmail notify failed:', err));
-        } else {
-            console.warn('[CHECKOUT] Gmail not configured: enabled=', gmailConfig.gmailEnabled, 'user=', !!gmailConfig.gmailUser, 'password=', !!gmailConfig.gmailPassword);
-        }
+        const gmailPayload = {
+            orderType: 'order',
+            customerName: orderData.name,
+            customerPhone: orderData.phone,
+            customerEmail: orderData.email,
+            pickupDate: orderData.pickupDate,
+            pickupTime: pickupTimeStr,
+            notes: orderData.notes,
+            items: orderData.cart.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            total: orderData.total,
+            itemCount: itemCount,
+            address: orderData.address
+        };
+        fetch('/api/gmail-notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(gmailPayload)
+        }).then(res => {
+            if (!res.ok) throw new Error('Gmail API returned ' + res.status);
+        }).catch(err => console.error('[CHECKOUT] Gmail notify failed:', err));
 
         if (socket) {
             socket.emit('submit_order', orderData);

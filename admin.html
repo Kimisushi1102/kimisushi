@@ -473,12 +473,351 @@
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
         
+        /* ========== RESPONSIVE: Mobile & Tablet ========== */
+
+        /* --- Mobile Sidebar Drawer --- */
+        @media (max-width: 1024px) {
+            body { overflow: hidden; }
+
+            /* Sidebar → hidden by default, slides in as drawer */
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 1100;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            /* Overlay behind sidebar */
+            .sidebar-overlay {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1050;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+            }
+            .sidebar-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Hamburger button (shown on mobile) */
+            .hamburger-btn {
+                display: flex;
+            }
+
+            /* Main layout: no sidebar gap on mobile */
+            #dashboard > .flex {
+                gap: 0;
+            }
+        }
+
+        /* Default: sidebar visible, hamburger hidden */
+        .admin-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+        }
+        .sidebar-overlay { display: none; }
+        .hamburger-btn { display: none; }
+
+        /* --- Mobile Header --- */
+        @media (max-width: 768px) {
+            header.bg-white.px-6.py-4 {
+                padding: 12px 16px;
+            }
+        }
+
+        /* --- Mobile: opening hours grid (7 rows × 3 cols → stack on phone) --- */
+        @media (max-width: 640px) {
+            .hours-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .hours-grid .grid-cols-3 {
+                display: grid;
+                grid-template-columns: 80px 1fr 1fr;
+                gap: 8px;
+                align-items: center;
+            }
+        }
+
+        /* --- Mobile: settings 2-col → 1-col --- */
+        @media (max-width: 768px) {
+            .settings-grid-2 > div[class*="grid grid-cols-2"] {
+                grid-template-columns: 1fr !important;
+            }
+            .settings-grid-2 > div[class*="grid grid-cols-3"] {
+                grid-template-columns: 1fr !important;
+            }
+            .settings-grid-2 > div[class*="grid grid-cols-4"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        /* --- Mobile: form delivery settings (4 cols → 2 cols → 1 col) --- */
+        @media (max-width: 1024px) {
+            .delivery-fees-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .delivery-fees-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* --- Mobile: image upload 3 cols → 1 col --- */
+        @media (max-width: 768px) {
+            .image-upload-grid > div[class*="grid-cols-3"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* --- Mobile: SEO form single column --- */
+        @media (max-width: 640px) {
+            .seo-card form .grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* --- Modal: full-screen on mobile --- */
+        @media (max-width: 640px) {
+            .modal-box {
+                border-radius: 20px 20px 0 0;
+                max-height: 95vh;
+                margin-top: auto;
+                width: 100%;
+                max-width: 100%;
+                align-self: flex-end;
+            }
+            .modal-overlay {
+                align-items: flex-end;
+                padding: 0;
+            }
+            .modal-overlay.show .modal-box {
+                transform: translateY(0);
+            }
+            .modal-overlay .modal-box {
+                transform: translateY(100%);
+            }
+        }
+
+        /* --- Mobile: tab nav scrollable --- */
+        @media (max-width: 640px) {
+            .tab-nav {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                border-radius: 10px;
+                white-space: nowrap;
+            }
+            .tab-nav::-webkit-scrollbar { display: none; }
+        }
+
+        /* --- Mobile: inbox detail modal grid 2→1 --- */
+        @media (max-width: 640px) {
+            .inbox-detail-grid > div[class*="grid-cols-2"] {
+                grid-template-columns: 1fr !important;
+            }
+            .inbox-actions-grid > div[class*="grid-cols-3"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        /* --- Mobile: tables card layout --- */
+        @media (max-width: 768px) {
+            .tables-management-grid > div[class*="grid-cols-3"] {
+                grid-template-columns: 1fr !important;
+            }
+            .table-cards-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 12px;
+            }
+        }
+
+        /* --- Mobile: section header padding & font --- */
+        @media (max-width: 640px) {
+            .section-title {
+                font-size: 20px !important;
+            }
+            .section-subtitle {
+                font-size: 12px !important;
+            }
+        }
+
+        /* --- Mobile: bottom nav safe area --- */
+        @media (max-width: 1024px) {
+            .pb-safe {
+                padding-bottom: env(safe-area-inset-bottom, 8px);
+            }
+        }
+
+        /* --- Mobile: form inputs min touch height --- */
+        @media (max-width: 768px) {
+            .form-input,
+            .form-select,
+            .form-textarea {
+                min-height: 48px;
+                padding: 12px 14px;
+            }
+            .form-textarea {
+                min-height: 80px;
+            }
+            .btn {
+                min-height: 48px;
+                padding: 12px 20px;
+            }
+            .btn-sm {
+                min-height: 40px;
+                padding: 8px 14px;
+            }
+        }
+
+        /* --- Mobile: action buttons in table list --- */
+        @media (max-width: 768px) {
+            .action-btns {
+                display: flex;
+                flex-direction: row;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .admin-table tbody td {
+                padding: 12px 10px;
+            }
+            .admin-table thead th {
+                padding: 10px 10px;
+                font-size: 10px;
+            }
+        }
+
+        /* --- Mobile: card header responsive --- */
+        @media (max-width: 640px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+        }
+
+        /* --- Mobile: inbox detail actions stacked --- */
+        @media (max-width: 640px) {
+            .inbox-detail-actions .btn {
+                width: 100%;
+            }
+        }
+
+        /* --- Mobile: finance section scrollable chart --- */
+        @media (max-width: 768px) {
+            .finance-grid .overflow-x-auto {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* --- Mobile: orders filter bar wrapping --- */
+        @media (max-width: 640px) {
+            .orders-filters {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .orders-filters .form-select,
+            .orders-filters .form-input {
+                width: 100% !important;
+                min-width: unset !important;
+            }
+            .orders-filters > * {
+                width: 100%;
+            }
+        }
+
+        /* --- Mobile: settings delivery toggle section --- */
+        @media (max-width: 640px) {
+            .delivery-fee-inputs {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        /* --- Mobile: data management buttons --- */
+        @media (max-width: 640px) {
+            .data-manage-btns {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            .data-manage-btns .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* --- Mobile: combo items textarea taller --- */
+        @media (max-width: 640px) {
+            #combo-items {
+                min-height: 120px;
+            }
+        }
+
+        /* --- Mobile: analytics chart containers --- */
+        @media (max-width: 640px) {
+            .analytics-grid > div[class*="grid-cols-2"] {
+                grid-template-columns: 1fr !important;
+            }
+            .analytics-grid > div[class*="grid-cols-3"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* --- Mobile: FAQ table → scrollable --- */
+        @media (max-width: 640px) {
+            .faq-table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* --- Mobile: tunnel section --- */
+        @media (max-width: 640px) {
+            .tunnel-steps > div[class*="flex gap-4"] {
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+
         @media (max-width: 1024px) {
             .grid-4 { grid-template-columns: repeat(2, 1fr); }
             .grid-3 { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4, .grid-6 { grid-template-columns: 1fr; }
+            .admin-content-area {
+                padding: 16px;
+                /* Space for mobile bottom nav (72px nav + 8px safety) */
+                padding-bottom: 96px;
+            }
+        }
+        @media (max-width: 480px) {
+            .admin-content-area {
+                padding: 12px;
+                padding-bottom: 96px;
+            }
         }
         
         /* File Upload */
@@ -605,11 +944,14 @@
         </div>
     </div>
 
+    <!-- Sidebar overlay: only visible on mobile when drawer is open -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
     <!-- DASHBOARD -->
     <div id="dashboard" class="flex w-full h-full opacity-0 pointer-events-none transition-opacity duration-500">
         
         <!-- Sidebar -->
-        <aside class="w-64 bg-[#1C1C1C] text-white flex flex-col shrink-0 overflow-y-auto">
+        <aside class="admin-sidebar bg-[#1C1C1C] text-white flex flex-col shrink-0 overflow-y-auto">
             <!-- Logo -->
             <div class="p-5 border-b border-white/10">
                 <div class="flex items-center gap-3">
@@ -763,9 +1105,15 @@
             
             <!-- Header -->
             <header class="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center shrink-0">
-                <div>
-                    <h1 class="text-xl font-serif font-bold text-[#8B0000]">Bảng Quản Trị</h1>
-                    <p class="text-xs text-gray-400">Chào mừng bạn quay trở lại</p>
+                <div class="flex items-center gap-3">
+                    <!-- Hamburger: only visible on mobile -->
+                    <button id="sidebar-toggle-btn" class="hamburger-btn w-10 h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors" aria-label="Menu">
+                        <i class="ph ph-list text-xl text-gray-600"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-xl font-serif font-bold text-[#8B0000]">Bảng Quản Trị</h1>
+                        <p class="text-xs text-gray-400">Chào mừng bạn quay trở lại</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <button id="header-refresh" class="btn btn-ghost btn-sm">
@@ -776,7 +1124,7 @@
             </header>
 
             <!-- Scrollable Content -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto p-6 admin-content-area">
 
                 <!-- ===================== SECTION: DASHBOARD ===================== -->
                 <div id="section-dashboard" class="admin-section active">
@@ -873,7 +1221,7 @@
                     </div>
 
                     <!-- KPI Grid -->
-                    <div class="grid-6 mb-6">
+                    <div class="grid-6 mb-6 analytics-grid">
                         <div class="stat-card text-center">
                             <p class="text-2xl font-black text-[#1C1C1C]" id="kpi-today-orders">0</p>
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wide mt-1">Đơn hôm nay</p>
@@ -1001,7 +1349,7 @@
                     </div>
                     
                     <!-- Filters -->
-                    <div class="filter-bar">
+                    <div class="filter-bar orders-filters">
                         <select id="orders-type-filter" class="form-select">
                             <option value="all">Tất cả loại</option>
                             <option value="order">Chỉ Đơn hàng</option>
@@ -1061,7 +1409,7 @@
                             <h3 class="font-bold text-[#1C1C1C]">Wochenplan</h3>
                         </div>
                         <div class="card-body">
-                            <div class="space-y-3">
+                            <div class="space-y-3 hours-grid">
                                 <div class="grid grid-cols-3 gap-4 font-bold text-xs text-gray-400 mb-2 pb-2 border-b">
                                     <span>Tag</span><span>Schicht 1</span><span>Schicht 2</span>
                                 </div>
@@ -1142,7 +1490,7 @@
                             <h3 class="font-bold text-[#1C1C1C]">Tải lên hình ảnh</h3>
                         </div>
                         <div class="card-body">
-                            <div class="grid-3 mb-6">
+                            <div class="grid-3 mb-6 image-upload-grid">
                                 <div>
                                     <label class="form-label">Hero Image</label>
                                     <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'hero-image-val')" class="form-input text-sm">
@@ -1379,7 +1727,7 @@
                         <p class="section-subtitle">Quản lý bàn và phân chia khu vực</p>
                     </div>
                     
-                    <div class="grid-3">
+                    <div class="grid-3 tables-management-grid">
                         <!-- Add New Table -->
                         <div class="card">
                             <div class="card-header">
@@ -1663,7 +2011,7 @@
                                 </label>
                             </div>
                             
-                            <div class="grid grid-cols-4 gap-4 pt-4 border-t">
+                            <div class="grid grid-cols-4 gap-4 pt-4 border-t delivery-fees-grid">
                                 <div>
                                     <label class="form-label">Đơn tối thiểu (€)</label>
                                     <input type="number" id="set-delivery-min" step="0.01" class="form-input text-sm" placeholder="15.00">
@@ -1692,7 +2040,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <form id="settings-form" class="space-y-4">
+                            <form id="settings-form" class="space-y-4 settings-grid-2">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="form-label">Tên nhà hàng</label>
@@ -1875,7 +2223,7 @@
                                     <h4 class="font-bold text-sm">Sao lưu & Khôi phục</h4>
                                     <p class="text-xs text-gray-400">Xuất/nhập dữ liệu thực đơn</p>
                                 </div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 data-manage-btns">
                                     <button onclick="exportSystemData()" class="btn btn-secondary btn-sm">
                                         <i class="ph ph-download-simple"></i> Sao lưu
                                     </button>
@@ -1898,7 +2246,7 @@
                         <h1 class="section-title">SEO & GEO</h1>
                         <p class="section-subtitle">Tối ưu công cụ tìm kiếm và vị trí địa lý</p>
                     </div>
-                    <div class="card max-w-3xl">
+                    <div class="card max-w-3xl seo-card">
                         <div class="card-header">
                             <h3 class="font-bold text-[#1C1C1C] flex items-center gap-2">
                                 <i class="ph ph-globe-hemisphere-west text-[#8B0000]"></i> Cấu hình SEO
@@ -1965,7 +2313,7 @@
 
                     <!-- FAQ List -->
                     <div class="card">
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto faq-table-wrap">
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-white/10 text-left">
@@ -2064,7 +2412,7 @@
 
     <!-- Mobile Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 flex justify-around items-center px-2 py-3 pb-safe">
-        <a href="#" class="flex flex-col items-center gap-1 text-[#8B0000]">
+        <a href="#" id="mobile-menu-btn" class="flex flex-col items-center gap-1 text-[#8B0000]">
             <i class="ph-fill ph-fork-knife text-2xl"></i>
             <span class="text-[10px] font-semibold">Menu</span>
         </a>
@@ -2101,7 +2449,7 @@
             <div class="p-5">
                 <div class="bg-gray-50 rounded-xl p-4 mb-4 border">
                     <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Thông tin khách hàng</h4>
-                    <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="grid grid-cols-2 gap-3 text-sm inbox-detail-grid">
                         <div><p class="text-[10px] text-gray-500 uppercase">Tên</p><p class="font-bold" id="inbox-detail-name">-</p></div>
                         <div><p class="text-[10px] text-gray-500 uppercase">Điện thoại</p><p class="font-bold" id="inbox-detail-phone">-</p></div>
                         <div class="col-span-2"><p class="text-[10px] text-gray-500 uppercase">Email</p><p class="font-bold" id="inbox-detail-email">-</p></div>
@@ -2124,7 +2472,7 @@
                 
                 <div class="border-t pt-4">
                     <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Trả lời nhanh (Auto Email + Telegram)</h4>
-                    <div id="inbox-detail-reservation-actions" class="space-y-2">
+                    <div id="inbox-detail-reservation-actions" class="space-y-2 inbox-detail-actions">
                         <button onclick="sendReply('reservation_confirmed')" class="btn btn-primary w-full text-sm">
                             <i class="ph-fill ph-check-circle"></i> OK - Xác nhận đặt bàn
                         </button>
@@ -2260,7 +2608,38 @@
             // Navigation handling
             const navItems = document.querySelectorAll('.sidebar-nav-item[data-section]');
             const sections = document.querySelectorAll('.admin-section');
-            
+            const sidebar = document.querySelector('.admin-sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const sidebarToggle = document.getElementById('sidebar-toggle-btn');
+
+            // Open sidebar (mobile)
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('open');
+                if (sidebarOverlay) sidebarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Close sidebar (mobile)
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('open');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            // Toggle sidebar (mobile)
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', openSidebar);
+            }
+
+            // Auto-close sidebar when a nav item is clicked (mobile)
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 1024) {
+                        closeSidebar();
+                    }
+                });
+            });
+
             navItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -2318,6 +2697,15 @@
                 mobileLogoutBtn.addEventListener('click', () => {
                     sessionStorage.removeItem('kimi_admin_auth');
                     window.location.reload();
+                });
+            }
+
+            // Mobile menu button (bottom nav) opens sidebar drawer
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openSidebar();
                 });
             }
             

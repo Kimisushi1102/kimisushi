@@ -128,12 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // --- 0.5 Delivery Visibility ---
         document.querySelectorAll('.delivery-content').forEach(el => {
-            if (config.deliveryEnabled === true) {
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
-            }
+            el.classList.toggle('hidden', config.deliveryEnabled !== true);
         });
+
+        // Toggle Lieferung button in checkout
+        const deliveryBtn = document.querySelector('.delivery-method-btn');
+        if (deliveryBtn) {
+            deliveryBtn.classList.toggle('hidden', config.deliveryEnabled !== true);
+            // If delivery is off and was selected, switch to Abholung
+            if (config.deliveryEnabled !== true && typeof currentMethod !== 'undefined' && currentMethod === 'delivery') {
+                document.querySelector('[data-method="pickup"]')?.click();
+            }
+        }
         
         return config;
     }

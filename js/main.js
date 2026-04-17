@@ -126,21 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.title = config.seoTitle;
         }
         
-        // --- 0.5 Delivery Visibility ---
+        // --- 0.5 Delivery Visibility (Hero section only) ---
         document.querySelectorAll('.delivery-content').forEach(el => {
             el.classList.toggle('hidden', config.deliveryEnabled !== true);
         });
+        // Note: Delivery button toggle is handled inside checkoutForm block (after currentMethod is defined)
 
-        // Toggle Lieferung button in checkout
-        const deliveryBtn = document.querySelector('.delivery-method-btn');
-        if (deliveryBtn) {
-            deliveryBtn.classList.toggle('hidden', config.deliveryEnabled !== true);
-            // If delivery is off and was selected, switch to Abholung
-            if (config.deliveryEnabled !== true && typeof currentMethod !== 'undefined' && currentMethod === 'delivery') {
-                document.querySelector('[data-method="pickup"]')?.click();
-            }
-        }
-        
         return config;
     }
     
@@ -967,6 +958,25 @@ if (checkoutForm) {
             }
         });
     });
+
+    // Init delivery button based on settings (after currentMethod is defined)
+    const initDeliveryButton = () => {
+        const config = typeof getSettings === 'function' ? getSettings() : {};
+        const deliveryBtn = document.querySelector('.delivery-method-btn');
+        if (deliveryBtn) {
+            deliveryBtn.classList.toggle('hidden', config.deliveryEnabled !== true);
+            // If delivery is off and was selected, switch to Abholung
+            if (config.deliveryEnabled !== true && typeof currentMethod !== 'undefined' && currentMethod === 'delivery') {
+                document.querySelector('[data-method="pickup"]')?.click();
+            }
+        }
+    };
+    // Run after settings load
+    if (typeof getSettings === 'function') {
+        getSettings().then(() => initDeliveryButton()).catch(() => initDeliveryButton());
+    } else {
+        initDeliveryButton();
+    }
 
     const addrInput = document.getElementById('co-address');
     if (addrInput) {

@@ -559,7 +559,7 @@ module.exports = async (req, res) => {
         '<p style="margin:0;color:#92400e;font-size:13px;text-align:center;">' + (isReservation ? 'Bitte diese Reservierung umgehend bestätigen!' : 'Bitte diese Bestellung umgehend bearbeiten!') + '</p></div></div>';
 
       const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: gmailUser, pass: gmailPassword } });
-      const info = await transporter.sendMail({ from: '"Sakura Sushi" <' + gmailUser + '>', to: gmailNotifyEmail, subject: subject, html: htmlContent });
+      const info = await transporter.sendMail({ from: '"Kimi Sushi" <' + gmailUser + '>', to: gmailNotifyEmail, subject: subject, html: htmlContent });
       return res.status(200).json({ success: true, messageId: info.messageId });
     }
 
@@ -584,9 +584,9 @@ module.exports = async (req, res) => {
       if (!user || !pass) return res.status(400).json({ success: false, error: 'Gmail credentials required' });
       const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
       const result = await transporter.sendMail({
-        from: '"Sakura Sushi" <' + user + '>', to: user,
-        subject: '✅ Sakura Sushi - Test Email',
-        html: '<h1>Test erfolgreich!</h1><p>Dies ist eine Test-E-Mail von Sakura Sushi System.</p>'
+        from: '"Kimi Sushi" <' + user + '>', to: user,
+        subject: '✅ Kimi Sushi - Test Email',
+        html: '<h1>Test erfolgreich!</h1><p>Dies ist eine Test-E-Mail von Kimi Sushi System.</p>'
       });
       return res.status(200).json({ success: true, messageId: result.messageId });
     }
@@ -599,7 +599,7 @@ module.exports = async (req, res) => {
       const response = await fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: '✅ Sakura Sushi BOT - Kết nối thành công! Bạn sẽ nhận được thông báo khi có khách đặt hàng.' })
+        body: JSON.stringify({ chat_id: chatId, text: '✅ Kimi Sushi BOT - Kết nối thành công! Bạn sẽ nhận được thông báo khi có khách đặt hàng.' })
       });
       const result = await response.json();
       return res.status(200).json({ success: result.ok });
@@ -691,19 +691,19 @@ module.exports = async (req, res) => {
 
       const templates = {
         reservation_confirmed: {
-          subject: "✅ Ihre Reservierung bei Sakura Sushi - Bestätigung",
+          subject: "✅ Ihre Reservierung bei Kimi Sushi - Bestätigung",
           html: '<div style="font-family:sans-serif;max-width:600px;margin:auto;border:2px solid #22c55e;padding:30px;border-radius:16px;"><div style="text-align:center;margin-bottom:30px;"><h1 style="color:#22c55e;font-size:28px;margin:0;">✅ Reservierung Bestätigt!</h1></div><div style="background:#f0fdf4;border-radius:12px;padding:20px;margin-bottom:20px;"><p style="margin:0 0 10px 0;">Sehr geehrte/r <strong>' + escapeHtml(customerName) + '</strong>,</p><p style="margin:0;color:#333;">Ihre Reservierung wurde erfolgreich bestätigt.</p></div><p style="color:#22c55e;font-weight:bold;font-size:18px;text-align:center;">Wir freuen uns auf Ihren Besuch!</p></div>'
         },
         reservation_declined: {
-          subject: "Ihre Reservierungsanfrage bei Sakura Sushi",
+          subject: "Ihre Reservierungsanfrage bei Kimi Sushi",
           html: '<div style="font-family:sans-serif;max-width:600px;margin:auto;border:2px solid #ef4444;padding:30px;border-radius:16px;"><div style="text-align:center;margin-bottom:30px;"><h1 style="color:#ef4444;font-size:28px;margin:0;">Reservierungsanfrage</h1></div><div style="background:#fef2f2;border-radius:12px;padding:20px;margin-bottom:20px;"><p style="margin:0 0 10px 0;">Sehr geehrte/r <strong>' + escapeHtml(customerName) + '</strong>,</p><p style="margin:0;color:#333;">Leider müssen wir Ihnen mitteilen, dass wir für den gewünschten Zeitpunkt bereits ausgebucht sind.</p></div></div>'
         },
         order_ready: {
-          subject: '✅ Ihre Bestellung bei Sakura Sushi - Bereit in ' + (waitMinutes || 15) + ' Minuten!',
+          subject: '✅ Ihre Bestellung bei Kimi Sushi - Bereit in ' + (waitMinutes || 15) + ' Minuten!',
           html: '<div style="font-family:sans-serif;max-width:600px;margin:auto;border:2px solid #f59e0b;padding:30px;border-radius:16px;"><div style="text-align:center;margin-bottom:30px;"><h1 style="color:#f59e0b;font-size:28px;margin:0;">🍣 Ihre Bestellung ist auf dem Weg!</h1></div><div style="background:#fffbeb;border-radius:12px;padding:20px;margin-bottom:20px;"><p style="margin:0 0 10px 0;">Hallo <strong>' + escapeHtml(customerName) + '</strong>,</p><p style="margin:15px 0 0 0;color:#333;">Ihre Bestellung wird in ca. <strong style="font-size:24px;color:#f59e0b;">' + (waitMinutes || 15) + ' Minuten</strong> fertig zubereitet sein.</p>' + (orderTotal ? '<p style="margin:15px 0 0 0;"><strong>Gesamtbetrag:</strong> <span style="font-size:20px;font-weight:bold;color:#e63946;">' + escapeHtml(orderTotal) + '€</span></p>' : '') + '</div></div>'
         },
         order_declined: {
-          subject: "Ihre Bestellung bei Sakura Sushi",
+          subject: "Ihre Bestellung bei Kimi Sushi",
           html: '<div style="font-family:sans-serif;max-width:600px;margin:auto;border:2px solid #ef4444;padding:30px;border-radius:16px;"><div style="text-align:center;margin-bottom:30px;"><h1 style="color:#ef4444;font-size:28px;margin:0;">Zu Ihrer Bestellung</h1></div><div style="background:#fef2f2;border-radius:12px;padding:20px;margin-bottom:20px;"><p style="margin:0 0 10px 0;">Hallo <strong>' + escapeHtml(customerName) + '</strong>,</p><p style="margin:0;color:#333;">Leider müssen wir Ihre Bestellung im Moment ablehnen. Bitte versuchen Sie es später erneut.</p></div></div>'
         }
       };
@@ -719,7 +719,7 @@ module.exports = async (req, res) => {
           const emailRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: "Sakura Sushi <onboarding@resend.dev>", to: [customerEmail], subject: template.subject, html: template.html })
+            body: JSON.stringify({ from: "Kimi Sushi <onboarding@resend.dev>", to: [customerEmail], subject: template.subject, html: template.html })
           });
           emailSuccess = emailRes.ok;
         } catch (e) { console.error('Email error:', e); }

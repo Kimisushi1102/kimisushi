@@ -208,11 +208,11 @@ export async function onRequest(context) {
       const safeItemsSubtotal = itemsSubtotal.toFixed(2).replace('.', ',');
 
       const emailContent = {
-        from: "Sakura Sushi <onboarding@resend.dev>",
+        from: "Kimi Sushi <onboarding@resend.dev>",
         to: [customerEmail],
         subject: isReservation
-          ? `✅ Ihre Reservierung bei Sakura Sushi - Eingang erhalten`
-          : `✅ Ihre Bestellung bei Sakura Sushi - Eingang erhalten`,
+          ? `✅ Ihre Reservierung bei Kimi Sushi - Eingang erhalten`
+          : `✅ Ihre Bestellung bei Kimi Sushi - Eingang erhalten`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #22c55e; padding: 30px; border-radius: 16px;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -242,9 +242,9 @@ export async function onRequest(context) {
               <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">Sie erhalten eine weitere Bestätigung, sobald wir Ihre ${isReservation ? 'Reservierung' : 'Bestellung'} bearbeitet haben.</p>
             </div>
             <p style="color: #22c55e; font-weight: bold; font-size: 16px; text-align: center; margin: 0;">Wir freuen uns auf Ihren Besuch! 🍣</p>
-            <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Sakura Sushi Team</p>
+            <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Kimi Sushi Team</p>
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-            <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+            <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
           </div>
         `
       };
@@ -281,7 +281,7 @@ export async function onRequest(context) {
       if (adminEmail && apiKey) {
         try {
           const adminEmailContent = {
-            from: "Sakura Sushi <onboarding@resend.dev>",
+            from: "Kimi Sushi <onboarding@resend.dev>",
             to: [adminEmail],
             subject: isReservation
               ? `📅 NEUE RESERVIERUNG - ${safeName}`
@@ -316,7 +316,7 @@ export async function onRequest(context) {
                   <p style="margin: 0; color: #92400e; font-size: 16px;">⚡ Bitte bearbeiten Sie diese Bestellung umgehend!</p>
                 </div>
                 <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-                <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Admin Benachrichtigung</p>
+                <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Admin Benachrichtigung</p>
               </div>
             `
           };
@@ -449,7 +449,7 @@ export async function onRequest(context) {
       // German email templates
       const templates = {
         reservation_confirmed: {
-          subject: "✅ Ihre Reservierung bei Sakura Sushi - Bestätigung",
+          subject: "✅ Ihre Reservierung bei Kimi Sushi - Bestätigung",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #22c55e; padding: 30px; border-radius: 16px;">
               <div style="text-align: center; margin-bottom: 30px;">
@@ -458,7 +458,7 @@ export async function onRequest(context) {
               </div>
               <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0 0 10px 0;">Sehr geehrte/r <strong style="font-size: 18px;">${escapeHtml(customerName)}</strong>,</p>
-                <p style="margin: 0; color: #333;">wir freuen uns sehr, Sie bei <strong>Sakura Sushi</strong> willkommen heißen zu dürfen!</p>
+                <p style="margin: 0; color: #333;">wir freuen uns sehr, Sie bei <strong>Kimi Sushi</strong> willkommen heißen zu dürfen!</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Ihre Reservierung wurde erfolgreich <strong style="color: #22c55e; font-size: 18px;">bestätigt</strong>.</p>
               </div>
               <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
@@ -466,14 +466,14 @@ export async function onRequest(context) {
                 <p style="margin: 10px 0 0 0; color: #333;"><strong>Telefon:</strong> Bitte rufen Sie uns an unter unserer Nummer.</p>
               </div>
               <p style="color: #22c55e; font-weight: bold; font-size: 18px; text-align: center; margin: 0;">Wir freuen uns auf Ihren Besuch!</p>
-              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Sakura Sushi Team</p>
+              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Kimi Sushi Team</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           `
         },
         reservation_declined: {
-          subject: "Ihre Reservierungsanfrage bei Sakura Sushi",
+          subject: "Ihre Reservierungsanfrage bei Kimi Sushi",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #ef4444; padding: 30px; border-radius: 16px;">
               <div style="text-align: center; margin-bottom: 30px;">
@@ -482,21 +482,21 @@ export async function onRequest(context) {
               </div>
               <div style="background: #fef2f2; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0 0 10px 0;">Sehr geehrte/r <strong style="font-size: 18px;">${escapeHtml(customerName)}</strong>,</p>
-                <p style="margin: 0; color: #333;">vielen Dank für Ihre Reservierungsanfrage bei <strong>Sakura Sushi</strong>.</p>
+                <p style="margin: 0; color: #333;">vielen Dank für Ihre Reservierungsanfrage bei <strong>Kimi Sushi</strong>.</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Leider müssen wir Ihnen mitteilen, dass wir für den gewünschten Zeitpunkt bereits <strong style="color: #ef4444;">ausgebucht</strong> sind.</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Wir würden uns sehr freuen, Sie zu einem <strong>anderen Zeitpunkt</strong> bei uns begrüßen zu dürfen.</p>
               </div>
               <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px;">
                 <p style="margin: 0; color: #666; font-size: 14px;">Bitte kontaktieren Sie uns für weitere Informationen oder um einen alternativen Termin zu vereinbaren.</p>
               </div>
-              <p style="color: #666; text-align: center; margin: 25px 0 0 0;">Mit freundlichen Grüßen,<br><strong>Ihr Sakura Sushi Team</strong></p>
+              <p style="color: #666; text-align: center; margin: 25px 0 0 0;">Mit freundlichen Grüßen,<br><strong>Ihr Kimi Sushi Team</strong></p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           `
         },
         order_ready: {
-          subject: `✅ Ihre Bestellung bei Sakura Sushi - Bereit in ${waitMinutes || 15} Minuten!`,
+          subject: `✅ Ihre Bestellung bei Kimi Sushi - Bereit in ${waitMinutes || 15} Minuten!`,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #f59e0b; padding: 30px; border-radius: 16px;">
               <div style="text-align: center; margin-bottom: 30px;">
@@ -505,7 +505,7 @@ export async function onRequest(context) {
               </div>
               <div style="background: #fffbeb; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #fcd34d;">
                 <p style="margin: 0 0 10px 0;">Hallo <strong style="font-size: 18px;">${escapeHtml(customerName)}</strong>,</p>
-                <p style="margin: 0; color: #333;">wir haben Ihre Bestellung bei <strong>Sakura Sushi</strong> erhalten. Vielen Dank!</p>
+                <p style="margin: 0; color: #333;">wir haben Ihre Bestellung bei <strong>Kimi Sushi</strong> erhalten. Vielen Dank!</p>
                 <p style="margin: 15px 0; color: #333;">Ihre Bestellung wird in ca. <strong style="font-size: 24px; color: #f59e0b;">${waitMinutes || 15} Minuten</strong> fertig zubereitet sein.</p>
                 <p style="margin: 0; color: #333;">Sie können Ihre Bestellung dann bequem bei uns <strong>abholen</strong>.</p>
                 ${orderTotal ? `<p style="margin: 15px 0 0 0; color: #333;"><strong>Gesamtbetrag:</strong> <span style="font-size: 20px; font-weight: bold; color: #e63946;">${escapeHtml(orderTotal)}€</span></p>` : ''}
@@ -514,14 +514,14 @@ export async function onRequest(context) {
                 <p style="margin: 0; color: #666; font-size: 14px;">Falls Sie Fragen haben oder Ihre Bestellung ändern möchten, rufen Sie uns bitte umgehend an.</p>
               </div>
               <p style="color: #f59e0b; font-weight: bold; font-size: 18px; text-align: center; margin: 0;">Wir wünschen Ihnen einen guten Appetit! 🍱</p>
-              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Sakura Sushi Team</p>
+              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Kimi Sushi Team</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           `
         },
         order_declined: {
-          subject: "Ihre Bestellung bei Sakura Sushi",
+          subject: "Ihre Bestellung bei Kimi Sushi",
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #ef4444; padding: 30px; border-radius: 16px;">
               <div style="text-align: center; margin-bottom: 30px;">
@@ -529,13 +529,13 @@ export async function onRequest(context) {
               </div>
               <div style="background: #fef2f2; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0 0 10px 0;">Hallo <strong style="font-size: 18px;">${escapeHtml(customerName)}</strong>,</p>
-                <p style="margin: 0; color: #333;">vielen Dank für Ihre Bestellung bei <strong>Sakura Sushi</strong>.</p>
+                <p style="margin: 0; color: #333;">vielen Dank für Ihre Bestellung bei <strong>Kimi Sushi</strong>.</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Leider müssen wir Ihnen mitteilen, dass wir Ihre Bestellung in diesem Moment <strong style="color: #ef4444;">nicht annehmen</strong> können.</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Bitte versuchen Sie es zu einem späteren Zeitpunkt erneut oder kontaktieren Sie uns.</p>
               </div>
-              <p style="color: #666; text-align: center; margin: 0;">Mit freundlichen Grüßen,<br><strong>Ihr Sakura Sushi Team</strong></p>
+              <p style="color: #666; text-align: center; margin: 0;">Mit freundlichen Grüßen,<br><strong>Ihr Kimi Sushi Team</strong></p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           `
         }
@@ -556,7 +556,7 @@ export async function onRequest(context) {
             method: "POST",
             headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              from: "Sakura Sushi <onboarding@resend.dev>",
+              from: "Kimi Sushi <onboarding@resend.dev>",
               to: [customerEmail],
               subject: template.subject,
               html: template.html
@@ -648,7 +648,7 @@ export async function onRequest(context) {
         // Không phải admin - có thể là khách hàng gửi tin nhắn trực tiếp
         // Gửi auto-reply cho khách
         if (botToken && adminIdStr === chatId) {
-          const customerReply = `Vielen Dank für Ihre Nachricht! 🍣\n\nIhre Bestellung wird bearbeitet. Wir melden uns in Kürze bei Ihnen.\n\nIhr Sakura Sushi Team`;
+          const customerReply = `Vielen Dank für Ihre Nachricht! 🍣\n\nIhre Bestellung wird bearbeitet. Wir melden uns in Kürze bei Ihnen.\n\nIhr Kimi Sushi Team`;
           await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -705,8 +705,8 @@ export async function onRequest(context) {
 
           // Template email tiếng Đức chuyên nghiệp
           const emailSubject = isReservation
-            ? `✅ Ihre Reservierung bei Sakura Sushi - Bestätigung`
-            : `✅ Ihre Bestellung bei Sakura Sushi - Bereit in ${waitMinutes} Minuten`;
+            ? `✅ Ihre Reservierung bei Kimi Sushi - Bestätigung`
+            : `✅ Ihre Bestellung bei Kimi Sushi - Bereit in ${waitMinutes} Minuten`;
 
           const emailHtml = isReservation ? `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #22c55e; padding: 30px; border-radius: 16px;">
@@ -716,16 +716,16 @@ export async function onRequest(context) {
               </div>
               <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0 0 10px 0;">Sehr geehrte/r <strong style="font-size: 18px;">${safeName}</strong>,</p>
-                <p style="margin: 0; color: #333;">wir freuen uns sehr, Sie bei <strong>Sakura Sushi</strong> willkommen heißen zu dürfen!</p>
+                <p style="margin: 0; color: #333;">wir freuen uns sehr, Sie bei <strong>Kimi Sushi</strong> willkommen heißen zu dürfen!</p>
                 <p style="margin: 15px 0 0 0; color: #333;">Ihre Reservierung wurde erfolgreich <strong style="color: #22c55e; font-size: 18px;">bestätigt</strong>.</p>
               </div>
               <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0; color: #666; font-size: 14px;">Bei Fragen oder Änderungen kontaktieren Sie uns gerne jederzeit.</p>
               </div>
               <p style="color: #22c55e; font-weight: bold; font-size: 18px; text-align: center; margin: 0;">Wir freuen uns auf Ihren Besuch!</p>
-              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Sakura Sushi Team</p>
+              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Kimi Sushi Team</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           ` : `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 2px solid #f59e0b; padding: 30px; border-radius: 16px;">
@@ -735,7 +735,7 @@ export async function onRequest(context) {
               </div>
               <div style="background: #fffbeb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                 <p style="margin: 0 0 10px 0;">Hallo <strong style="font-size: 18px;">${safeName}</strong>,</p>
-                <p style="margin: 0; color: #333;">wir haben Ihre Bestellung bei <strong>Sakura Sushi</strong> erhalten. Vielen Dank!</p>
+                <p style="margin: 0; color: #333;">wir haben Ihre Bestellung bei <strong>Kimi Sushi</strong> erhalten. Vielen Dank!</p>
                 <p style="margin: 15px 0; color: #333;">Ihre Bestellung wird in ca. <strong style="font-size: 24px; color: #f59e0b;">${waitMinutes} Minuten</strong> fertig zubereitet sein.</p>
                 <p style="margin: 0; color: #333;">Sie können Ihre Bestellung dann bequem bei uns <strong>abholen</strong>.</p>
                 ${pendingOrder.total ? `<p style="margin: 15px 0 0 0; color: #333;"><strong>Gesamtbetrag:</strong> <span style="font-size: 20px; font-weight: bold; color: #e63946;">${escapeHtml(pendingOrder.total)}€</span></p>` : ''}
@@ -744,9 +744,9 @@ export async function onRequest(context) {
                 <p style="margin: 0; color: #666; font-size: 14px;">Falls Sie Fragen haben oder Ihre Bestellung ändern möchten, rufen Sie uns bitte umgehend an.</p>
               </div>
               <p style="color: #f59e0b; font-weight: bold; font-size: 18px; text-align: center; margin: 0;">Wir wünschen Ihnen einen guten Appetit! 🍱</p>
-              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Sakura Sushi Team</p>
+              <p style="color: #666; text-align: center; margin: 10px 0 0 0;">Ihr Kimi Sushi Team</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
-              <p style="font-size: 11px; color: #999; text-align: center;">Sakura Sushi - Authentische japanische Küche</p>
+              <p style="font-size: 11px; color: #999; text-align: center;">Kimi Sushi - Authentische japanische Küche</p>
             </div>
           `;
 
@@ -754,7 +754,7 @@ export async function onRequest(context) {
             method: "POST",
             headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              from: "Sakura Sushi <onboarding@resend.dev>",
+              from: "Kimi Sushi <onboarding@resend.dev>",
               to: [customerEmail],
               subject: emailSubject,
               html: emailHtml

@@ -176,19 +176,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle both raw array (Vercel/KV) and {success, items} (local MongoDB server) formats
         try {
             const res = await fetch('/api/combos');
-            console.log('[DEBUG combos] fetch /api/combos status:', res.status, 'ok:', res.ok);
             if (res.ok) {
                 const raw = await res.json();
-                console.log('[DEBUG combos] raw API response:', JSON.stringify(raw));
                 // Normalize: handle { success, items } format from MongoDB server vs raw array from KV
                 const serverCombos = (raw && raw.items && Array.isArray(raw.items))
                     ? raw.items
                     : (Array.isArray(raw) ? raw : []);
-                console.log('[DEBUG combos] serverCombos extracted:', serverCombos.length, 'items');
                 if (serverCombos.length > 0) {
                     // Update activeCombos so global renderCombos() uses server data
                     activeCombos = serverCombos;
-                    console.log('[DEBUG combos] activeCombos updated:', activeCombos.length);
                     // Save to localStorage for offline use
                     if (typeof saveCombos === 'function') {
                         saveCombos(serverCombos);
@@ -197,11 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.renderCombosGlobal === 'function') {
                         window.renderCombosGlobal();
                     }
-                } else {
-                    console.log('[DEBUG combos] serverCombos is EMPTY - will show sample data');
                 }
-            } else {
-                console.warn('[DEBUG combos] fetch failed with status:', res.status);
             }
         } catch (e) {
             console.warn('[WEBSITE] Combos API error:', e);
@@ -510,8 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderCombos() {
         if (!combosGrid) return;
         // Use activeCombos (updated by async load) or fallback to localStorage
-        let combos = activeCombos.length > 0 ? activeCombos : (typeof getCombos === 'function' ? getCombos() : []);
-        console.log('[DEBUG renderCombos] called — activeCombos.length:', activeCombos.length, 'combos to render:', combos ? combos.length : 'null/undefined');
+        let combos = activeCombos.length > 0 ? activeCombos : (typeof getCombosSync === 'function' ? getCombosSync() : []);
         // Sample menu set data - UI fallback only, does NOT affect database or logic
         if (!combos || combos.length === 0) {
             combos = [

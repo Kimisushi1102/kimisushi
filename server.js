@@ -5,11 +5,35 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const https = require('https');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
 
-// ========== TELEGRAM SETTINGS ==========
+// ==================== MONGODB ====================
+const { connectDB, mongoose } = require('./db');
+
+// ==================== MODELS ====================
+const MenuItem = require('./models/MenuItem');
+const Combo = require('./models/Combo');
+const Table = require('./models/Table');
+const Order = require('./models/Order');
+const Settings = require('./models/Settings');
+const FAQ = require('./models/FAQ');
+const User = require('./models/User');
+const ActivityLog = require('./models/ActivityLog');
+const Analytics = require('./models/Analytics');
+
+// ==================== MIDDLEWARE ====================
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// ==================== SOCKET.IO ====================
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+// ==================== TELEGRAM ====================
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
@@ -44,7 +68,7 @@ function sendTelegramMessage(message) {
       try {
         const parsed = JSON.parse(body);
         if (parsed.ok) {
-          console.log('[TELEGRAM] Message sent successfully. chat_id:', parsed.result.chat.id, '| msg_id:', parsed.result.message_id);
+          console.log('[TELEGRAM] Message sent successfully.');
         } else {
           console.error('[TELEGRAM] API error — code:', parsed.error_code, '| description:', parsed.description);
         }
@@ -62,36 +86,17 @@ function sendTelegramMessage(message) {
   req.end();
 }
 
-// CORS cho phép tất cả origins
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-
-// Socket.IO
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] }
-});
-
-// Lưu trữ orders tạm thời (trong production nên dùng database)
-const orders = [];
-const reservations = [];
-
-// ========== GMAIL SMTP NOTIFICATION ==========
-
-// Tạo transporter cho Gmail (hỗ trợ cả env và request body)
+// ==================== GMAIL SMTP ====================
 function createGmailTransporter(gmailUser, gmailPassword) {
   const user = gmailUser || process.env.GMAIL_USER;
   const pass = gmailPassword || process.env.GMAIL_APP_PASSWORD;
   return nodemailer.createTransport({
     service: 'gmail',
-    auth: {
-      user: user,
-      pass: pass
-    }
+    auth: { user, pass }
   });
 }
 
-// Sử dụng transporter với Gmail config từ request body
-async function createGmailTransporterWithConfig(gmailConfig) {
+function createGmailTransporterWithConfig(gmailConfig) {
   const user = gmailConfig?.gmailUser || process.env.GMAIL_USER;
   const pass = gmailConfig?.gmailPassword || process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass) return null;
@@ -101,22 +106,14 @@ async function createGmailTransporterWithConfig(gmailConfig) {
   });
 }
 
-// Hàm gửi email thông báo đơn hàng qua Gmail
 async function sendGmailNotification(orderData, gmailConfig) {
-  // DEBUG: Always log what we're receiving
-  console.log('[GMAIL] Function called with gmailConfig:', JSON.stringify(gmailConfig));
-  console.log('[GMAIL] process.env.GMAIL_ENABLED:', process.env.GMAIL_ENABLED);
-  console.log('[GMAIL] process.env.GMAIL_USER:', process.env.GMAIL_USER ? 'SET' : 'NOT SET');
-
   const gmailUser = gmailConfig?.gmailUser || process.env.GMAIL_USER;
   const gmailNotifyEmail = gmailConfig?.gmailNotifyEmail || process.env.GMAIL_NOTIFY_EMAIL || gmailUser;
   const gmailEnabled = gmailConfig?.gmailEnabled || process.env.GMAIL_ENABLED === 'true';
   const gmailPassword = gmailConfig?.gmailPassword || process.env.GMAIL_APP_PASSWORD;
 
-  console.log('[GMAIL] Final gmailEnabled:', gmailEnabled, '| gmailUser:', gmailUser ? 'SET' : 'NOT SET', '| gmailPassword:', gmailPassword ? 'SET' : 'NOT SET');
-
   if (!gmailEnabled || !gmailUser || !gmailPassword) {
-    console.log('[GMAIL] Gmail not configured, skipping notification. gmailEnabled=', gmailEnabled, 'gmailUser=', !!gmailUser, 'gmailPassword=', !!gmailPassword);
+    console.log('[GMAIL] Gmail not configured, skipping notification.');
     return { success: false, reason: 'Gmail not configured' };
   }
 
@@ -127,7 +124,6 @@ async function sendGmailNotification(orderData, gmailConfig) {
   const customerEmail = orderData.customerEmail || orderData.email || '-';
   const pickupDateRaw = orderData.pickupDate || orderData.date || '-';
   const pickupTimeRaw = orderData.pickupTime || orderData.time || '-';
-  const pickupDate = pickupDateRaw !== '-' ? pickupDateRaw : '-';
   const pickupTimeDisplay = pickupTimeRaw === 'asap'
     ? 'So schnell wie möglich'
     : (pickupTimeRaw !== '-' ? `${pickupTimeRaw} Uhr` : '-');
@@ -140,12 +136,6 @@ async function sendGmailNotification(orderData, gmailConfig) {
   const itemId = orderData.id || orderData.orderId || '-';
   const itemCount = orderData.itemCount || (orderData.guests ? `${orderData.guests} ${isReservation ? 'Gäste' : 'Personen'}` : '-');
 
-  // DEBUG LOG - nhận được items gì?
-  console.log('[GMAIL-BACKEND] Received items:', JSON.stringify(items));
-  console.log('[GMAIL-BACKEND] Items count:', items.length);
-  console.log('[GMAIL-BACKEND] Full orderData:', JSON.stringify(orderData));
-
-  // Normalize price: "5,90 €" -> 5.90 (number)
   const normalizePrice = (p) => {
     if (typeof p === 'number') return p;
     if (!p) return 0;
@@ -153,11 +143,8 @@ async function sendGmailNotification(orderData, gmailConfig) {
     return parseFloat(cleaned) || 0;
   };
 
-  // Format price: 5.9 -> "5,90 €"
   const fmt = (n) => n.toFixed(2).replace('.', ',') + ' €';
 
-
-  // Nội dung email thông báo
   const subject = isReservation
     ? `📅 Neue Tischreservierung - ${customerName} - ${new Date().toLocaleDateString('de-DE')}`
     : `Neue Bestellung - ${customerName} - ${new Date().toLocaleDateString('de-DE')}`;
@@ -172,15 +159,12 @@ async function sendGmailNotification(orderData, gmailConfig) {
           ${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
         </p>
       </div>
-
       <div style="background: #f0f9ff; border-radius: 10px; padding: 16px; margin-bottom: 16px; border: 1px solid #dbeafe;">
-        <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
-          📋 Bestell-/Reservierungsdaten
-        </h3>
+        <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; text-transform: uppercase;">📋 Bestell-/Reservierungsdaten</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px; width: 130px;"><strong>Nr.:</strong></td>
-            <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #111;">${itemId}</td>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: bold;">${itemId}</td>
           </tr>
           ${isReservation ? `<tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px;"><strong>Personen:</strong></td>
@@ -188,7 +172,7 @@ async function sendGmailNotification(orderData, gmailConfig) {
           </tr>` : ''}
           <tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px;"><strong>Datum:</strong></td>
-            <td style="padding: 6px 0; font-size: 14px;">${pickupDate !== '-' ? pickupDate.split('-').reverse().join('.') : '-'}</td>
+            <td style="padding: 6px 0; font-size: 14px;">${pickupDateRaw !== '-' ? pickupDateRaw.split('-').reverse().join('.') : '-'}</td>
           </tr>
           <tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px;"><strong>Uhrzeit:</strong></td>
@@ -196,7 +180,7 @@ async function sendGmailNotification(orderData, gmailConfig) {
           </tr>
           ${!isReservation ? `<tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px;"><strong>Art:</strong></td>
-            <td style="padding: 6px 0; font-size: 14px;">${method === 'delivery' ? '🚴 Lieferung' : method === 'Abholung / Vor Ort' ? '🏪 Abholung / Vor Ort' : method}</td>
+            <td style="padding: 6px 0; font-size: 14px;">${method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung / Vor Ort'}</td>
           </tr>` : ''}
           ${notes && notes.trim() ? `<tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px; vertical-align: top;"><strong>⚠️ Allergien:</strong></td>
@@ -204,11 +188,8 @@ async function sendGmailNotification(orderData, gmailConfig) {
           </tr>` : ''}
         </table>
       </div>
-
       <div style="background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 16px; border: 1px solid #e5e7eb;">
-        <h3 style="margin: 0 0 10px 0; color: #111; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
-          👤 Kundendaten
-        </h3>
+        <h3 style="margin: 0 0 10px 0; color: #111; font-size: 14px; text-transform: uppercase;">👤 Kundendaten</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 6px 0; color: #666; font-size: 13px; width: 130px;"><strong>Name:</strong></td>
@@ -228,17 +209,9 @@ async function sendGmailNotification(orderData, gmailConfig) {
           </tr>` : ''}
         </table>
       </div>
-
-      ${notes && notes !== '-' ? `
-      <div style="background: #fffbeb; border-radius: 10px; padding: 16px; margin-bottom: 16px; border: 1px solid #fde68a;">
-        <h3 style="margin: 0 0 6px 0; color: #92400e; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">📝 Anmerkung</h3>
-        <p style="margin: 0; font-size: 14px; color: #333;">${notes}</p>
-      </div>
-      ` : ''}
-
       ${!isReservation && items.length > 0 ? `
       <div style="background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 16px; border: 1px solid #e5e7eb;">
-        <h3 style="margin: 0 0 12px 0; color: #8B0000; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🛒 Bestellte Artikel</h3>
+        <h3 style="margin: 0 0 12px 0; color: #8B0000; font-size: 14px; text-transform: uppercase;">🛒 Bestellte Artikel</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr style="background: #8B0000;">
             <th style="padding: 9px 10px; text-align: left; color: white; font-size: 12px; border-bottom: 2px solid #a80000;">Gericht</th>
@@ -278,19 +251,16 @@ async function sendGmailNotification(orderData, gmailConfig) {
         </table>
       </div>
       ` : ''}
-
       <div style="background: #fef3c7; border-radius: 10px; padding: 14px; margin-bottom: 16px; border: 1px solid #fde68a;">
         <p style="margin: 0; color: #92400e; font-size: 13px; text-align: center;">
           ${isReservation ? 'Bitte diese Reservierung umgehend bestätigen!' : 'Bitte diese Bestellung umgehend bearbeiten!'}
         </p>
       </div>
-
       <div style="background: #f9fafb; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
         <p style="margin: 0; font-size: 12px; color: #6b7280; text-align: center;">
           <strong>Status:</strong> ${status.charAt(0).toUpperCase() + status.slice(1)} · ${isReservation ? 'Reservierung' : 'Bestellung'}
         </p>
       </div>
-
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0 12px;">
       <p style="font-size: 11px; color: #aaa; text-align: center; margin: 0;">Kimi Sushi — Automatisiertes Benachrichtigungssystem</p>
     </div>
@@ -301,7 +271,6 @@ async function sendGmailNotification(orderData, gmailConfig) {
     : createGmailTransporter();
 
   if (!transporter) {
-    console.log('[GMAIL] No valid transporter, skipping.');
     return { success: false, reason: 'No valid Gmail credentials' };
   }
 
@@ -312,40 +281,53 @@ async function sendGmailNotification(orderData, gmailConfig) {
       subject: subject,
       html: htmlContent
     });
-
-    console.log('[GMAIL] Notification sent successfully:', info.messageId);
+    console.log('[GMAIL] Notification sent:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('[GMAIL] Error sending notification:', error);
+    console.error('[GMAIL] Error:', error);
     return { success: false, error: error.message };
   }
 }
 
-// ========== API ROUTES ==========
+// ==================== HELPERS ====================
+function sha256(str) {
+  return crypto.createHash('sha256').update(str).digest('hex');
+}
 
-// Health check
-app.get('/api/health', (req, res) => {
+async function logActivity(user, action, details) {
+  try {
+    await ActivityLog.create({
+      id: 'log_' + Date.now(),
+      user: user || 'system',
+      action,
+      details,
+      ip: 'server',
+      timestamp: new Date()
+    });
+  } catch (e) {
+    console.error('[ACTIVITY_LOG] Error:', e.message);
+  }
+}
+
+// ==================== API: HEALTH ====================
+app.get('/api/health', async (req, res) => {
   res.json({
     status: 'ok',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     gmail: {
       enabled: process.env.GMAIL_ENABLED === 'true',
       user: process.env.GMAIL_USER ? '***' + process.env.GMAIL_USER.slice(-10) : null,
-      notifyEmail: process.env.GMAIL_NOTIFY_EMAIL
     },
     timestamp: new Date().toISOString()
   });
 });
 
-// Gmail notification endpoint (hỗ trợ Gmail config từ request body)
+// ==================== API: GMAIL ====================
 app.post('/api/gmail-notify', async (req, res) => {
   try {
     const orderData = req.body;
+    if (!orderData) return res.status(400).json({ error: 'Missing order data' });
 
-    if (!orderData) {
-      return res.status(400).json({ error: 'Missing order data' });
-    }
-
-    // Lấy Gmail config từ request body (từ frontend settings)
     const gmailConfig = {
       gmailEnabled: orderData.gmailEnabled,
       gmailUser: orderData.gmailUser,
@@ -354,7 +336,6 @@ app.post('/api/gmail-notify', async (req, res) => {
     };
 
     const result = await sendGmailNotification(orderData, gmailConfig);
-
     if (result.success) {
       res.json({ success: true, message: 'Email sent successfully', messageId: result.messageId });
     } else {
@@ -366,16 +347,12 @@ app.post('/api/gmail-notify', async (req, res) => {
   }
 });
 
-// Test Gmail connection
 app.post('/api/gmail-test', async (req, res) => {
   try {
     const transporter = createGmailTransporter();
-
     await transporter.verify().then(() => {
-      console.log('[GMAIL] SMTP connection verified');
       res.json({ success: true, message: 'Gmail SMTP connected successfully!' });
     }).catch(err => {
-      console.error('[GMAIL] SMTP verification failed:', err);
       res.status(500).json({ success: false, error: err.message });
     });
   } catch (error) {
@@ -383,163 +360,235 @@ app.post('/api/gmail-test', async (req, res) => {
   }
 });
 
-// Test Gmail send (hỗ trợ credentials từ request body)
 app.post('/api/gmail-test-send', async (req, res) => {
-  const { gmailUser, gmailPassword, testMode } = req.body || {};
-
+  const { gmailUser, gmailPassword } = req.body || {};
   const result = await sendGmailNotification({
     orderType: 'order',
     customerName: 'Test Customer',
     customerPhone: '+49 123 456789',
     customerEmail: 'test@example.com',
-    pickupTime: '18:00 Uhr',
+    pickupTime: '18:00',
     items: [
       { name: 'Sake Nigiri', quantity: 2, price: '5,90 €' },
       { name: 'Dragon Roll', quantity: 1, price: '14,90 €' }
     ],
     total: '26,70'
-  }, {
-    gmailUser: gmailUser,
-    gmailPassword: gmailPassword,
-    gmailEnabled: true
-  });
-
+  }, { gmailUser, gmailPassword, gmailEnabled: true });
   res.json(result);
 });
 
-// ========== RESTAURANT API (đồng bộ với frontend) ==========
-
-// Inbox - Lưu trữ đơn hàng/đặt bàn
-app.get('/api/inbox', (req, res) => {
-  const all = [...orders, ...reservations].sort((a, b) =>
-    new Date(b.time || b.createdAt) - new Date(a.time || a.createdAt)
-  );
-  res.json(all);
+// ==================== API: MENU ====================
+app.get('/api/menu', async (req, res) => {
+  try {
+    const items = await MenuItem.find({ isVisible: true }).sort({ category: 1, name: 1 });
+    res.json(items);
+  } catch (e) {
+    console.error('[API] GET /api/menu error:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.post('/api/inbox', (req, res) => {
-  const item = req.body;
-
-  // DEBUG: Log incoming data
-  console.log('[API/INBOX] Received item type:', item?.type);
-  console.log('[API/INBOX] Items field:', JSON.stringify(item?.items));
-  console.log('[API/INBOX] Items count:', Array.isArray(item?.items) ? item.items.length : 'NOT_ARRAY');
-  if (item?.items) {
-    item.items.forEach((it, idx) => {
-      console.log(`[API/INBOX] Item[${idx}]:`, JSON.stringify(it));
-    });
+app.post('/api/menu', async (req, res) => {
+  try {
+    const items = req.body;
+    // Replace all: delete all then insert
+    await MenuItem.deleteMany({});
+    if (items && items.length > 0) {
+      await MenuItem.insertMany(items.map(item => ({ ...item, updatedAt: new Date() })));
+    }
+    logActivity(req.body?._adminUser || 'admin', 'MENU_UPDATE', `Updated ${items?.length || 0} menu items`);
+    const saved = await MenuItem.find({ isVisible: true });
+    res.json({ success: true, count: saved.length, items: saved });
+  } catch (e) {
+    console.error('[API] POST /api/menu error:', e);
+    res.status(500).json({ error: e.message });
   }
+});
 
-  if (!item.id) {
-    item.id = (item.type === 'reservation' ? 'res_' : 'order_') + Date.now();
+// ==================== API: COMBOS ====================
+app.get('/api/combos', async (req, res) => {
+  try {
+    const combos = await Combo.find({ isVisible: true }).sort({ name: 1 });
+    res.json(combos);
+  } catch (e) {
+    console.error('[API] GET /api/combos error:', e);
+    res.status(500).json({ error: e.message });
   }
-  item.createdAt = new Date().toISOString();
+});
 
-  // === ASAP RESOLUTION: wenn "asap" außerhalb der Öffnungszeiten liegt → nächste Öffnungszeit ===
-  if (item.type !== 'reservation' && item.pickupTime === 'asap') {
-    const now = new Date();
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
-    const todayKey = dayNames[now.getDay()];
-    const nextKey = dayNames[(now.getDay() + 1) % 7];
+app.post('/api/combos', async (req, res) => {
+  try {
+    const combos = req.body;
+    await Combo.deleteMany({});
+    if (combos && combos.length > 0) {
+      await Combo.insertMany(combos.map(c => ({ ...c, updatedAt: new Date() })));
+    }
+    logActivity(req.body?._adminUser || 'admin', 'COMBOS_UPDATE', `Updated ${combos?.length || 0} combos`);
+    const saved = await Combo.find({ isVisible: true });
+    res.json({ success: true, count: saved.length, items: saved });
+  } catch (e) {
+    console.error('[API] POST /api/combos error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
 
-    const parseHours = (str) => {
-      if (!str || !str.includes('-')) return null;
-      const parts = str.split('-').map(s => s.trim());
-      return {
-        start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
-        end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
+// ==================== API: TABLES ====================
+app.get('/api/tables', async (req, res) => {
+  try {
+    let tables = await Table.find({});
+    if (!tables || tables.length === 0) {
+      // Seed default tables
+      const defaults = [
+        { id: 'T1', name: 'Bàn 1', zone: 'Phòng 1', status: 'empty', orderItems: [], total: 0 },
+        { id: 'T2', name: 'Bàn 2', zone: 'Phòng 1', status: 'empty', orderItems: [], total: 0 },
+        { id: 'T3', name: 'Bàn 3', zone: 'Phòng 2', status: 'empty', orderItems: [], total: 0 },
+        { id: 'T4', name: 'Bàn 4', zone: 'Phòng 2', status: 'empty', orderItems: [], total: 0 },
+        { id: 'T5', name: 'Bàn 5 (Ngoài)', zone: 'Ngoài Trời', status: 'empty', orderItems: [], total: 0 },
+        { id: 'T6', name: 'Bàn 6 (Ngoài)', zone: 'Ngoài Trời', status: 'empty', orderItems: [], total: 0 }
+      ];
+      await Table.insertMany(defaults);
+      tables = defaults;
+    }
+    res.json(tables);
+  } catch (e) {
+    console.error('[API] GET /api/tables error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/tables', async (req, res) => {
+  try {
+    const tables = req.body;
+    await Table.deleteMany({});
+    if (tables && tables.length > 0) {
+      await Table.insertMany(tables.map(t => ({ ...t, updatedAt: new Date() })));
+    }
+    logActivity(req.body?._adminUser || 'admin', 'TABLES_UPDATE', `Updated ${tables?.length || 0} tables`);
+    const saved = await Table.find({});
+    res.json({ success: true, count: saved.length, items: saved });
+  } catch (e) {
+    console.error('[API] POST /api/tables error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==================== API: ORDERS / INBOX ====================
+app.get('/api/inbox', async (req, res) => {
+  try {
+    const ordersList = await Order.find({ type: 'order' }).sort({ createdAt: -1 });
+    const reservationsList = await Order.find({ type: 'reservation' }).sort({ createdAt: -1 });
+    const all = [...ordersList, ...reservationsList].sort((a, b) =>
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    res.json(all);
+  } catch (e) {
+    console.error('[API] GET /api/inbox error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/inbox', async (req, res) => {
+  try {
+    const item = req.body;
+
+    if (!item.id) {
+      item.id = (item.type === 'reservation' ? 'res_' : 'order_') + Date.now();
+    }
+    item.createdAt = new Date();
+    item.updatedAt = new Date();
+
+    // ASAP resolution logic
+    if (item.type !== 'reservation' && item.pickupTime === 'asap') {
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
+      const todayKey = dayNames[now.getDay()];
+
+      const settings = await getSettingsObj();
+      const parseHours = (str) => {
+        if (!str || !str.includes('-')) return null;
+        const parts = str.split('-').map(s => s.trim());
+        return {
+          start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
+          end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
+        };
       };
-    };
 
-    const getSlotsForDay = (key, offsetDays) => {
-      const h1 = settings[key + '1'] || '11:00 - 15:00';
-      const h2 = settings[key + '2'] || '17:00 - 22:00';
-      return [parseHours(h1), parseHours(h2)].filter(Boolean);
-    };
+      const todayKeyCap = todayKey.charAt(0).toUpperCase() + todayKey.slice(1);
+      const todaySlots = [
+        parseHours(settings['hours' + todayKeyCap + '1']),
+        parseHours(settings['hours' + todayKeyCap + '2'])
+      ].filter(Boolean);
 
-    const todaySlots = getSlotsForDay('hours' + todayKey.charAt(0).toUpperCase() + todayKey.slice(1));
-    const isStoreOpen = todaySlots.some(s => nowMin >= s.start && nowMin < s.end - 20);
+      const isStoreOpen = todaySlots.some(s => nowMin >= s.start && nowMin < s.end - 20);
 
-    if (isStoreOpen) {
-      // Store offen → earliest slot heute + 30min
-      const allSlots = [...todaySlots].sort((a, b) => a.start - b.start);
-      let earliest = allSlots[0].start;
-      if (nowMin >= earliest) earliest = Math.ceil((nowMin + 30) / 30) * 30;
-      const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
-      const nextMm = String(earliest % 60).padStart(2, '0');
-      item.pickupDate = now.toISOString().split('T')[0];
-      item.pickupTime = `${nextHh}:${nextMm}`;
-      item.pickupTimeDisplay = `Schnellstmöglich (ca. ${nextHh}:${nextMm} Uhr)`;
-      console.log(`[ASAP] Store offen → nächste Zeit: ${item.pickupTime}`);
-    } else {
-      // Store geschlossen → erste Öffnungszeit morgen
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const nextDayKey = dayNames[tomorrow.getDay()];
-      const nextSlots = getSlotsForDay('hours' + nextDayKey.charAt(0).toUpperCase() + nextDayKey.slice(1));
-      if (nextSlots.length > 0) {
-        const earliest = Math.min(...nextSlots.map(s => s.start));
+      if (isStoreOpen) {
+        const allSlots = [...todaySlots].sort((a, b) => a.start - b.start);
+        let earliest = allSlots[0].start;
+        if (nowMin >= earliest) earliest = Math.ceil((nowMin + 30) / 30) * 30;
         const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
         const nextMm = String(earliest % 60).padStart(2, '0');
-        item.pickupDate = tomorrow.toISOString().split('T')[0];
+        item.pickupDate = now.toISOString().split('T')[0];
         item.pickupTime = `${nextHh}:${nextMm}`;
-        item.pickupTimeDisplay = `${tomorrow.toLocaleDateString('de-DE')} um ${nextHh}:${nextMm} Uhr`;
-        console.log(`[ASAP] Store geschlossen → nächste Öffnung: ${item.pickupDate} ${item.pickupTime}`);
+        item.pickupTimeDisplay = `Schnellstmöglich (ca. ${nextHh}:${nextMm} Uhr)`;
+      } else {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextDayKey = dayNames[tomorrow.getDay()];
+        const nextDayKeyCap = nextDayKey.charAt(0).toUpperCase() + nextDayKey.slice(1);
+        const nextSlots = [
+          parseHours(settings['hours' + nextDayKeyCap + '1']),
+          parseHours(settings['hours' + nextDayKeyCap + '2'])
+        ].filter(Boolean);
+
+        if (nextSlots.length > 0) {
+          const earliest = Math.min(...nextSlots.map(s => s.start));
+          const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
+          const nextMm = String(earliest % 60).padStart(2, '0');
+          item.pickupDate = tomorrow.toISOString().split('T')[0];
+          item.pickupTime = `${nextHh}:${nextMm}`;
+          item.pickupTimeDisplay = `${tomorrow.toLocaleDateString('de-DE')} um ${nextHh}:${nextMm} Uhr`;
+        }
       }
     }
-  }
 
-  if (item.type === 'reservation') {
-    const idx = reservations.findIndex(r => r.id === item.id);
-    if (idx >= 0) {
-      reservations[idx] = item;
-    } else {
-      reservations.unshift(item);
+    // Upsert: update if exists, create if not
+    await Order.findOneAndUpdate(
+      { id: item.id },
+      { $set: item },
+      { upsert: true, new: true }
+    );
+
+    // Gmail notification
+    const gmailCfg = {
+      gmailEnabled: item.gmailEnabled || process.env.GMAIL_ENABLED === 'true',
+      gmailUser: item.gmailUser || process.env.GMAIL_USER,
+      gmailPassword: item.gmailPassword || process.env.GMAIL_APP_PASSWORD,
+      gmailNotifyEmail: item.gmailNotifyEmail || process.env.GMAIL_NOTIFY_EMAIL || process.env.GMAIL_USER
+    };
+    if (gmailCfg.gmailEnabled && gmailCfg.gmailUser && gmailCfg.gmailPassword) {
+      sendGmailNotification(item, gmailCfg).catch(err => {
+        console.error('[AUTO-GMAIL] Error:', err);
+      });
     }
-  } else {
-    const idx = orders.findIndex(o => o.id === item.id);
-    if (idx >= 0) {
-      orders[idx] = item;
-    } else {
-      orders.unshift(item);
-    }
-  }
 
-  // Gửi thông báo Gmail tự động khi có đơn mới
-  // Always use env vars as fallback (they are reliably set from .env)
-  const gmailCfg = {
-    gmailEnabled: item.gmailEnabled || process.env.GMAIL_ENABLED === 'true',
-    gmailUser: item.gmailUser || process.env.GMAIL_USER,
-    gmailPassword: item.gmailPassword || process.env.GMAIL_APP_PASSWORD,
-    gmailNotifyEmail: item.gmailNotifyEmail || process.env.GMAIL_NOTIFY_EMAIL || process.env.GMAIL_USER
-  };
-  if (gmailCfg.gmailEnabled && gmailCfg.gmailUser && gmailCfg.gmailPassword) {
-    sendGmailNotification(item, gmailCfg).catch(err => {
-      console.error('[AUTO-GMAIL] Error:', err);
-    });
-  }
+    // Telegram notification
+    const isReservation = item.type === 'reservation';
+    const customerName = item.name || item.customerName || '-';
+    const phone = item.phone || item.customerPhone || '-';
+    const customerEmail = item.email || item.customerEmail || '-';
+    const status = item.status || 'neu';
 
-  // Gửi thông báo Telegram tự động khi có đơn mới
-  const isReservation = item.type === 'reservation';
-  const customerName = item.name || item.customerName || '-';
-  const phone = item.phone || item.customerPhone || '-';
-  const customerEmail = item.email || item.customerEmail || '-';
-  const status = item.status || 'neu';
+    let telegramMsg;
+    if (isReservation) {
+      const guests = item.guests || item.persons || '-';
+      const notes = item.notes || item.remark || '-';
+      const resDate = item.date || '-';
+      const resTime = item.time || '-';
+      const fmtDate = resDate !== '-' ? resDate.split('-').reverse().join('.') : '-';
+      const fmtTime = resTime !== '-' ? `${resTime} Uhr` : '-';
 
-  let telegramMsg;
-
-  if (isReservation) {
-    const guests = item.guests || item.persons || '-';
-    const notes = item.notes || item.remark || '-';
-    const resDate = item.date || '-';
-    const resTime = item.time || '-';
-
-    const fmtDate = resDate !== '-' ? resDate.split('-').reverse().join('.') : '-';
-    const fmtTime = resTime !== '-' ? `${resTime} Uhr` : '-';
-
-    telegramMsg =
-`📅 NEUE TISCHRESERVIERUNG
+      telegramMsg = `📅 NEUE TISCHRESERVIERUNG
 
 ━━━━━━━━━━━━━━━
 🔖 Nr.: ${item.id || '-'}
@@ -554,32 +603,25 @@ app.post('/api/inbox', (req, res) => {
 📝 Anmerkung: ${notes}
 ━━━━━━━━━━━━━━━
 Status: ${status.toUpperCase()}`;
-  } else {
-    const total = item.total ? `${item.total.replace('.', ',')} €` : '-';
-    const method = item.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
-    const address = item.address && item.address !== 'Abholung / Vor Ort' ? item.address : '-';
+    } else {
+      const total = item.total ? `${item.total.replace('.', ',')} €` : '-';
+      const method = item.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
+      const address = item.address && item.address !== 'Abholung / Vor Ort' ? item.address : '-';
+      const orderDate = item.date || item.pickupDate || '-';
+      const orderTime = item.time || item.pickupTime || item.pickupTimeDisplay || '-';
+      const timeDisplay = orderTime === 'asap' ? 'So schnell wie möglich' : orderTime;
 
-    let itemsDetail = '';
-    if (item.items && item.items.length > 0) {
-      item.items.forEach(i => {
-        const qty = i.quantity || 1;
-        const price = i.price ? ` — ${i.price}` : '';
-        itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
-      });
-    } else if (item.cart && item.cart.length > 0) {
-      item.cart.forEach(i => {
-        const qty = i.quantity || 1;
-        const price = i.price ? ` — ${i.price}` : '';
-        itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
-      });
-    }
+      let itemsDetail = '';
+      const src = item.items || item.cart || [];
+      if (src.length > 0) {
+        src.forEach(i => {
+          const qty = i.quantity || 1;
+          const price = i.price ? ` — ${i.price}` : '';
+          itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
+        });
+      }
 
-    const orderDate = item.date || item.pickupDate || '-';
-    const orderTime = item.time || item.pickupTime || item.pickupTimeDisplay || '-';
-    const timeDisplay = orderTime === 'asap' ? 'So schnell wie möglich' : orderTime;
-
-    telegramMsg =
-`🍣 NEUE BESTELLUNG
+      telegramMsg = `🍣 NEUE BESTELLUNG
 
 ━━━━━━━━━━━━━━━
 📋 BESTELL-NR.: ${item.id || '-'}
@@ -594,305 +636,309 @@ ${item.method === 'delivery' ? `📍 Adresse: ${address}` : ''}
 🗓 Datum: ${orderDate !== '-' ? orderDate.split('-').reverse().join('.') : '-'}
 🕒 Abholzeit: ${timeDisplay}
 ━━━━━━━━━━━━━━━
-${item.notes && item.notes.trim() ? `⚠️ ALLERGIEN / WÜNSCHE:\n  ${item.notes.trim()}\n━━━━━━━━━━━━━━━\n` : ''}📋 Bestellte Artikel:${itemsDetail || '\n  (keine Details)'}
+${item.notes && item.notes.trim() ? `⚠️ ALLERGIEN / WÜNSCHE:
+  ${item.notes.trim()}
+━━━━━━━━━━━━━━━
+` : ''}📋 Bestellte Artikel:${itemsDetail || '\n  (keine Details)'}
 ━━━━━━━━━━━━━━━
 💰 Gesamtbetrag: ${total}
 ━━━━━━━━━━━━━━━
 Status: ${status.toUpperCase()}`;
+    }
+
+    sendTelegramMessage(telegramMsg);
+
+    // Broadcast via Socket.IO
+    io.emit(item.type === 'reservation' ? 'new_reservation' : 'new_order', item);
+
+    res.json({ success: true, id: item.id });
+  } catch (e) {
+    console.error('[API] POST /api/inbox error:', e);
+    res.status(500).json({ error: e.message });
   }
-  
-  sendTelegramMessage(telegramMsg);
-
-  // Broadcast qua Socket.IO
-  io.emit(item.type === 'reservation' ? 'new_reservation' : 'new_order', item);
-
-  res.json({ success: true, id: item.id });
 });
 
-const fs = require('fs');
-const path = require('path');
-
-// Menu API - Lưu vào file để không mất khi restart
-const MENU_FILE = path.join(__dirname, 'data', 'menu.json');
-const COMBOS_FILE = path.join(__dirname, 'data', 'combos.json');
-const SETTINGS_FILE = path.join(__dirname, 'data', 'settings.json');
-
-// Đảm bảo thư mục data tồn tại
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-}
-
-// Load menu từ file
-function loadMenuData() {
-    try {
-        if (fs.existsSync(MENU_FILE)) {
-            return JSON.parse(fs.readFileSync(MENU_FILE, 'utf8'));
-        }
-    } catch (e) { console.log('[DATA] Load menu error:', e.message); }
-    return [];
-}
-
-// Save menu vào file
-function saveMenuData(data) {
-    try {
-        fs.writeFileSync(MENU_FILE, JSON.stringify(data, null, 2));
-    } catch (e) { console.log('[DATA] Save menu error:', e.message); }
-}
-
-// Load combos từ file
-function loadCombosData() {
-    try {
-        if (fs.existsSync(COMBOS_FILE)) {
-            return JSON.parse(fs.readFileSync(COMBOS_FILE, 'utf8'));
-        }
-    } catch (e) { console.log('[DATA] Load combos error:', e.message); }
-    return [];
-}
-
-// Save combos vào file
-function saveCombosData(data) {
-    try {
-        fs.writeFileSync(COMBOS_FILE, JSON.stringify(data, null, 2));
-    } catch (e) { console.log('[DATA] Save combos error:', e.message); }
-}
-
-const menuData = loadMenuData();
-const combosData = loadCombosData();
-let settingsData = {};
-
-// Default settings if no file exists
-const defaultSettings = {
-    brandName: "Kimi Sushi",
-    logoImage: "",
-    heroImage: "images/hero_sushi.png",
-    aboutImage: "images/gallery-1.jpg",
-    phone: "+49 123 4567890",
-    email: "hallo@kimisushi.de",
-    address: "Bernhäuser Hauptstraße 27, 70794 Filderstadt",
-    seoTitle: "Kimi Sushi | Frisches Sushi & Authentische Japanische Küche",
-    seoDescription: "Genießen Sie frisches, hochwertiges Sushi bei Kimi Sushi in Filderstadt.",
-    seoKeywords: "Kimi Sushi, Sushi Filderstadt, japanisches Restaurant",
-    hoursSummary: "Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00",
-    hoursMon1: "11:00 - 15:00", hoursMon2: "17:00 - 22:00",
-    hoursTue1: "11:00 - 15:00", hoursTue2: "17:00 - 22:00",
-    hoursWed1: "11:00 - 15:00", hoursWed2: "17:00 - 22:00",
-    hoursThu1: "11:00 - 15:00", hoursThu2: "17:00 - 22:00",
-    hoursFri1: "11:00 - 15:00", hoursFri2: "17:00 - 22:00",
-    hoursSat1: "11:00 - 15:00", hoursSat2: "17:00 - 22:00",
-    hoursSun1: "17:00 - 22:00", hoursSun2: "",
-    deliveryEnabled: false,
-    taxRate1: "19", taxRate2: "7"
-};
-
-if (fs.existsSync(SETTINGS_FILE)) {
-    try { 
-        const loaded = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-        if (loaded && typeof loaded === 'object') {
-            settingsData = { ...defaultSettings, ...loaded };
-        }
-    } catch(e) {
-        settingsData = defaultSettings;
-    }
-} else {
-    settingsData = defaultSettings;
-}
-
-// Menu API
-app.get('/api/menu', (req, res) => res.json(menuData));
-app.post('/api/menu', (req, res) => {
-  menuData.length = 0;
-  menuData.push(...req.body);
-  saveMenuData(menuData);
-  res.json({ success: true, count: menuData.length });
-});
-
-// Combos API
-app.get('/api/combos', (req, res) => res.json(combosData));
-app.post('/api/combos', (req, res) => {
-  combosData.length = 0;
-  combosData.push(...req.body);
-  saveCombosData(combosData);
-  res.json({ success: true, count: combosData.length });
-});
-
-// ========== FAQ API ==========
-const FAQ_FILE = path.join(__dirname, 'data', 'faq.json');
-
-let faqData = [];
-try {
-    if (fs.existsSync(FAQ_FILE)) {
-        faqData = JSON.parse(fs.readFileSync(FAQ_FILE, 'utf8'));
-    }
-} catch (e) {
-    console.log('[DATA] Load FAQ error:', e.message);
-}
-
-function saveFaqData(data) {
-    try {
-        fs.writeFileSync(FAQ_FILE, JSON.stringify(data, null, 2));
-    } catch (e) {
-        console.log('[DATA] Save FAQ error:', e.message);
-    }
-}
-
-app.get('/api/faq', (req, res) => {
-    const visible = faqData
-        .filter(f => f.isVisible)
-        .sort((a, b) => a.order - b.order);
-    res.json(visible);
-});
-
-app.get('/api/faq/all', (req, res) => {
-    res.json([...faqData].sort((a, b) => a.order - b.order));
-});
-
-app.post('/api/faq', (req, res) => {
-    faqData.length = 0;
-    faqData.push(...req.body);
-    saveFaqData(faqData);
-    logActivity('admin', 'faq_update', `Updated ${faqData.length} FAQ items`);
-    res.json({ success: true, count: faqData.length });
-});
-
-// ========== ADMIN AUTH API ==========
-const crypto = require('crypto');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-
-let usersData = {};
-try { usersData = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); } catch(e) {}
-
-function sha256(str) {
-  return crypto.createHash('sha256').update(str).digest('hex');
-}
-
-function logActivity(user, action, details) {
+// ==================== API: FAQ ====================
+app.get('/api/faq', async (req, res) => {
   try {
-    let log = [];
-    try { log = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'activity_log.json'), 'utf8')); } catch(e) {}
-    log.unshift({
-      id: 'log_' + Date.now(),
-      timestamp: new Date().toISOString(),
-      user: user || 'system',
-      action,
-      details,
-      ip: 'server'
-    });
-    if (log.length > 1000) log = log.slice(0, 1000);
-    fs.writeFileSync(path.join(__dirname, 'data', 'activity_log.json'), JSON.stringify(log, null, 2));
-  } catch(e) { console.error('[ACTIVITY_LOG] Error:', e.message); }
+    const faqs = await FAQ.find({ isVisible: true }).sort({ order: 1 });
+    res.json(faqs);
+  } catch (e) {
+    console.error('[API] GET /api/faq error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/faq/all', async (req, res) => {
+  try {
+    const faqs = await FAQ.find({}).sort({ order: 1 });
+    res.json(faqs);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/faq', async (req, res) => {
+  try {
+    const faqs = req.body;
+    await FAQ.deleteMany({});
+    if (faqs && faqs.length > 0) {
+      await FAQ.insertMany(faqs.map(f => ({ ...f, updatedAt: new Date() })));
+    }
+    logActivity(req.body?._adminUser || 'admin', 'FAQ_UPDATE', `Updated ${faqs?.length || 0} FAQ items`);
+    const saved = await FAQ.find({}).sort({ order: 1 });
+    res.json({ success: true, count: saved.length, items: saved });
+  } catch (e) {
+    console.error('[API] POST /api/faq error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==================== API: SETTINGS ====================
+async function getSettingsObj() {
+  try {
+    let settings = await Settings.findOne({});
+    if (!settings) {
+      settings = await Settings.create({
+        brandName: 'Kimi Sushi',
+        seoTitle: 'Kimi Sushi | Frisches Sushi & Authentische Japanische Küche',
+        seoDescription: 'Genießen Sie frisches, hochwertiges Sushi bei Kimi Sushi in Filderstadt.',
+        hoursSummary: 'Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00',
+        hoursMon1: '11:00 - 15:00', hoursMon2: '17:00 - 22:00',
+        hoursTue1: '11:00 - 15:00', hoursTue2: '17:00 - 22:00',
+        hoursWed1: '11:00 - 15:00', hoursWed2: '17:00 - 22:00',
+        hoursThu1: '11:00 - 15:00', hoursThu2: '17:00 - 22:00',
+        hoursFri1: '11:00 - 15:00', hoursFri2: '17:00 - 22:00',
+        hoursSat1: '11:00 - 15:00', hoursSat2: '17:00 - 22:00',
+        hoursSun1: '17:00 - 22:00', hoursSun2: '',
+        deliveryEnabled: false,
+        taxRate1: '19', taxRate2: '7'
+      });
+    }
+    return settings.toObject();
+  } catch (e) {
+    console.error('[SETTINGS] getSettingsObj error:', e);
+    return {};
+  }
 }
 
-app.post('/api/admin/login', (req, res) => {
-  const { username, password } = req.body;
-  const user = usersData.users.find(u => u.username === username && u.active);
-  if (!user) return res.status(401).json({ success: false, message: 'Benutzer nicht gefunden' });
-  const hash = sha256(password);
-  if (user.passwordHash !== hash) return res.status(401).json({ success: false, message: 'Falsches Passwort' });
-  user.lastLogin = new Date().toISOString();
-  fs.writeFileSync(USERS_FILE, JSON.stringify(usersData, null, 2));
-  const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
-  logActivity(user.username, 'LOGIN', { role: user.role });
-  res.json({ success: true, token, user: { id: user.id, username: user.username, name: user.name, role: user.role } });
-});
-
-app.post('/api/admin/change-password', (req, res) => {
-  const { token, oldPassword, newPassword } = req.body;
-  const parts = Buffer.from(token, 'base64').toString('utf8').split(':');
-  const user = usersData.users.find(u => u.id === parts[0]);
-  if (!user || user.passwordHash !== sha256(oldPassword)) return res.status(403).json({ success: false });
-  user.passwordHash = sha256(newPassword);
-  fs.writeFileSync(USERS_FILE, JSON.stringify(usersData, null, 2));
-  logActivity(user.username, 'CHANGE_PASSWORD', {});
-  res.json({ success: true });
-});
-
-app.post('/api/admin/verify', (req, res) => {
-  const { token } = req.body;
+app.get('/api/settings', async (req, res) => {
   try {
+    const settings = await getSettingsObj();
+    res.json(settings);
+  } catch (e) {
+    console.error('[API] GET /api/settings error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/settings', async (req, res) => {
+  try {
+    const data = req.body;
+    delete data._adminUser;
+    data.updatedAt = new Date();
+    await Settings.findOneAndUpdate({}, { $set: data }, { upsert: true, new: true });
+    logActivity(req.body?._adminUser || 'admin', 'UPDATE_SETTINGS', { section: 'general' });
+    const settings = await getSettingsObj();
+    res.json({ success: true, settings });
+  } catch (e) {
+    console.error('[API] POST /api/settings error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/settings/seo', async (req, res) => {
+  try {
+    const { seoTitle, seoDescription, seoKeywords, seoTitleEn, seoDescriptionEn, seoKeywordsEn, seoAuthor, siteDomain } = req.body;
+    await Settings.findOneAndUpdate({}, {
+      $set: { seoTitle, seoDescription, seoKeywords, seoTitleEn, seoDescriptionEn, seoKeywordsEn, seoAuthor, siteDomain, updatedAt: new Date() }
+    }, { upsert: true });
+    logActivity(req.body?._adminUser || 'admin', 'UPDATE_SEO', {});
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/settings/geo', async (req, res) => {
+  try {
+    const { geoRegion, geoPosition, geoPlacename } = req.body;
+    await Settings.findOneAndUpdate({}, { $set: { geoRegion, geoPosition, geoPlacename, updatedAt: new Date() } }, { upsert: true });
+    logActivity(req.body?._adminUser || 'admin', 'UPDATE_GEO', {});
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/settings/hours', async (req, res) => {
+  try {
+    const keys = ['hoursMon1','hoursMon2','hoursTue1','hoursTue2','hoursWed1','hoursWed2','hoursThu1','hoursThu2','hoursFri1','hoursFri2','hoursSat1','hoursSat2','hoursSun1','hoursSun2','hoursSummary'];
+    const updateData = {};
+    keys.forEach(k => { if (req.body[k] !== undefined) updateData[k] = req.body[k]; });
+    updateData.updatedAt = new Date();
+    await Settings.findOneAndUpdate({}, { $set: updateData }, { upsert: true });
+    logActivity(req.body?._adminUser || 'admin', 'UPDATE_HOURS', {});
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==================== API: ADMIN AUTH ====================
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username, active: true });
+    if (!user) return res.status(401).json({ success: false, message: 'Benutzer nicht gefunden' });
+
+    const hash = sha256(password);
+    if (user.passwordHash !== hash) return res.status(401).json({ success: false, message: 'Falsches Passwort' });
+
+    user.lastLogin = new Date();
+    await user.save();
+    const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    logActivity(user.username, 'LOGIN', { role: user.role });
+    res.json({ success: true, token, user: { id: user.id, username: user.username, name: user.name, role: user.role } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/change-password', async (req, res) => {
+  try {
+    const { token, oldPassword, newPassword } = req.body;
     const parts = Buffer.from(token, 'base64').toString('utf8').split(':');
-    const user = usersData.users.find(u => u.id === parts[0]);
+    const user = await User.findOne({ id: parts[0] });
+    if (!user || user.passwordHash !== sha256(oldPassword)) return res.status(403).json({ success: false });
+
+    user.passwordHash = sha256(newPassword);
+    await user.save();
+    logActivity(user.username, 'CHANGE_PASSWORD', {});
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/verify', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const parts = Buffer.from(token, 'base64').toString('utf8').split(':');
+    const user = await User.findOne({ id: parts[0] });
     if (!user || !user.active) return res.status(401).json({ valid: false });
     res.json({ valid: true, user: { id: user.id, username: user.username, name: user.name, role: user.role } });
-  } catch(e) { res.status(401).json({ valid: false }); }
-});
-
-// ========== ANALYTICS API ==========
-const ANALYTICS_FILE = path.join(__dirname, 'data', 'analytics.json');
-let analyticsData = {};
-try { analyticsData = JSON.parse(fs.readFileSync(ANALYTICS_FILE, 'utf8')); } catch(e) {}
-
-function saveAnalytics() {
-  try { fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(analyticsData, null, 2)); } catch(e) {}
-}
-
-app.get('/api/analytics', (req, res) => res.json(analyticsData));
-
-app.post('/api/analytics/track', (req, res) => {
-  const { type, event, data } = req.body;
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const hourStr = now.getHours();
-
-  if (type === 'pageview') {
-    analyticsData.pageviews.push({ date: dateStr, hour: hourStr, path: event, timestamp: now.toISOString() });
-    analyticsData.visits.push({ date: dateStr, hour: hourStr, timestamp: now.toISOString() });
-  } else if (type === 'click') {
-    analyticsData.clicks.push({ date: dateStr, hour: hourStr, event, data, timestamp: now.toISOString() });
-  } else if (type === 'order') {
-    analyticsData.orders.push({ date: dateStr, hour: hourStr, ...data, timestamp: now.toISOString() });
-    // update daily orders
-    const dayIdx = analyticsData.dailyOrders.findIndex(d => d.date === dateStr);
-    if (dayIdx >= 0) analyticsData.dailyOrders[dayIdx].count++;
-    else analyticsData.dailyOrders.push({ date: dateStr, count: 1 });
-    // update revenue
-    const revIdx = analyticsData.dailyRevenue.findIndex(d => d.date === dateStr);
-    const amount = parseFloat(data.total) || 0;
-    if (revIdx >= 0) analyticsData.dailyRevenue[revIdx].amount += amount;
-    else analyticsData.dailyRevenue.push({ date: dateStr, amount });
-    // update top products
-    if (data.items) {
-      data.items.forEach(it => {
-        const prod = analyticsData.topProducts.find(p => p.name === it.name);
-        if (prod) { prod.count++; prod.revenue += (parseFloat(it.unitPrice) || 0) * it.quantity; }
-        else analyticsData.topProducts.push({ name: it.name, count: 1, revenue: (parseFloat(it.unitPrice) || 0) * it.quantity });
-      });
-      analyticsData.topProducts.sort((a, b) => b.count - a.count);
-      analyticsData.topProducts = analyticsData.topProducts.slice(0, 20);
-    }
-  } else if (type === 'reservation') {
-    analyticsData.reservations.push({ date: dateStr, hour: hourStr, ...data, timestamp: now.toISOString() });
-  } else if (type === 'hourly') {
-    const idx = analyticsData.hourlyDistribution.findIndex(h => h.hour === hourStr);
-    if (idx >= 0) analyticsData.hourlyDistribution[idx][event] = (analyticsData.hourlyDistribution[idx][event] || 0) + 1;
-    else {
-      const entry = { hour: hourStr };
-      entry[event] = 1;
-      analyticsData.hourlyDistribution.push(entry);
-    }
+  } catch (e) {
+    res.status(401).json({ valid: false });
   }
-
-  saveAnalytics();
-  res.json({ success: true });
 });
 
-app.post('/api/analytics/reset', (req, res) => {
-  analyticsData = { visits: [], pageviews: [], clicks: [], orders: [], reservations: [], products: [], hourlyDistribution: [], dailyOrders: [], dailyRevenue: [], topProducts: [], statusDistribution: [], lastReset: new Date().toISOString() };
-  saveAnalytics();
-  logActivity(req.body?.user || 'admin', 'RESET_ANALYTICS', {});
-  res.json({ success: true });
+// ==================== API: ANALYTICS ====================
+app.get('/api/analytics', async (req, res) => {
+  try {
+    let analytics = await Analytics.findOne({});
+    if (!analytics) {
+      analytics = await Analytics.create({
+        visits: [], pageviews: [], clicks: [],
+        orders: [], reservations: [], products: [],
+        hourlyDistribution: [], dailyOrders: [], dailyRevenue: [],
+        topProducts: [], statusDistribution: [], lastReset: null
+      });
+    }
+    res.json(analytics);
+  } catch (e) {
+    console.error('[API] GET /api/analytics error:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ========== ACTIVITY LOG API ==========
-app.get('/api/admin/activity-log', (req, res) => {
-  try { res.json(JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'activity_log.json'), 'utf8'))); }
-  catch(e) { res.json([]); }
+app.post('/api/analytics/track', async (req, res) => {
+  try {
+    const { type, event, data } = req.body;
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const hourStr = now.getHours();
+
+    let analytics = await Analytics.findOne({});
+    if (!analytics) {
+      analytics = await Analytics.create({
+        visits: [], pageviews: [], clicks: [],
+        orders: [], reservations: [], products: [],
+        hourlyDistribution: [], dailyOrders: [], dailyRevenue: [],
+        topProducts: [], statusDistribution: []
+      });
+    }
+
+    if (type === 'pageview') {
+      analytics.pageviews.push({ date: dateStr, hour: hourStr, path: event, timestamp: now });
+      analytics.visits.push({ date: dateStr, hour: hourStr, timestamp: now });
+    } else if (type === 'click') {
+      analytics.clicks.push({ date: dateStr, hour: hourStr, event, data, timestamp: now });
+    } else if (type === 'order') {
+      analytics.orders.push({ date: dateStr, hour: hourStr, ...data, timestamp: now });
+      const dayIdx = analytics.dailyOrders.findIndex(d => d.date === dateStr);
+      if (dayIdx >= 0) analytics.dailyOrders[dayIdx].count++;
+      else analytics.dailyOrders.push({ date: dateStr, count: 1 });
+      const revIdx = analytics.dailyRevenue.findIndex(d => d.date === dateStr);
+      const amount = parseFloat(data.total) || 0;
+      if (revIdx >= 0) analytics.dailyRevenue[revIdx].amount += amount;
+      else analytics.dailyRevenue.push({ date: dateStr, amount });
+      if (data.items) {
+        data.items.forEach(it => {
+          const prod = analytics.topProducts.find(p => p.name === it.name);
+          if (prod) { prod.count++; prod.revenue += (parseFloat(it.unitPrice) || 0) * it.quantity; }
+          else analytics.topProducts.push({ name: it.name, count: 1, revenue: (parseFloat(it.unitPrice) || 0) * it.quantity });
+        });
+        analytics.topProducts.sort((a, b) => b.count - a.count);
+        analytics.topProducts = analytics.topProducts.slice(0, 20);
+      }
+    } else if (type === 'reservation') {
+      analytics.reservations.push({ date: dateStr, hour: hourStr, ...data, timestamp: now });
+    } else if (type === 'hourly') {
+      const idx = analytics.hourlyDistribution.findIndex(h => h.hour === hourStr);
+      if (idx >= 0) {
+        analytics.hourlyDistribution[idx][event] = (analytics.hourlyDistribution[idx][event] || 0) + 1;
+      } else {
+        const entry = { hour: hourStr };
+        entry[event] = 1;
+        analytics.hourlyDistribution.push(entry);
+      }
+    }
+
+    await analytics.save();
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[API] POST /api/analytics/track error:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ========== SEO FILES API ==========
-const SEO_DIR = path.join(__dirname, 'public');
-const SITEMAP_FILE = path.join(SEO_DIR, 'sitemap.xml');
-const ROBOTS_FILE = path.join(SEO_DIR, 'robots.txt');
+app.post('/api/analytics/reset', async (req, res) => {
+  try {
+    await Analytics.findOneAndUpdate({}, {
+      visits: [], pageviews: [], clicks: [],
+      orders: [], reservations: [], products: [],
+      hourlyDistribution: [], dailyOrders: [], dailyRevenue: [],
+      topProducts: [], statusDistribution: [], lastReset: new Date()
+    });
+    logActivity(req.body?.user || 'admin', 'RESET_ANALYTICS', {});
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
+// ==================== API: ACTIVITY LOG ====================
+app.get('/api/admin/activity-log', async (req, res) => {
+  try {
+    const logs = await ActivityLog.find({}).sort({ timestamp: -1 }).limit(200);
+    res.json(logs);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==================== API: SEO FILES ====================
 app.get('/sitemap.xml', (req, res) => {
   const baseUrl = process.env.VPS_DOMAIN || 'https://kimisushi.de';
   const today = new Date().toISOString().split('T')[0];
@@ -911,88 +957,46 @@ app.get('/robots.txt', (req, res) => {
   res.type('text').send(`User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\nSitemap: ${baseUrl}/sitemap.xml\n`);
 });
 
-// Settings API
-app.get('/api/settings', (req, res) => res.json(settingsData));
-app.post('/api/settings', (req, res) => {
-  settingsData = req.body;
-  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsData, null, 2)); } catch(e) {}
-  logActivity(req.body?._adminUser || 'admin', 'UPDATE_SETTINGS', { section: 'general' });
-  res.json({ success: true });
-});
-
-app.post('/api/admin/settings/seo', (req, res) => {
-  const { seoTitle, seoDescription, seoKeywords, seoTitleEn, seoDescriptionEn, seoKeywordsEn, seoAuthor, siteDomain } = req.body;
-  settingsData.seoTitle = seoTitle;
-  settingsData.seoDescription = seoDescription;
-  settingsData.seoKeywords = seoKeywords;
-  settingsData.seoTitleEn = seoTitleEn;
-  settingsData.seoDescriptionEn = seoDescriptionEn;
-  settingsData.seoKeywordsEn = seoKeywordsEn;
-  settingsData.seoAuthor = seoAuthor;
-  settingsData.siteDomain = siteDomain;
-  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsData, null, 2)); } catch(e) {}
-  logActivity(req.body?._adminUser || 'admin', 'UPDATE_SEO', {});
-  res.json({ success: true });
-});
-
-app.post('/api/admin/settings/geo', (req, res) => {
-  settingsData.geoRegion = req.body.geoRegion;
-  settingsData.geoPosition = req.body.geoPosition;
-  settingsData.geoPlacename = req.body.geoPlacename;
-  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsData, null, 2)); } catch(e) {}
-  logActivity(req.body?._adminUser || 'admin', 'UPDATE_GEO', {});
-  res.json({ success: true });
-});
-
-app.post('/api/admin/settings/hours', (req, res) => {
-  const keys = ['hoursMon1','hoursMon2','hoursTue1','hoursTue2','hoursWed1','hoursWed2','hoursThu1','hoursThu2','hoursFri1','hoursFri2','hoursSat1','hoursSat2','hoursSun1','hoursSun2','hoursSummary'];
-  keys.forEach(k => { if (req.body[k] !== undefined) settingsData[k] = req.body[k]; });
-  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsData, null, 2)); } catch(e) {}
-  logActivity(req.body?._adminUser || 'admin', 'UPDATE_HOURS', {});
-  res.json({ success: true });
-});
-
-// ========== SOCKET.IO ==========
+// ==================== SOCKET.IO ====================
 io.on('connection', (socket) => {
   console.log('[SOCKET] Client connected:', socket.id);
 
-  socket.on('submit_order', (order) => {
+  socket.on('submit_order', async (order) => {
     console.log('[SOCKET] New order received:', order.id);
+
+    order.id = order.id || 'order_' + Date.now();
+    order.createdAt = new Date();
+    order.updatedAt = new Date();
+    await Order.findOneAndUpdate({ id: order.id }, { $set: order }, { upsert: true, new: true });
+
     io.emit('admin_new_order', order);
 
-    // ---------- BUILD TELEGRAM MESSAGE ----------
     const customerName = order.customerName || order.name || '-';
-    const phone        = order.customerPhone || order.phone || '-';
-    const email        = order.customerEmail || order.email || '-';
-    const orderId      = order.id || '-';
-    const pickupDate   = order.pickupDate || '-';
-    const pickupTime   = order.pickupTime || order.pickupTimeDisplay || '-';
+    const phone = order.customerPhone || order.phone || '-';
+    const email = order.customerEmail || order.email || '-';
+    const orderId = order.id || '-';
+    const pickupDate = order.pickupDate || '-';
+    const pickupTime = order.pickupTime || order.pickupTimeDisplay || '-';
     const pickupDisplay = pickupTime === 'asap' ? 'So schnell wie möglich' : pickupTime;
-    const method       = order.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
-    const address      = order.address && order.address !== 'Abholung / Vor Ort' ? order.address : null;
-    const notes        = (order.notes || '').trim();
-    const total        = order.total ? `${order.total.replace('.', ',')} €` : '-';
-    const itemCount    = order.itemCount || (order.cart ? order.cart.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0) : (order.items ? order.items.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0) : '-'));
-
-    const itemsSource  = order.items || order.cart || [];
-    let itemsDetail    = '';
+    const method = order.method === 'delivery' ? '🚴 Lieferung' : '🏪 Abholung';
+    const address = order.address && order.address !== 'Abholung / Vor Ort' ? order.address : null;
+    const notes = (order.notes || '').trim();
+    const total = order.total ? `${order.total.replace('.', ',')} €` : '-';
+    const itemCount = order.itemCount || '-';
+    const itemsSource = order.items || order.cart || [];
+    let itemsDetail = '';
     if (itemsSource.length > 0) {
       itemsSource.forEach(i => {
-        const name  = i.name || '-';
-        const qty   = parseInt(i.quantity) || 1;
+        const qty = parseInt(i.quantity) || 1;
         const price = i.price ? ` — ${i.price}` : '';
-        itemsDetail += `\n  ▸ ${name} x${qty}${price}`;
+        itemsDetail += `\n  ▸ ${i.name || '-'} x${qty}${price}`;
       });
     } else {
       itemsDetail = '\n  (keine Details)';
     }
+    const formattedDate = pickupDate !== '-' ? pickupDate.split('-').reverse().join('.') : '-';
 
-    const formattedDate = pickupDate !== '-' && pickupDate !== ''
-      ? pickupDate.split('-').reverse().join('.')
-      : '-';
-
-    const telegramMsg =
-`🍣 NEUE BESTELLUNG
+    const telegramMsg = `🍣 NEUE BESTELLUNG
 
 ━━━━━━━━━━━━━━━
 📋 BESTELL-NR.: ${orderId}
@@ -1021,9 +1025,12 @@ Status: NEU`;
     sendTelegramMessage(telegramMsg);
   });
 
-  socket.on('submit_reservation', (res) => {
-    console.log('[SOCKET] New reservation received:', res.name);
-    io.emit('admin_new_reservation', res);
+  socket.on('submit_reservation', async (resv) => {
+    console.log('[SOCKET] New reservation received:', resv.name);
+    resv.id = resv.id || 'res_' + Date.now();
+    resv.createdAt = new Date();
+    await Order.findOneAndUpdate({ id: resv.id }, { $set: resv }, { upsert: true, new: true });
+    io.emit('admin_new_reservation', resv);
   });
 
   socket.on('disconnect', () => {
@@ -1031,33 +1038,32 @@ Status: NEU`;
   });
 });
 
-// ========== STATIC FILES ==========
+// ==================== STATIC FILES ====================
 app.use(express.static('.'));
 
-// Fallback to index.html
 app.get('*', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// ========== START SERVER ==========
+// ==================== START SERVER ====================
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log('');
-  console.log('===========================================');
-  console.log('🍣 Kimi Sushi Server đang chạy!');
-  console.log(`🌐 http://localhost:${PORT}`);
-  console.log('===========================================');
-  console.log('');
-  console.log('[CONFIG] Gmail Settings:');
-  console.log(`  GMAIL_ENABLED: ${process.env.GMAIL_ENABLED === 'true' ? '✅ Bật' : '❌ Tắt'}`);
-  console.log(`  GMAIL_USER: ${process.env.GMAIL_USER || '❌ Chưa cấu hình'}`);
-  console.log(`  GMAIL_NOTIFY_EMAIL: ${process.env.GMAIL_NOTIFY_EMAIL || '(same as GMAIL_USER)'}`);
-  console.log(`  GMAIL_APP_PASSWORD: ${process.env.GMAIL_APP_PASSWORD ? '✅ Đã cấu hình' : '❌ Chưa cấu hình'}`);
-  console.log('');
-  console.log('📝 Để bật Gmail, hãy tạo file .env với:');
-  console.log('   GMAIL_ENABLED=true');
-  console.log('   GMAIL_USER=your-email@gmail.com');
-  console.log('   GMAIL_APP_PASSWORD=your-16-char-app-password');
-  console.log('   GMAIL_NOTIFY_EMAIL=notify@example.com (optional)');
-  console.log('');
-});
+
+async function start() {
+  await connectDB();
+
+  server.listen(PORT, () => {
+    console.log('');
+    console.log('===========================================');
+    console.log('🍣 Kimi Sushi Server đang chạy!');
+    console.log(`🌐 http://localhost:${PORT}`);
+    console.log(`📊 MongoDB: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '⚠️ Disconnected (offline mode)'}`);
+    console.log('===========================================');
+    console.log('');
+    console.log('[CONFIG] Gmail Settings:');
+    console.log(`  GMAIL_ENABLED: ${process.env.GMAIL_ENABLED === 'true' ? '✅ Bật' : '❌ Tắt'}`);
+    console.log(`  GMAIL_USER: ${process.env.GMAIL_USER || '❌ Chưa cấu hình'}`);
+    console.log(`  GMAIL_APP_PASSWORD: ${process.env.GMAIL_APP_PASSWORD ? '✅ Đã cấu hình' : '❌ Chưa cấu hình'}`);
+  });
+}
+
+start();

@@ -363,16 +363,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(menuGrid) {
         menuGrid.style.transition = 'opacity 0.3s ease';
-        
+
+        // Sample menu data - UI fallback only, does NOT affect database or logic
+        const sampleMenuItems = [
+            { id: 'sm_1', name: 'Lachs Nigiri', price: '5,90 €', description: 'Frischer atlantischer Lachs auf perfekt geformtem Sushireis', category: 'sushi', image: 'images/lachs_nigiri.png', pieces: '2 Stück', tag: 'Bestseller' },
+            { id: 'sm_2', name: 'Thunfisch Nigiri', price: '6,50 €', description: 'Premium Thunfisch, zart und geschmackvoll', category: 'sushi', image: 'images/thunfisch_nigiri.png', pieces: '2 Stück', tag: 'Bestseller' },
+            { id: 'sm_3', name: 'Dragon Roll', price: '14,90 €', description: 'Tempura Garnele, Avocado, Gurke, topped mit Aal und Eiklar', category: 'maki', image: 'images/dragon_roll.png', pieces: '8 Stück', tag: 'Empfehlung' },
+            { id: 'sm_4', name: 'Rainbow Roll', price: '13,90 €', description: 'California Roll topped mit buntem Lachskaviar und Lachs', category: 'maki', image: 'images/rainbow_roll.png', pieces: '8 Stück', tag: 'Neu' },
+            { id: 'sm_5', name: 'Lachs Sashimi', price: '12,90 €', description: '18 hauchdünne Scheiben frischer Lachs', category: 'sashimi', image: 'images/lachs_sashimi.png', pieces: '18 Stück', tag: 'Bestseller' },
+            { id: 'sm_6', name: 'Mix Sashimi', price: '18,90 €', description: 'Auswahl der besten Sashimi: Lachs, Thunfisch und Tintenfisch', category: 'sashimi', image: 'images/mix_sashimi.png', pieces: '22 Stück', tag: 'Empfehlung' },
+            { id: 'sm_7', name: 'California Roll', price: '9,90 €', description: 'Krabbenstick, Avocado, Gurke mit Sesam', category: 'maki', image: 'images/california_roll.png', pieces: '8 Stück', tag: '' },
+            { id: 'sm_8', name: 'Avocado Maki', price: '7,90 €', description: 'Cremige Avocado in einem perfekt gerollten Maki', category: 'maki', image: 'images/avocado_maki.png', pieces: '8 Stück', tag: 'Veggie' }
+        ];
+
         // Fetch Live Menu from Server
         fetch('/api/menu').then(r => r.json()).then(liveMenu => {
             if (liveMenu && liveMenu.length > 0) {
                 activeMenu = liveMenu;
-                renderCategoryFilters();
-                renderMenu('all');
+            } else {
+                activeMenu = sampleMenuItems;
             }
+            renderCategoryFilters();
+            renderMenu('all');
         }).catch(err => {
-            console.log("Server offline, using cached menu data.");
+            activeMenu = sampleMenuItems;
             renderCategoryFilters();
             renderMenu('all');
         });
@@ -478,6 +492,36 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderCombos() {
         if (!combosGrid) return;
         const combos = typeof getCombos === 'function' ? getCombos() : [];
+        // Sample menu set data - UI fallback only, does NOT affect database or logic
+        if (!combos || combos.length === 0) {
+            combos = [
+                {
+                    id: 'combo_sample_1',
+                    name: 'Sushi Menü Classic',
+                    subtitle: 'Perfekt für 2 Personen',
+                    price: '24,90 €',
+                    oldPrice: '29,90 €',
+                    items: '8x Nigiri Sushi\n4x Maki Roll\n1x Miso Suppe\n2x Wasabi & Ingwer',
+                    tag: "Chef's Choice"
+                },
+                {
+                    id: 'combo_sample_2',
+                    name: 'Sushi Menü Deluxe',
+                    subtitle: 'Für 3–4 Personen',
+                    price: '39,90 €',
+                    items: '12x Nigiri Sushi\n8x Maki Roll\n6x Sashimi\n2x Miso Suppe\n1x Edamame',
+                    tag: 'Bestseller'
+                },
+                {
+                    id: 'combo_sample_3',
+                    name: 'Vegetarisches Menü',
+                    subtitle: 'Für 2 Personen',
+                    price: '19,90 €',
+                    items: '6x Avocado Maki\n4x Kappa Maki\n2x Veggie Roll\n1x Edamame\n1x Miso Suppe',
+                    tag: 'Veggie'
+                }
+            ];
+        }
         combosGrid.innerHTML = '';
 
         combos.forEach((c, idx) => {

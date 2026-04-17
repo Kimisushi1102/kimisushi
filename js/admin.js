@@ -1048,7 +1048,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 price: escapeHTML(domElsCombo.price.value),
                 oldPrice: escapeHTML(domElsCombo.oldprice.value),
                 tag: escapeHTML(domElsCombo.tag.value),
-                items: escapeHTML(domElsCombo.items.value) // We allow newlines, escapeHTML preserves it slightly but we handle \n manually
+                items: escapeHTML(domElsCombo.items.value),
+                isVisible: true
             };
 
             // Fix escapeHTML for newlines

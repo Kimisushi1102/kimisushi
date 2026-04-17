@@ -1,4 +1,17 @@
 // Menu API - fetch from backend instead of hard-coded defaults
+
+// Sync version - reads from localStorage directly (for admin panel use)
+function getMenuSync() {
+    const stored = localStorage.getItem('kimi_menu');
+    try {
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch (e) {}
+    return [];
+}
+
 async function getMenu() {
     try {
         const res = await fetch('/api/menu');
@@ -48,6 +61,18 @@ async function resetToDefault() {
 }
 
 // Settings - fetched from API
+
+// Sync version - reads from localStorage directly (for admin panel use)
+function getSettingsSync() {
+    const stored = localStorage.getItem('kimi_settings');
+    try {
+        if (stored) return JSON.parse(stored);
+    } catch (e) {
+        localStorage.removeItem('kimi_settings');
+    }
+    return null;
+}
+
 async function getSettings() {
     try {
         const res = await fetch('/api/settings');
@@ -84,6 +109,19 @@ async function saveSettings(settingsObj) {
 }
 
 // Combos - fetched from API
+
+// Sync version - reads from localStorage directly (for admin panel use)
+function getCombosSync() {
+    const stored = localStorage.getItem('kimi_combos');
+    try {
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch (e) {}
+    return [];
+}
+
 async function getCombos() {
     try {
         const res = await fetch('/api/combos');

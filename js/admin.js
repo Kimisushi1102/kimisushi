@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     function initHoursManagement() {
-        const config = getSettings();
+        const config = getSettingsSync();
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         
         days.forEach(d => {
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const saveHoursBtn = document.getElementById('save-hours');
     if (saveHoursBtn) {
         saveHoursBtn.addEventListener('click', async () => {
-            const config = getSettings();
+            const config = getSettingsSync();
             const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
             days.forEach(d => {
                 const val1 = (document.getElementById('set-h-' + d + '-1') || {}).value || '';
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const settingsForm = document.getElementById('settings-form');
     function loadSettingsForm() {
         if (!settingsForm) return;
-        const config = getSettings();
+        const config = getSettingsSync();
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el) el.value = val || "";
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settingsForm) {
         settingsForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const current = getSettings();
+            const current = getSettingsSync();
             const config = {
                 ...current,
                 brandName: document.getElementById('set-name').value,
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const seoForm = document.getElementById('seo-form');
     function loadSeoForm() {
         if (!seoForm) return;
-        const config = getSettings();
+        const config = getSettingsSync();
         document.getElementById('seo-title').value = config.seoTitle || "";
         document.getElementById('seo-desc').value = config.seoDescription || "";
         document.getElementById('seo-keywords').value = config.seoKeywords || "";
@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (seoForm) {
         seoForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const config = getSettings();
+            const config = getSettingsSync();
             config.seoTitle = document.getElementById('seo-title').value;
             config.seoDescription = document.getElementById('seo-desc').value;
             config.seoKeywords = document.getElementById('seo-keywords').value;
@@ -681,7 +681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const datalist = document.getElementById('category-list');
         if (!datalist) return;
         
-        const menu = getMenu();
+        const menu = getMenuSync();
         const categories = [...new Set(menu.map(item => item.category))].filter(c => c && c.trim() !== "");
         
         // Default categories if list is empty
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const menuTableBody = document.getElementById('admin-menu-list');
         if (!menuTableBody) return;
         
-        const menu = getMenu();
+        const menu = getMenuSync();
         menuTableBody.innerHTML = '';
 
         // Update category datalist for the input
@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function editItemPreFill(id) {
-        const currentMenu = getMenu();
+        const currentMenu = getMenuSync();
         const item = currentMenu.find(i => i.id === id);
         if (item) {
             editingId = id;
@@ -833,7 +833,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pieces: escapeHTML(domEls.pieces.value) || ""
         };
 
-        let currentMenu = getMenu();
+        let currentMenu = getMenuSync();
 
         if (editingId) {
             // Update existing
@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     function deleteItem(id) {
-        let currentMenu = getMenu();
+        let currentMenu = getMenuSync();
         currentMenu = currentMenu.filter(item => item.id !== id);
         saveMenu(currentMenu);
         renderTable();
@@ -870,7 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resetBtn.addEventListener('click', () => {
         if(confirm("Bạn có chắc chắn muốn Xóa toàn bộ và khôi phục Thực đơn Mặc định không?")) {
-            saveMenu(getMenu()).then(() => {
+            saveMenu(getMenuSync()).then(() => {
                 showToast("Đã khôi phục & Đồng bộ POS.");
                 renderTable();
                 notifyPosUpdate();
@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (mockDataBtn) {
         mockDataBtn.addEventListener('click', () => {
             if(confirm("Bạn có muốn tạo ra 50 món ăn ngẫu nhiên để Test không?")) {
-                const currentMenu = getMenu();
+                const currentMenu = getMenuSync();
                 
                 const templates = [
                     { name: "Spicy Tuna Roll", image: "images/dragon_roll.png", category: "maki", p: 8.90, desc: "Scharfer Thunfisch mit Frühlingszwiebeln und Chili-Mayo.", pieces: "8 Stück" },
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderCombosTable() {
         if (!adminCombosList) return;
-        const combos = getCombos();
+        const combos = getCombosSync();
         adminCombosList.innerHTML = '';
 
         if (combos.length === 0) {
@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
                 if(confirm("Bạn có chắc muốn xoá Combo này?")) {
-                    let combos = getCombos();
+                    let combos = getCombosSync();
                     saveCombos(combos.filter(item => item.id !== id));
                     renderCombosTable();
                     showToast("Đã xoá Combo.", true);
@@ -1011,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.combo-edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.getAttribute('data-id');
-                const combos = getCombos();
+                const combos = getCombosSync();
                 const item = combos.find(i => i.id === id);
                 if (item) {
                     editingComboId = id;
@@ -1054,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fix escapeHTML for newlines
             formData.items = domElsCombo.items.value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-            let currentCombos = getCombos();
+            let currentCombos = getCombosSync();
 
             if (editingComboId) {
                 currentCombos = currentCombos.map(item => {
@@ -1316,10 +1316,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Data Management (Backup/Restore) ---
     window.exportSystemData = function() {
         const data = {
-            menu: getMenu(),
+            menu: getMenuSync(),
             tables: getTables(),
-            settings: getSettings(),
-            combos: getCombos(),
+            settings: getSettingsSync(),
+            combos: getCombosSync(),
             exportDate: new Date().toISOString()
         };
         

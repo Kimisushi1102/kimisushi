@@ -171,24 +171,33 @@ document.addEventListener('DOMContentLoaded', () => {
         activeMenu = await loadMenuForWebsite();
         renderCategoryFilters();
         renderMenu();
-        
+
         // Load combos from server (server is primary source)
+        // Handle both raw array (Vercel/KV) and {success, items} (local MongoDB server) formats
         try {
             const res = await fetch('/api/combos');
             if (res.ok) {
-                const serverCombos = await res.json();
-                if (serverCombos && Array.isArray(serverCombos) && serverCombos.length > 0) {
+                const raw = await res.json();
+                // Normalize: handle { success, items } format from MongoDB server vs raw array from KV
+                const serverCombos = (raw && raw.items && Array.isArray(raw.items))
+                    ? raw.items
+                    : (Array.isArray(raw) ? raw : []);
+                if (serverCombos.length > 0) {
+                    // Update activeCombos so global renderCombos() uses server data
+                    activeCombos = serverCombos;
                     // Save to localStorage for offline use
                     if (typeof saveCombos === 'function') {
                         saveCombos(serverCombos);
                     }
-                    // Re-render combos with server data
-                    if (typeof renderCombos === 'function') {
-                        renderCombos();
+                    // Re-render combos with server data (global renderCombos is defined below)
+                    if (typeof window.renderCombosGlobal === 'function') {
+                        window.renderCombosGlobal();
                     }
                 }
             }
-        } catch (e) {}
+        } catch (e) {
+            console.warn('[WEBSITE] Combos API error:', e);
+        }
     })();
     
     // --- 1. Mobile Menu Toggle ---
@@ -270,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterTabsContainer = document.getElementById('filter-tabs-container');
 
     let activeMenu = typeof getMenu === 'function' ? getMenu() : [];
+    let activeCombos = [];
 
     function renderCategoryFilters() {
         if (!filterTabsContainer) return;
@@ -491,7 +501,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCombos() {
         if (!combosGrid) return;
-        const combos = typeof getCombos === 'function' ? getCombos() : [];
+        // Use activeCombos (updated by async load) or fallback to localStorage
+        let combos = activeCombos.length > 0 ? activeCombos : (typeof getCombos === 'function' ? getCombos() : []);
         // Sample menu set data - UI fallback only, does NOT affect database or logic
         if (!combos || combos.length === 0) {
             combos = [
@@ -603,6 +614,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(combosGrid) {
         renderCombos();
     }
+
+    // Expose renderCombos globally so the async menu loader (above) can call it
+    window.renderCombosGlobal = renderCombos;
 
     // --- 5. Back to Top Button ---
     const backToTopBtn = document.getElementById('back-to-top');

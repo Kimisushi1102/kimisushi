@@ -809,6 +809,1080 @@
             .grid-2, .grid-3, .grid-4, .grid-6 { grid-template-columns: 1fr; }
             .admin-content-area {
                 padding: 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            .admin-content-area {
+                padding: 12px;
+            }
+        }
+
+        /* ================================================ */
+        /* ==================== POS ====================== */
+        /* ================================================ */
+
+        /* --- POS Layout --- */
+        #section-pos {
+            height: calc(100vh - 120px) !important;
+            display: flex !important;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f3f4f6;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .pos-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .pos-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .pos-logo {
+            width: 36px;
+            height: 36px;
+            background: #8B0000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .pos-header-info .pos-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1C1C1C;
+            line-height: 1.2;
+        }
+
+        .pos-header-info .pos-datetime {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .pos-header-search {
+            flex: 1;
+            min-width: 160px;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .pos-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .pos-search-input {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .pos-search-input:focus {
+            outline: none;
+            border-color: #8B0000;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(139,0,0,0.08);
+        }
+
+        .pos-header-right {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .pos-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .pos-action-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        /* --- POS Body --- */
+        .pos-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* --- Menu Panel --- */
+        .pos-menu-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f3f4f6;
+        }
+
+        /* Categories */
+        .pos-cat-wrapper {
+            flex-shrink: 0;
+            padding: 10px 12px 6px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .pos-cat-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+
+        .pos-cat-scroll::-webkit-scrollbar { display: none; }
+
+        .pos-cat-btn {
+            flex-shrink: 0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .pos-cat-btn:hover {
+            border-color: #8B0000;
+            color: #8B0000;
+        }
+
+        .pos-cat-btn.active {
+            background: #8B0000;
+            border-color: #8B0000;
+            color: #fff;
+        }
+
+        /* Menu Grid */
+        .pos-grid-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .pos-item-card {
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 100px;
+        }
+
+        .pos-item-card:hover {
+            border-color: #8B0000;
+            box-shadow: 0 2px 8px rgba(139,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        .pos-item-card:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .pos-item-card.pos-out-of-stock {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pos-item-img {
+            width: 100%;
+            height: 48px;
+            border-radius: 8px;
+            background: #fafafa;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d1d5db;
+        }
+
+        .pos-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pos-item-info {
+            flex: 1;
+        }
+
+        .pos-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1C1C1C;
+            line-height: 1.3;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .pos-item-sub {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .pos-item-price {
+            font-size: 13px;
+            font-weight: 700;
+            color: #8B0000;
+        }
+
+        .pos-stock-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .pos-combo-card {
+            border-color: #C5A059;
+        }
+
+        .pos-combo-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px dashed #f0f0f0;
+        }
+
+        .pos-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #C5A059;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .pos-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .pos-empty-state p {
+            font-size: 14px;
+        }
+
+        /* --- Cart Panel --- */
+        .pos-cart-panel {
+            width: 320px;
+            flex-shrink: 0;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pos-cart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+        }
+
+        .pos-cart-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1C1C1C;
+        }
+
+        .pos-cart-badge {
+            background: #8B0000;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .pos-cart-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        .pos-customer-row {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+        }
+
+        .pos-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .pos-input:focus {
+            outline: none;
+            border-color: #8B0000;
+            box-shadow: 0 0 0 2px rgba(139,0,0,0.08);
+        }
+
+        /* Cart Scroll */
+        .pos-cart-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px 12px;
+        }
+
+        .pos-cart-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+            color: #d1d5db;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .pos-cart-empty p {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .pos-cart-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .pos-cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .pos-cart-item-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pos-cart-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pos-cart-itemname {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1C1C1C;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pos-cart-item-note {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .pos-cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .pos-qty-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            color: #374151;
+            flex-shrink: 0;
+        }
+
+        .pos-qty-btn:hover {
+            background: #f3f4f6;
+            border-color: #8B0000;
+            color: #8B0000;
+        }
+
+        .pos-qty-val {
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            color: #1C1C1C;
+        }
+
+        .pos-cart-item-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: #8B0000;
+            min-width: 50px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .pos-cart-remove {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d1d5db;
+            border-radius: 4px;
+            flex-shrink: 0;
+            transition: color 0.15s;
+        }
+
+        .pos-cart-remove:hover {
+            color: #ef4444;
+        }
+
+        .pos-cart-combo-items {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+            padding-left: 4px;
+        }
+
+        /* Totals */
+        .pos-totals {
+            flex-shrink: 0;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pos-totals-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+            padding: 3px 0;
+        }
+
+        .pos-totals-divider {
+            border-top: 1px solid #e5e7eb;
+            margin: 6px 0;
+        }
+
+        .pos-totals-grand {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1C1C1C;
+        }
+
+        .pos-grand-total {
+            color: #8B0000;
+        }
+
+        /* Payment Methods */
+        .pos-payment-methods {
+            flex-shrink: 0;
+            padding: 10px 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .pos-payment-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .pos-payment-btns {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        .pos-payment-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px;
+            border-radius: 8px;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 10px;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .pos-payment-btn:hover {
+            border-color: #8B0000;
+            color: #8B0000;
+        }
+
+        .pos-payment-btn.active {
+            background: #8B0000;
+            border-color: #8B0000;
+            color: #fff;
+        }
+
+        /* Actions */
+        .pos-actions {
+            flex-shrink: 0;
+            padding: 10px 16px 14px;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pos-btn-print {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .pos-btn-print:hover {
+            background: #f3f4f6;
+        }
+
+        .pos-btn-pay {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            background: #8B0000;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .pos-btn-pay:hover:not(:disabled) {
+            background: #700000;
+        }
+
+        .pos-btn-pay:disabled {
+            cursor: not-allowed;
+        }
+
+        /* FAB */
+        .pos-cart-fab {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #8B0000;
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 16px rgba(139,0,0,0.35);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            position: fixed;
+        }
+
+        .pos-cart-fab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #C5A059;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        /* Modals */
+        .pos-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+
+        .pos-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .pos-modal-box {
+            background: #fff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            transform: scale(0.95);
+            transition: transform 0.2s;
+        }
+
+        .pos-modal-overlay.show .pos-modal-box {
+            transform: scale(1);
+        }
+
+        .pos-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .pos-modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1C1C1C;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pos-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        .pos-modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        .pos-modal-body {
+            padding: 20px;
+        }
+
+        /* Payment Confirm */
+        .pos-payment-summary {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .pos-payment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            padding: 6px 0;
+        }
+
+        .pos-payment-amount {
+            font-size: 22px;
+            font-weight: 800;
+            color: #8B0000;
+        }
+
+        .pos-payment-btns-confirm {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Discount Form */
+        .pos-form-group {
+            margin-bottom: 16px;
+        }
+
+        .pos-form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .pos-form-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0 16px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .pos-form-divider::before,
+        .pos-form-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .pos-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Success Modal */
+        .pos-modal-success {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .pos-success-icon {
+            margin-bottom: 16px;
+        }
+
+        .pos-success-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1C1C1C;
+            margin-bottom: 8px;
+        }
+
+        .pos-success-id {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .pos-success-total {
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 24px;
+        }
+
+        .pos-success-total strong {
+            font-size: 24px;
+            font-weight: 800;
+            color: #8B0000;
+        }
+
+        /* Buttons */
+        .pos-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            background: #8B0000;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .pos-btn-primary:hover {
+            background: #700000;
+        }
+
+        .pos-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .pos-btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .pos-btn-lg {
+            padding: 14px 24px;
+            font-size: 15px;
+        }
+
+        .pos-btn-pay-modal {
+            background: #22c55e;
+        }
+
+        .pos-btn-pay-modal:hover {
+            background: #16a34a;
+        }
+
+        /* Toast */
+        #pos-toast-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .pos-toast {
+            background: #1C1C1C;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .pos-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .pos-toast--success { background: #16a34a; }
+        .pos-toast--error { background: #dc2626; }
+
+        /* --- POS Mobile Responsive --- */
+        @media (max-width: 1024px) {
+            .pos-cart-panel {
+                width: 300px;
+            }
+            .pos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            #section-pos {
+                height: calc(100vh - 80px) !important;
+            }
+
+            .pos-body {
+                position: relative;
+            }
+
+            .pos-menu-panel {
+                width: 100%;
+            }
+
+            .pos-cart-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 85vw;
+                max-width: 360px;
+                z-index: 300;
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            }
+
+            .pos-cart-panel.open {
+                transform: translateX(0);
+            }
+
+            .pos-cart-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 299;
+            }
+
+            .pos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+
+            .pos-cart-fab {
+                display: flex !important;
+                bottom: 90px;
+            }
+
+            .pos-header {
+                padding: 10px 12px;
+            }
+
+            .pos-action-btn .sm\:inline {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+            }
+
+            .pos-item-card {
+                padding: 10px;
+                min-height: 90px;
+            }
+
+            .pos-cart-panel {
+                width: 100vw;
+                max-width: 100vw;
+                border-radius: 20px 20px 0 0;
+                top: auto;
+                height: 90vh;
+            }
+        }
+
+        /* --- POS: Hide FAB when cart is open on mobile --- */
+        @media (max-width: 768px) {
+            .pos-cart-panel.open ~ .pos-cart-fab,
+            .pos-cart-panel.open + .pos-cart-fab {
+                display: none !important;
+            }
+        }
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4, .grid-6 { grid-template-columns: 1fr; }
+            .admin-content-area {
+                padding: 16px;
                 /* Space for mobile bottom nav (72px nav + 8px safety) */
                 padding-bottom: 96px;
             }
@@ -1520,12 +2594,238 @@
                 </div>
 
                 <!-- ===================== SECTION: POS ===================== -->
-                <div id="section-pos" class="admin-section" style="height: calc(100vh - 160px);">
-                    <div class="section-header">
-                        <h1 class="section-title">Giao diện Bán hàng (POS)</h1>
-                        <p class="section-subtitle">Phần mềm bán hàng chuyên nghiệp</p>
+                <div id="section-pos" class="admin-section pos-management" style="height: calc(100vh - 160px);">
+
+                    <!-- POS Header -->
+                    <div class="pos-header">
+                        <div class="pos-header-left">
+                            <div class="pos-logo">
+                                <i class="ph-fill ph-flower-lotus text-xl"></i>
+                            </div>
+                            <div class="pos-header-info">
+                                <h2 class="pos-title">Kimi Sushi POS</h2>
+                                <span class="pos-datetime" id="pos-datetime"></span>
+                            </div>
+                        </div>
+                        <div class="pos-header-search">
+                            <i class="ph ph-magnifying-glass pos-search-icon"></i>
+                            <input type="text" id="pos-search-input" placeholder="Gericht suchen..." class="pos-search-input" oninput="posSearch(this.value)">
+                        </div>
+                        <div class="pos-header-right">
+                            <button class="pos-action-btn" onclick="openPOSDiscountModal()" title="Rabatt">
+                                <i class="ph ph-percent text-lg"></i>
+                                <span class="hidden sm:inline">Rabatt</span>
+                            </button>
+                            <button class="pos-action-btn" onclick="clearPOSCart()" id="pos-clear-btn" style="display:none;" title="Leeren">
+                                <i class="ph ph-trash text-lg"></i>
+                                <span class="hidden sm:inline">Leeren</span>
+                            </button>
+                        </div>
                     </div>
-                    <iframe src="billing/index.html" class="w-full h-[calc(100vh-240px)] border-0 rounded-2xl bg-gray-50"></iframe>
+
+                    <!-- POS Body -->
+                    <div class="pos-body">
+
+                        <!-- Menu Panel (left) -->
+                        <div class="pos-menu-panel">
+                            <!-- Category Tabs -->
+                            <div class="pos-cat-wrapper">
+                                <div class="pos-cat-scroll" id="pos-category-list">
+                                    <!-- Rendered by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Menu Grid -->
+                            <div class="pos-grid-wrapper">
+                                <div class="pos-grid" id="pos-menu-grid">
+                                    <!-- Rendered by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cart Panel (right) -->
+                        <div class="pos-cart-panel" id="pos-cart-panel">
+                            <div class="pos-cart-header">
+                                <div class="pos-cart-title">
+                                    <i class="ph ph-shopping-cart text-[#8B0000]"></i>
+                                    <span>Warenkorb</span>
+                                    <span class="pos-cart-badge" id="pos-cart-count">0</span>
+                                </div>
+                                <button class="pos-cart-toggle md:hidden" onclick="togglePOSCartMobile()">
+                                    <i class="ph ph-x text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Customer Info -->
+                            <div class="pos-customer-row">
+                                <input type="text" id="pos-customer-name" placeholder="Name (optional)" class="pos-input" oninput="posCustomerName=this.value">
+                                <input type="text" id="pos-customer-phone" placeholder="Tel. (optional)" class="pos-input" oninput="posCustomerPhone=this.value">
+                            </div>
+
+                            <!-- Cart Items -->
+                            <div class="pos-cart-scroll" id="pos-cart-list">
+                                <!-- Rendered by JS -->
+                            </div>
+
+                            <!-- Totals -->
+                            <div class="pos-totals">
+                                <div class="pos-totals-row">
+                                    <span>Zwischensumme</span>
+                                    <span id="pos-subtotal">0,00 €</span>
+                                </div>
+                                <div class="pos-totals-row pos-totals-discount hidden">
+                                    <span>Rabatt</span>
+                                    <span id="pos-discount">-0,00 €</span>
+                                </div>
+                                <div class="pos-totals-row">
+                                    <span>Netto</span>
+                                    <span id="pos-taxable">0,00 €</span>
+                                </div>
+                                <div class="pos-totals-row pos-tax-row">
+                                    <span>MwSt. <span id="pos-tax-rate">19</span>%</span>
+                                    <span id="pos-tax">0,00 €</span>
+                                </div>
+                                <div class="pos-totals-divider"></div>
+                                <div class="pos-totals-row pos-totals-grand">
+                                    <span>Gesamt</span>
+                                    <span class="pos-grand-total" id="pos-total">0,00 €</span>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="pos-payment-methods">
+                                <div class="pos-payment-label">Zahlungsart</div>
+                                <div class="pos-payment-btns">
+                                    <button class="pos-payment-btn active" data-method="cash" onclick="selectPOSPayment('cash')">
+                                        <i class="ph ph-money text-lg"></i>
+                                        <span>Bar</span>
+                                    </button>
+                                    <button class="pos-payment-btn" data-method="card" onclick="selectPOSPayment('card')">
+                                        <i class="ph ph-credit-card text-lg"></i>
+                                        <span>Karte</span>
+                                    </button>
+                                    <button class="pos-payment-btn" data-method="voucher" onclick="selectPOSPayment('voucher')">
+                                        <i class="ph ph-ticket text-lg"></i>
+                                        <span>Gutschein</span>
+                                    </button>
+                                    <button class="pos-payment-btn" data-method="transfer" onclick="selectPOSPayment('transfer')">
+                                        <i class="ph ph-arrows-left-right text-lg"></i>
+                                        <span>Überweisung</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pos-actions">
+                                <button class="pos-btn-print" id="pos-print-btn" onclick="openPOSPaymentModal()" style="display:none;">
+                                    <i class="ph ph-printer text-lg"></i>
+                                    <span>Drucken</span>
+                                </button>
+                                <button class="pos-btn-pay" id="pos-pay-btn" onclick="openPOSPaymentModal()" disabled style="opacity:0.5">
+                                    <i class="ph ph-check-circle text-lg"></i>
+                                    <span>Bezahlt</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Cart Toggle FAB -->
+                    <button class="pos-cart-fab md:hidden" id="pos-cart-fab" onclick="openPOSCartMobile()" style="display:none;">
+                        <i class="ph ph-shopping-cart text-xl"></i>
+                        <span class="pos-cart-fab-badge" id="pos-cart-count-fab">0</span>
+                    </button>
+
+                </div>
+
+                <!-- POS Modals -->
+
+                <!-- Payment Confirmation Modal -->
+                <div id="pos-payment-modal" class="pos-modal-overlay">
+                    <div class="pos-modal-box">
+                        <div class="pos-modal-header">
+                            <h3 class="pos-modal-title">
+                                <i class="ph ph-credit-card text-[#8B0000]"></i>
+                                Zahlung bestätigen
+                            </h3>
+                            <button class="pos-modal-close" onclick="closePOSPaymentModal()">
+                                <i class="ph ph-x text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="pos-modal-body">
+                            <div class="pos-payment-summary">
+                                <div class="pos-payment-row">
+                                    <span>Gesamtbetrag</span>
+                                    <span class="pos-payment-amount" id="pos-payment-total">0,00 €</span>
+                                </div>
+                                <div class="pos-payment-row">
+                                    <span>Zahlungsart</span>
+                                    <span id="pos-payment-method-label">Bar</span>
+                                </div>
+                            </div>
+                            <div class="pos-payment-btns-confirm">
+                                <button class="pos-btn-secondary pos-btn-lg" onclick="closePOSPaymentModal()">
+                                    <i class="ph ph-x text-lg"></i> Abbrechen
+                                </button>
+                                <button class="pos-btn-secondary pos-btn-lg" onclick="confirmPOSPayment(true)">
+                                    <i class="ph ph-printer text-lg"></i> Drucken
+                                </button>
+                                <button class="pos-btn-primary pos-btn-lg pos-btn-pay-modal" onclick="confirmPOSPayment(false)">
+                                    <i class="ph ph-check text-lg"></i> Bezahlt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Modal -->
+                <div id="pos-discount-modal" class="pos-modal-overlay">
+                    <div class="pos-modal-box">
+                        <div class="pos-modal-header">
+                            <h3 class="pos-modal-title">
+                                <i class="ph ph-percent text-[#8B0000]"></i>
+                                Rabatt gewähren
+                            </h3>
+                            <button class="pos-modal-close" onclick="closePOSDiscountModal()">
+                                <i class="ph ph-x text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="pos-modal-body">
+                            <div class="pos-form-group">
+                                <label class="pos-form-label">Prozent (%)</label>
+                                <input type="number" id="pos-discount-pct" class="pos-input" placeholder="0" min="0" max="100">
+                            </div>
+                            <div class="pos-form-divider">
+                                <span>oder</span>
+                            </div>
+                            <div class="pos-form-group">
+                                <label class="pos-form-label">Betrag (€)</label>
+                                <input type="number" id="pos-discount-amt" class="pos-input" placeholder="0,00" step="0.01">
+                            </div>
+                            <div class="pos-modal-actions">
+                                <button class="pos-btn-secondary" onclick="removePOSDiscount()">
+                                    <i class="ph ph-trash text-sm"></i> Rabatt entfernen
+                                </button>
+                                <button class="pos-btn-primary" onclick="applyPOSDiscount()">
+                                    <i class="ph ph-check text-sm"></i> Anwenden
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Modal -->
+                <div id="pos-success-modal" class="pos-modal-overlay">
+                    <div class="pos-modal-box pos-modal-success">
+                        <div class="pos-success-icon">
+                            <i class="ph ph-check-circle text-6xl text-green-500"></i>
+                        </div>
+                        <h3 class="pos-success-title">Bestellung erfolgreich!</h3>
+                        <p class="pos-success-id" id="pos-success-id">#00000</p>
+                        <p class="pos-success-total">Gesamt: <strong id="pos-success-total">0,00 €</strong></p>
+                        <button class="pos-btn-primary pos-btn-lg" onclick="closePOSSuccessModal()">
+                            <i class="ph ph-check text-lg"></i> OK
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ===================== SECTION: INBOX ===================== -->
@@ -2733,6 +4033,7 @@
 
     <!-- External Scripts -->
     <script src="js/data.js?v=2.0"></script>
+    <script src="js/pos.js"></script>
     <script src="js/admin-orders.js?v=2.0"></script>
     <script src="js/admin-analytics.js?v=2.0"></script>
     <script src="js/admin-seo.js?v=2.0"></script>

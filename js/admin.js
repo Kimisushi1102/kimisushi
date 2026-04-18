@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tableManagement = document.getElementById('table-management');
     const tunnelManagement = document.getElementById('tunnel-management');
     const financeReport = document.getElementById('finance-report');
-    const posManagement = document.getElementById('pos-management');
+    const posManagement = document.getElementById('section-pos');
     const inboxManagement = document.getElementById('inbox-management');
     const sectionDashboard = document.getElementById('section-dashboard');
     const sectionAnalytics = document.getElementById('section-analytics');
@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (section === 'media') initMediaGallery();
         if (section === 'hours') initHoursManagement();
         if (section === 'faq' && typeof window.loadFaq === 'function') window.loadFaq();
+        if (section === 'pos' && typeof window.initPOS === 'function') window.initPOS();
     };
 
     function initHoursManagement() {
@@ -257,7 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const contentToSection = {
             'menu-management': 'menu', 'combos-management': 'combos', 'settings-management': 'settings',
             'seo-management': 'seo', 'table-management': 'tables', 'tunnel-management': 'tunnel',
-            'finance-report': 'finance', 'pos-management': 'pos', 'inbox-management': 'inbox'
+            'finance-report': 'finance', 'section-pos': 'pos', 'inbox-management': 'inbox'
         };
         const sec = contentToSection[activeContent?.id];
         if (sec) switchSection(sec);

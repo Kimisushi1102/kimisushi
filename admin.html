@@ -823,13 +823,17 @@
 
         /* --- POS Layout --- */
         #section-pos {
-            height: calc(100vh - 120px) !important;
-            display: flex !important;
-            flex-direction: column;
+            height: calc(100vh - 120px);
             overflow: hidden;
             background: #f3f4f6;
-            padding: 0 !important;
-            margin: 0 !important;
+            padding: 0;
+            margin: 0;
+            /* Start hidden — admin-section handles initial display:none */
+        }
+
+        #section-pos:not(.hidden) {
+            display: flex;
+            flex-direction: column;
         }
 
         .pos-header {
@@ -935,6 +939,378 @@
             border-color: #d1d5db;
         }
 
+        /* --- POS Order Type Selector --- */
+        .pos-order-type-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .pos-order-type-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1.5px solid #e5e7eb;
+            background: #fff;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pos-order-type-btn:hover {
+            border-color: #8B0000;
+            color: #8B0000;
+        }
+
+        .pos-order-type-btn.active {
+            background: #8B0000;
+            border-color: #8B0000;
+            color: #fff;
+        }
+
+        /* --- POS Area Tabs --- */
+        .pos-area-bar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .pos-area-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .pos-area-tab:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .pos-area-tab.active {
+            background: #8B0000;
+            color: #fff;
+        }
+
+        /* --- POS Table Grid --- */
+        .pos-table-grid-wrapper {
+            display: none;
+            padding: 8px 12px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .pos-table-grid-wrapper.visible {
+            display: block;
+        }
+
+        .pos-table-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .pos-table-card {
+            min-width: 80px;
+            max-width: 110px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .pos-table-card:hover {
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .pos-table-card.active {
+            border-color: #8B0000;
+            background: #fff5f5;
+        }
+
+        .pos-table-card.status-free {
+            border-color: #e5e7eb;
+            background: #fff;
+        }
+
+        .pos-table-card.status-ordered {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .pos-table-card.status-paid {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .pos-table-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .pos-table-id {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
+        .pos-table-status {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 3px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .pos-table-status.status-free { color: #6b7280; background: #f3f4f6; }
+        .pos-table-status.status-ordered { color: #92400e; background: #fef3c7; }
+        .pos-table-status.status-paid { color: #065f46; background: #d1fae5; }
+
+        .pos-table-bills {
+            font-size: 9px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        /* --- POS Cart Context --- */
+        .pos-cart-context {
+            padding: 4px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .pos-context-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #374151;
+        }
+
+        .pos-context-type {
+            font-weight: 600;
+            color: #8B0000;
+        }
+
+        .pos-context-sep {
+            color: #d1d5db;
+        }
+
+        .pos-context-area,
+        .pos-context-table {
+            font-weight: 500;
+        }
+
+        .pos-context-bill {
+            color: #6b7280;
+            background: #e5e7eb;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+        }
+
+        /* --- POS Bill Tabs --- */
+        .pos-bill-tabs {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px 0;
+            overflow-x: auto;
+            flex-shrink: 0;
+            flex-wrap: nowrap;
+        }
+
+        .pos-bill-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px 6px 0 0;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            max-width: 100px;
+        }
+
+        .pos-bill-tab:hover {
+            background: #f3f4f6;
+        }
+
+        .pos-bill-tab.active {
+            background: #fff;
+            color: #8B0000;
+            border-color: #8B0000;
+            font-weight: 600;
+        }
+
+        .pos-bill-tab.paid {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .pos-bill-tab-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60px;
+        }
+
+        .pos-bill-tab-total {
+            font-weight: 700;
+            font-size: 10px;
+        }
+
+        .pos-bill-tab-add {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            border: 1px dashed #d1d5db;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .pos-bill-tab-add:hover {
+            border-color: #8B0000;
+            color: #8B0000;
+            background: #fff5f5;
+        }
+
+        /* --- POS Item Selection (for split bill) --- */
+        .pos-cart-item.selected {
+            background: #fff5f5;
+            border-color: #8B0000;
+        }
+
+        .pos-cart-item.selected .pos-item-selector {
+            background: #8B0000;
+            color: #fff;
+        }
+
+        .pos-item-selector {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #d1d5db;
+            background: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.1s;
+        }
+
+        .pos-item-selector.checked {
+            background: #8B0000;
+            border-color: #8B0000;
+            color: #fff;
+        }
+
+        /* --- POS Split Bill Actions --- */
+        .pos-split-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .pos-split-actions.hidden {
+            display: none;
+        }
+
+        .pos-split-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #374151;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pos-split-btn:hover {
+            border-color: #8B0000;
+            color: #8B0000;
+        }
+
+        .pos-split-btn.primary {
+            background: #8B0000;
+            border-color: #8B0000;
+            color: #fff;
+        }
+
+        .pos-split-btn.primary:hover {
+            background: #a00000;
+        }
+
+        .pos-split-selected-count {
+            font-size: 11px;
+            color: #6b7280;
+            margin-left: auto;
+        }
+
+        .pos-split-select {
+            flex: 1;
+            min-width: 0;
+            padding: 3px 6px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #374151;
+            background: #fff;
+        }
+
         /* --- POS Body --- */
         .pos-body {
             display: flex;
@@ -1008,6 +1384,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 10px;
+            align-items: start;
         }
 
         .pos-item-card {
@@ -1022,7 +1399,6 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            min-height: 100px;
         }
 
         .pos-item-card:hover {
@@ -1060,7 +1436,9 @@
         }
 
         .pos-item-info {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .pos-item-name {
@@ -1791,8 +2169,8 @@
         }
 
         @media (max-width: 768px) {
-            #section-pos {
-                height: calc(100vh - 80px) !important;
+            #section-pos:not(.hidden) {
+                height: calc(100vh - 80px);
             }
 
             .pos-body {
@@ -1829,6 +2207,25 @@
 
             .pos-grid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                align-items: start;
+            }
+
+            .pos-area-bar {
+                padding: 4px 8px;
+            }
+
+            .pos-table-grid-wrapper {
+                max-height: 120px;
+                padding: 6px 8px;
+            }
+
+            .pos-bill-tabs {
+                padding: 4px 8px 0;
+            }
+
+            .pos-split-actions {
+                padding: 4px 8px;
+                flex-wrap: wrap;
             }
 
             .pos-cart-fab {
@@ -1853,7 +2250,6 @@
 
             .pos-item-card {
                 padding: 10px;
-                min-height: 90px;
             }
 
             .pos-cart-panel {
@@ -1870,8 +2266,6 @@
             .pos-cart-panel.open ~ .pos-cart-fab,
             .pos-cart-panel.open + .pos-cart-fab {
                 display: none !important;
-            }
-        }
             }
         }
 
@@ -2628,6 +3022,21 @@
 
                         <!-- Menu Panel (left) -->
                         <div class="pos-menu-panel">
+                            <!-- Order Type Selector -->
+                            <div class="pos-order-type-bar" id="pos-order-type-selector">
+                                <!-- Rendered by JS -->
+                            </div>
+
+                            <!-- Area Tabs -->
+                            <div class="pos-area-bar" id="pos-area-tabs">
+                                <!-- Rendered by JS -->
+                            </div>
+
+                            <!-- Table Grid (Dine-in only) -->
+                            <div class="pos-table-grid-wrapper" id="pos-table-grid">
+                                <!-- Rendered by JS -->
+                            </div>
+
                             <!-- Category Tabs -->
                             <div class="pos-cat-wrapper">
                                 <div class="pos-cat-scroll" id="pos-category-list">
@@ -2656,6 +3065,12 @@
                                 </button>
                             </div>
 
+                            <!-- Cart Context Info (Dine-in) -->
+                            <div id="pos-cart-context" class="pos-cart-context"></div>
+
+                            <!-- Bill Tabs (Dine-in, multiple bills) -->
+                            <div id="pos-bill-tabs" class="pos-bill-tabs"></div>
+
                             <!-- Customer Info -->
                             <div class="pos-customer-row">
                                 <input type="text" id="pos-customer-name" placeholder="Name (optional)" class="pos-input" oninput="posCustomerName=this.value">
@@ -2665,6 +3080,22 @@
                             <!-- Cart Items -->
                             <div class="pos-cart-scroll" id="pos-cart-list">
                                 <!-- Rendered by JS -->
+                            </div>
+
+                            <!-- Split Bill Actions -->
+                            <div class="pos-split-actions hidden" id="pos-split-actions">
+                                <button class="pos-split-btn" onclick="togglePOSItemSelection()">
+                                    <i class="ph ph-check-square text-sm"></i>
+                                    <span>Auswählen</span>
+                                </button>
+                                <select class="pos-split-select" id="pos-move-to-bill-select">
+                                    <option value="">Rechnung wählen...</option>
+                                </select>
+                                <button class="pos-split-btn primary" onclick="moveSelectedItemsToBill()">
+                                    <i class="ph ph-arrow-right text-sm"></i>
+                                    <span>Verschieben</span>
+                                </button>
+                                <span class="pos-split-selected-count" id="pos-selected-count">0 ausgewählt</span>
                             </div>
 
                             <!-- Totals -->
@@ -3960,6 +4391,7 @@
                     if (sectionId === 'pos') {
                         const posSection = document.getElementById('section-pos');
                         if (posSection) posSection.classList.add('active');
+                        if (typeof window.initPOS === 'function') window.initPOS();
                     }
 
                     // Special case for FAQ section

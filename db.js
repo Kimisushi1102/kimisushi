@@ -30,6 +30,7 @@ dns.promises.resolve4 = async function(hostname) {
 };
 
 let isConnected = false;
+let reconnectTimer = null;
 
 async function connectDB() {
   if (isConnected) return;
@@ -53,11 +54,40 @@ async function connectDB() {
     mongoose.connection.on('disconnected', () => {
       console.warn('[MongoDB] Disconnected. Will retry on next operation.');
       isConnected = false;
+      scheduleReconnect();
+    });
+    mongoose.connection.on('reconnected', () => {
+      console.log('[MongoDB] Reconnected successfully.');
+      isConnected = true;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
     });
   } catch (err) {
     console.error('[MongoDB] Failed to connect:', err.message);
     isConnected = false;
+    scheduleReconnect();
   }
+}
+
+function scheduleReconnect(delay = 15000) {
+  if (reconnectTimer) return;
+  console.warn(`[MongoDB] Scheduling reconnect in ${delay / 1000}s...`);
+  reconnectTimer = setTimeout(async () => {
+    reconnectTimer = null;
+    console.log('[MongoDB] Attempting reconnection...');
+    try {
+      await mongoose.connect(process.env.MONGODB_URL, {
+        serverSelectionTimeoutMS: 10000,
+      });
+      isConnected = true;
+      console.log('[MongoDB] Reconnected successfully.');
+    } catch (err) {
+      console.error('[MongoDB] Reconnection failed:', err.message);
+      scheduleReconnect(Math.min(delay * 1.5, 120000));
+    }
+  }, delay);
 }
 
 module.exports = { connectDB, mongoose };

@@ -1145,23 +1145,18 @@ if (checkoutForm) {
 
         const slots = [parseHours(h1), parseHours(h2)].filter(s => s !== null);
 
-        // Lưu lại giá trị hiện tại của timeSelect trước khi xóa options
         const previousTimeValue = timeSelect.value;
 
         const now = new Date();
         const isToday = dateInput.value === now.toISOString().split('T')[0];
         const currentMin = now.getHours() * 60 + now.getMinutes();
 
-        // Prüfen ob Store gerade offen ist (nur heute relevant)
         let storeCurrentlyOpen = false;
         if (isToday) {
             slots.forEach(s => {
                 if (currentMin >= s.start && currentMin < s.end - 20) storeCurrentlyOpen = true;
             });
         }
-
-        // Always add "So schnell wie möglich" as first option for pickup orders
-        timeSelect.innerHTML = '<option value="asap">So schnell wie möglich</option>';
 
         if (noticeEl) {
             const masterEnabled = config.orderingEnabled !== false;
@@ -1173,7 +1168,15 @@ if (checkoutForm) {
             }
         }
 
-        // Only add fixed time slots (no asap-skip logic for future dates)
+        timeSelect.innerHTML = '';
+
+        // ASAP: only if store is open RIGHT NOW and selecting today
+        if (isToday && storeCurrentlyOpen && isOrder) {
+            timeSelect.innerHTML = '<option value="asap">So schnell wie möglich</option>';
+        }
+
+        // Build list of all valid slot values
+        const allSlotValues = [];
         slots.forEach(s => {
             for (let m = s.start; m < s.end; m += 30) {
                 if (isToday && m < currentMin + 30) continue;
@@ -1181,27 +1184,14 @@ if (checkoutForm) {
                 const mm = (m % 60).toString().padStart(2, '0');
                 const timeStr = `${hh}:${mm}`;
                 timeSelect.innerHTML += `<option value="${timeStr}">${timeStr} Uhr</option>`;
+                allSlotValues.push(timeStr);
             }
         });
 
-        // Restore previous selection if still valid, else select first available
-        const allSlotValues = [];
-        slots.forEach(s => {
-            for (let m = s.start; m < s.end; m += 30) {
-                if (isToday && m < currentMin + 30) continue;
-                const hh = Math.floor(m / 60).toString().padStart(2, '0');
-                const mm = (m % 60).toString().padStart(2, '0');
-                allSlotValues.push(`${hh}:${mm}`);
-            }
-        });
-
+        // Restore selection: keep valid previous choice, else first available slot
         if (previousTimeValue && previousTimeValue !== 'asap' && allSlotValues.includes(previousTimeValue)) {
             timeSelect.value = previousTimeValue;
-        } else if (!previousTimeValue || previousTimeValue === 'asap') {
-            // Default: always select "asap" if no valid previous selection
-            timeSelect.value = 'asap';
         } else if (allSlotValues.length > 0) {
-            // Store geschlossen → earliest slot vorselektieren
             timeSelect.value = allSlotValues[0];
         }
     };
@@ -1408,104 +1398,109 @@ if (checkoutForm) {
             status: 'pending'
         };
         try {
-            const ls = JSON.parse(localStorage.getItem('kimi_inbox') || '[]');
-            ls.unshift(inboxItem);
-            if (ls.length > 200) ls.splice(200);
             localStorage.setItem('kimi_inbox', JSON.stringify(ls));
         } catch(e) {}
 
-        if (!orderData.pickupTime) {
+        // Save order to server (also validates ASAP)
+        fetch('/api/inbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(inboxItem)
+        }).then(res => res.json()).then(result => {
+            if (!result.success) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                checkoutModal.classList.remove('opacity-0', 'pointer-events-none');
+                statusModal.classList.add('opacity-0', 'pointer-events-none');
+                alert(result.error || 'Fehler beim Absenden der Bestellung.');
+                return;
+            }
+            // Success — proceed with notifications
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const pickupTimeStr = orderData.pickupTimeDisplay;
+
+            fetch('/api/notify-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderType: 'order',
+                    customerName: orderData.name,
+                    customerPhone: orderData.phone,
+                    customerEmail: orderData.email,
+                    pickupDate: orderData.pickupDate,
+                    pickupTime: pickupTimeStr,
+                    total: orderData.total,
+                    itemCount: itemCount,
+                    notes: orderData.notes,
+                    items: orderData.cart.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price
+                    }))
+                })
+            }).catch(err => console.error('[CHECKOUT] Telegram notify failed:', err));
+
+            fetch('/api/notify-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerEmail: orderData.email,
+                    customerName: orderData.name,
+                    customerPhone: orderData.phone,
+                    orderType: 'order',
+                    pickupDate: orderData.pickupDate,
+                    pickupTime: pickupTimeStr,
+                    notes: orderData.notes,
+                    items: orderData.cart.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price
+                    })),
+                    total: orderData.total,
+                    itemCount: itemCount
+                })
+            }).catch(err => console.error('[CHECKOUT] Email confirm failed:', err));
+
+            fetch('/api/gmail-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderType: 'order',
+                    customerName: orderData.name,
+                    customerPhone: orderData.phone,
+                    customerEmail: orderData.email,
+                    pickupDate: orderData.pickupDate,
+                    pickupTime: pickupTimeStr,
+                    notes: orderData.notes,
+                    items: orderData.cart.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price
+                    })),
+                    total: orderData.total,
+                    itemCount: itemCount,
+                    address: orderData.address
+                })
+            }).then(res => {
+                if (!res.ok) throw new Error('Gmail API returned ' + res.status);
+            }).catch(err => console.error('[CHECKOUT] Gmail notify failed:', err));
+
+            if (socket) {
+                socket.emit('submit_order', orderData);
+            }
+
+            cart = [];
+            updateCartUI();
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
-            return alert("Bitte wählen Sie eine Abholzeit.");
-        }
-
-        checkoutModal.classList.add('opacity-0', 'pointer-events-none');
-        statusModal.classList.remove('opacity-0', 'pointer-events-none');
-
-        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const pickupTimeStr = orderData.pickupTimeDisplay;
-
-        // Send Telegram notification to admin
-        fetch('/api/notify-admin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                orderType: 'order',
-                customerName: orderData.name,
-                customerPhone: orderData.phone,
-                customerEmail: orderData.email,
-                pickupDate: orderData.pickupDate,
-                pickupTime: pickupTimeStr,
-                total: orderData.total,
-                itemCount: itemCount,
-                notes: orderData.notes,
-                items: orderData.cart.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                }))
-            })
-        }).catch(err => console.error('[CHECKOUT] Telegram notify failed:', err));
-
-        // Send email confirmation to customer
-        fetch('/api/notify-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                customerEmail: orderData.email,
-                customerName: orderData.name,
-                customerPhone: orderData.phone,
-                orderType: 'order',
-                pickupDate: orderData.pickupDate,
-                pickupTime: pickupTimeStr,
-                notes: orderData.notes,
-                items: orderData.cart.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                total: orderData.total,
-                itemCount: itemCount
-            })
-        }).catch(err => console.error('[CHECKOUT] Email confirm failed:', err));
-
-        // Send Gmail notification to admin
-        const gmailPayload = {
-            orderType: 'order',
-            customerName: orderData.name,
-            customerPhone: orderData.phone,
-            customerEmail: orderData.email,
-            pickupDate: orderData.pickupDate,
-            pickupTime: pickupTimeStr,
-            notes: orderData.notes,
-            items: orderData.cart.map(item => ({
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price
-            })),
-            total: orderData.total,
-            itemCount: itemCount,
-            address: orderData.address
-        };
-        fetch('/api/gmail-notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(gmailPayload)
-        }).then(res => {
-            if (!res.ok) throw new Error('Gmail API returned ' + res.status);
-        }).catch(err => console.error('[CHECKOUT] Gmail notify failed:', err));
-
-        if (socket) {
-            socket.emit('submit_order', orderData);
-        }
-
-        // CLEAR CART after successful submission
-        cart = [];
-        updateCartUI();
-
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
+        }).catch(err => {
+            console.error('[CHECKOUT] Server save failed:', err);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            checkoutModal.classList.remove('opacity-0', 'pointer-events-none');
+            statusModal.classList.add('opacity-0', 'pointer-events-none');
+            alert('Verbindungsfehler. Bitte versuchen Sie es erneut.');
+        });
     });
 }
 

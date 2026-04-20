@@ -324,6 +324,10 @@ module.exports = async (req, res) => {
         item.updatedAt = new Date();
         if (item.type !== 'reservation' && item.pickupTime === 'asap') {
           const settings = await getSettingsObj();
+          const storeOpenNow = dateUtils.isStoreOpenNow(settings);
+          if (!storeOpenNow) {
+            return res.status(400).json({ error: 'ASAP ist außerhalb der Öffnungszeiten nicht verfügbar. Bitte wählen Sie eine konkrete Abholzeit.' });
+          }
           const resolved = dateUtils.resolveAsap(settings);
           item.pickupDate = resolved.pickupDate;
           item.pickupTime = resolved.pickupTime;

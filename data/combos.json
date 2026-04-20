@@ -1,6 +1,87 @@
 [
   {
-    "id": "c1",
+    "id": "c_lm1",
+    "name": "M1 Lunch Salmon Box",
+    "subtitle": "Lunch Special",
+    "price": "14,00 €",
+    "oldPrice": "",
+    "tag": "",
+    "items": "6x Sake Maki\n8x Alaska Roll\n2x Lachs Nigiri\n1x Miso Suppe"
+  },
+  {
+    "id": "c_lm2",
+    "name": "M2 Lunch Mix Box",
+    "subtitle": "Lunch Special",
+    "price": "14,00 €",
+    "oldPrice": "",
+    "tag": "",
+    "items": "8x Fresh Sommer Roll\n6x Maguro Maki\n1x Lachs Nigiri\n1x Tuna Nigiri"
+  },
+  {
+    "id": "c_lm3",
+    "name": "M3 Lunch Vegie Box",
+    "subtitle": "Lunch Special",
+    "price": "13,00 €",
+    "oldPrice": "",
+    "tag": "Veggie",
+    "items": "4x Crunchy Avocado\n4x Avocado Roll\n4x Gurke Roll\n6x Gurke Maki"
+  },
+  {
+    "id": "c_sb1",
+    "name": "B1 Sushi Veggie Box",
+    "subtitle": "Vegetarisch",
+    "price": "16,90 €",
+    "oldPrice": "",
+    "tag": "Vegetarisch",
+    "items": "8x Vegie Roll\n3x Gurke Maki\n3x Avocado Maki\n6x Crunchy Vegie"
+  },
+  {
+    "id": "c_sb2",
+    "name": "B2 Sushi Salmon Box",
+    "subtitle": "Lachs Special",
+    "price": "21,90 €",
+    "oldPrice": "",
+    "tag": "",
+    "items": "6x Sake Maki\n8x Alaska Roll\n2x Sake Nigiri\n3x Sake Sashimi"
+  },
+  {
+    "id": "c_sb3",
+    "name": "B3 Sushi Inside Out Box",
+    "subtitle": "Mix Variety",
+    "price": "19,90 €",
+    "oldPrice": "",
+    "tag": "",
+    "items": "8x Spicy Tuna Roll\n8x Fresh Sommer Roll\n8x Alaska Roll"
+  },
+  {
+    "id": "c_sb4",
+    "name": "B4 Sushi Coupe",
+    "subtitle": "Für 2 Personen",
+    "price": "39,90 €",
+    "oldPrice": "",
+    "tag": "Für 2 Personen",
+    "items": "6x Crunchy Salmon\n3x Mix Nigiri\n4x Spicy Tuna Aburi\n4x Dragon Roll Aburi\n3x Salmon Sashimi\n3x Tuna Sashimi\n6x Maki"
+  },
+  {
+    "id": "c_sb5",
+    "name": "B5 Omakase",
+    "subtitle": "Ab 2 Personen",
+    "price": "30,00 € / pro Person",
+    "oldPrice": "",
+    "tag": "Chef's Choice",
+    "items": "Unser Sushi-Chef trifft für Sie die Auswahl aus unserer exklusiven Karte an Sushi-Kreationen. Lassen Sie sich überraschen!"
+  },
+  {
+    "id": "c_sb6",
+    "name": "B6 Überraschung",
+    "subtitle": "3 Gänge Menü - Ab 2 Personen",
+    "price": "39,90 € / pro Person",
+    "oldPrice": "",
+    "tag": "Ab 2 Personen",
+    "items": "Vorspeisen & Desserts\n6x Mix Sashimi\n5x Nigiri\n16x Special Roll\n8x Inside Out Roll\n12x Maki\n12x Crunchy"
+  },
+  {
+    "id": "c_tokyo",
     "name": "Tokyo Set",
     "subtitle": "Für 1 Person",
     "price": "18,90 €",
@@ -9,7 +90,7 @@
     "items": "2x Sake Nigiri\n4x Maki Lachs\n2x California Roll\nMiso Suppe"
   },
   {
-    "id": "c2",
+    "id": "c_kimi",
     "name": "Kimi Premium",
     "subtitle": "Ideal für 2 Personen",
     "price": "45,00 €",
@@ -18,30 +99,12 @@
     "items": "8x Chef's Signature Rolls\n6x Premium Nigiri Mix\n4x Dragon Roll\nEdamame & 2 Miso Suppen"
   },
   {
-    "id": "c3",
+    "id": "c_veggie",
     "name": "Veggie Delight",
     "subtitle": "100% Pflanzlich",
     "price": "16,50 €",
     "oldPrice": "",
     "tag": "Veggie",
     "items": "2x Avocado Nigiri\n6x Gurke Maki\n8x Veggie Tempura Roll\nWakame Salat"
-  },
-  {
-    "id": "combo_1776076879745",
-    "name": "Omakase",
-    "subtitle": "Für 2 Personen",
-    "price": "30 € / pro Persone",
-    "oldPrice": "",
-    "tag": "Chef&#39;s Choice",
-    "items": "abcxyz"
-  },
-  {
-    "id": "combo_1776080165935",
-    "name": "Omakase2",
-    "subtitle": "Für 2 Personen",
-    "price": "30 € / pro Persone",
-    "oldPrice": "",
-    "tag": "Chef&#39;s Choice",
-    "items": ""
   }
 ]

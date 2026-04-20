@@ -1,117 +1,1185 @@
 [
   {
-    "id": "1",
-    "name": "Sake Nigiri",
-    "price": "5,90 €",
-    "category": "Nigiri",
-    "description": "Premium Lachs auf perfekt gewürztem Sushireis",
-    "image": "images/salmon_nigiri.png",
-    "pieces": "2 Stück",
-    "tag": "Bestseller"
+    "id": "v1",
+    "name": "Yakitori",
+    "price": "5,20 €",
+    "category": "Vorspeisen",
+    "description": "Hähnchen Spieße mit Sosse (3 Stück)",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
   },
   {
-    "id": "2",
-    "name": "Dragon Roll",
-    "price": "14,90 €",
+    "id": "v2",
+    "name": "Gyoza",
+    "price": "5,50 €",
+    "category": "Vorspeisen",
+    "description": "Teigtaschen mit Hähnchen-Gemüse Füllung frittiert (4 Stück)",
+    "image": "",
+    "pieces": "4 Stück",
+    "tag": ""
+  },
+  {
+    "id": "v3",
+    "name": "Edamame",
+    "price": "4,90 €",
+    "category": "Vorspeisen",
+    "description": "Japanische Bohnen mit Salz",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v4",
+    "name": "Wakame Salat",
+    "price": "4,90 €",
+    "category": "Vorspeisen",
+    "description": "Eingelegter Seetangsalat",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v5",
+    "name": "Mango Salat",
+    "price": "5,50 €",
+    "category": "Vorspeisen",
+    "description": "Mango mit hausgemacht Sosse und Kräuter",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v6",
+    "name": "Tempura Avocado",
+    "price": "4,90 €",
+    "category": "Vorspeisen",
+    "description": "Avocado Tempura mit Sosse",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v7",
+    "name": "Salmon Miso Soup",
+    "price": "5,50 €",
+    "category": "Vorspeisen",
+    "description": "Tofu, Seealgen, Lachs, Frühlingszwiebeln",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v8",
+    "name": "Miso Soup",
+    "price": "4,90 €",
+    "category": "Vorspeisen",
+    "description": "Tofu, Seealgen, Frühlingszwiebeln",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "v9",
+    "name": "Ebi Tempura",
+    "price": "6,50 €",
+    "category": "Vorspeisen",
+    "description": "Panierte Garnelen mit Sosse (3 Stück)",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "n1",
+    "name": "Sake Nigiri",
+    "price": "5,20 €",
+    "category": "Nigiri",
+    "description": "Lachs",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n2",
+    "name": "Maguro Nigiri",
+    "price": "5,50 €",
+    "category": "Nigiri",
+    "description": "Thunfisch",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n3",
+    "name": "Avo Nigiri",
+    "price": "4,50 €",
+    "category": "Nigiri",
+    "description": "Avocado",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n4",
+    "name": "Tamago Nigiri",
+    "price": "4,50 €",
+    "category": "Nigiri",
+    "description": "Japanische Eier",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n5",
+    "name": "Ebi Nigiri",
+    "price": "5,50 €",
+    "category": "Nigiri",
+    "description": "Garnelen",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n6",
+    "name": "Ika Nigiri",
+    "price": "4,90 €",
+    "category": "Nigiri",
+    "description": "Tintenfisch",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n7",
+    "name": "Unagi Nigiri",
+    "price": "5,50 €",
+    "category": "Nigiri",
+    "description": "Flussaal",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n8",
+    "name": "Hokkigai Nigiri",
+    "price": "6,50 €",
+    "category": "Nigiri",
+    "description": "Schmetterlingsmuscheln",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n9",
+    "name": "Sake Aburi Nigiri",
+    "price": "6,90 €",
+    "category": "Nigiri",
+    "description": "Lachs flambiert, Frühlingszwiebeln, Sesam, Fischrogen, Sosse",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n10",
+    "name": "Maguro Aburi Nigiri",
+    "price": "7,50 €",
+    "category": "Nigiri",
+    "description": "Thunfisch flambiert, Frühlingszwiebeln, Sesam, Fischrogen, Sosse",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+  {
+    "id": "n11",
+    "name": "Hotate Nigiri",
+    "price": "5,90 €",
+    "category": "Nigiri",
+    "description": "Jakobsmuschel, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "2 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "m1",
+    "name": "Sake Maki",
+    "price": "4,90 €",
     "category": "Maki",
-    "description": "Gebackene Garnele, Gurke, Avocado mit Unagi-Sauce",
-    "image": "images/dragon_roll.png",
+    "description": "Lachs",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m2",
+    "name": "Sake Avo Maki",
+    "price": "5,30 €",
+    "category": "Maki",
+    "description": "Lachs und Avocado",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m3",
+    "name": "Maguro Maki",
+    "price": "5,50 €",
+    "category": "Maki",
+    "description": "Thunfisch",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m4",
+    "name": "Kappa Maki",
+    "price": "4,20 €",
+    "category": "Maki",
+    "description": "Gurke, Sesam",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m5",
+    "name": "Avocado Maki",
+    "price": "4,20 €",
+    "category": "Maki",
+    "description": "Avocado, Sesam",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m6",
+    "name": "Ebi Tempura Maki",
+    "price": "5,50 €",
+    "category": "Maki",
+    "description": "Panierte Garnelen, Frischkäse",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m7",
+    "name": "Unagi Maki",
+    "price": "5,90 €",
+    "category": "Maki",
+    "description": "Flussaal",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m8",
+    "name": "Ika Tobiko Maki",
+    "price": "6,50 €",
+    "category": "Maki",
+    "description": "Tintenfisch, Fischrogen",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+  {
+    "id": "m9",
+    "name": "Tamago Maki",
+    "price": "4,50 €",
+    "category": "Maki",
+    "description": "Japanische Eier",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "io1",
+    "name": "Alaska Roll",
+    "price": "8,90 €",
+    "category": "Inside Out Roll",
+    "description": "Lachs, Avocado, Frischkäse, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io2",
+    "name": "Fresh Sommer Roll",
+    "price": "9,50 €",
+    "category": "Inside Out Roll",
+    "description": "Lachs, Gurke, Rucola, Frischkäse, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io3",
+    "name": "Vegie Roll",
+    "price": "7,90 €",
+    "category": "Inside Out Roll",
+    "description": "Avocado, Gurke, Rucola, Frischkäse, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Veggie"
+  },
+  {
+    "id": "io4",
+    "name": "Avo Roll",
+    "price": "7,90 €",
+    "category": "Inside Out Roll",
+    "description": "Avocado, Frischkäse, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io5",
+    "name": "Gurke Roll",
+    "price": "7,90 €",
+    "category": "Inside Out Roll",
+    "description": "Gurke, Frischkäse, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io6",
+    "name": "Teriyaki Chicken Roll",
+    "price": "8,90 €",
+    "category": "Inside Out Roll",
+    "description": "Teriyaki Hähnchen, Gurke, Avocado",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io7",
+    "name": "California Roll",
+    "price": "8,50 €",
+    "category": "Inside Out Roll",
+    "description": "Surimi, Avocado, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io8",
+    "name": "Spicy Tuna Roll",
+    "price": "9,50 €",
+    "category": "Inside Out Roll",
+    "description": "Gehackte Thunfisch, Frühlingszwiebeln, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "io9",
+    "name": "Kimikimi Roll",
+    "price": "10,50 €",
+    "category": "Inside Out Roll",
+    "description": "Gekochte Krebsfleisch, Gurke, Avocado, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Empfehlung"
+  },
+
+  {
+    "id": "gr1",
+    "name": "Green Salmon Roll",
+    "price": "8,90 €",
+    "category": "Green Roll",
+    "description": "Lachs, Avocado, frische Kräutermantel, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "gr2",
+    "name": "Green Tuna Roll",
+    "price": "9,50 €",
+    "category": "Green Roll",
+    "description": "Thunfisch, Gurken, frische Kräutermantel, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "gr3",
+    "name": "Green Ebi Tempura Roll",
+    "price": "9,50 €",
+    "category": "Green Roll",
+    "description": "Panierte Garnelen, Gurken, frische Kräutermantel, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "gr4",
+    "name": "Green Vegie Roll",
+    "price": "7,90 €",
+    "category": "Green Roll",
+    "description": "Avocado, Gurke, Rucola, frische Kräutermantel, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Veggie"
+  },
+  {
+    "id": "gr5",
+    "name": "Green Tempura Asupara Roll",
+    "price": "8,50 €",
+    "category": "Green Roll",
+    "description": "Spargel Tempura, Paprika Tempura, Frischkäse, frische Kräutermantel",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "cr1",
+    "name": "Crunchy Salmon Roll",
+    "price": "9,50 €",
+    "category": "Crunchy Roll",
+    "description": "Gebratene Lachs, Frischkäse, Avocado, Gurke, Rucola, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "cr2",
+    "name": "Crunchy Spicy Tuna Roll",
+    "price": "9,90 €",
+    "category": "Crunchy Roll",
+    "description": "Spicy Tuna, Gurke, Zwiebeln, Rucola, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "cr3",
+    "name": "Crunchy Vegie Roll",
+    "price": "9,00 €",
+    "category": "Crunchy Roll",
+    "description": "Avocado, Gurke, Rucola, Frischkäse, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Veggie"
+  },
+  {
+    "id": "cr4",
+    "name": "Crunchy Ebi Roll",
+    "price": "8,50 €",
+    "category": "Crunchy Roll",
+    "description": "Panierte Garnelen, Gurke, Fischrogen, Rucola",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "sc1",
+    "name": "Salmon Schale",
+    "price": "15,90 €",
+    "category": "Sushi Schale",
+    "description": "Lachs, Avocado, Gurke, Rucola, Mango, Sushi Reis, Ingwer, Wakame, Sosse",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sc2",
+    "name": "Maguro Schale",
+    "price": "16,50 €",
+    "category": "Sushi Schale",
+    "description": "Thunfisch, Avocado, Gurke, Rucola, Mango, Sushi Reis, Wakame, Ingwer, Sosse",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sc3",
+    "name": "Vegie Schale",
+    "price": "14,90 €",
+    "category": "Sushi Schale",
+    "description": "Avocado, Gurke, Rucola, Mango, Sushi Reis, Wakame, Ingwer, Sosse",
+    "image": "",
+    "pieces": "",
+    "tag": "Veggie"
+  },
+
+  {
+    "id": "aot1",
+    "name": "Salmon Avocado on Top",
+    "price": "10,50 €",
+    "category": "Avocado on Top",
+    "description": "Lachs, Frischkäse, Gurke",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "aot2",
+    "name": "Tuna Avocado on Top",
+    "price": "10,90 €",
+    "category": "Avocado on Top",
+    "description": "Thunfisch, Gurke, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "aot3",
+    "name": "Ebi Tempura Avocado on Top",
+    "price": "11,30 €",
+    "category": "Avocado on Top",
+    "description": "Panierte Garnelen, Gurke, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "aot4",
+    "name": "Vegie Avocado on Top",
+    "price": "9,90 €",
+    "category": "Avocado on Top",
+    "description": "Spargel Tempura, Paprika Tempura, Frischkäse",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Veggie"
+  },
+  {
+    "id": "aot5",
+    "name": "Chicken Teriyaki Avocado on Top",
+    "price": "10,50 €",
+    "category": "Avocado on Top",
+    "description": "Hähnchen Spieße, Gurke",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "sp1",
+    "name": "Hotate Unagi Roll",
+    "price": "14,90 €",
+    "category": "Special Roll",
+    "description": "Jakobsmuscheln, Flussaal, Avocado, Frischkäse, Frühlingszwiebeln, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "sp2",
+    "name": "Sake Roll Aburi",
+    "price": "14,90 €",
+    "category": "Special Roll",
+    "description": "Lachs flambiert, Avocado, Frischkäse, Frühlingszwiebeln, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "sp3",
+    "name": "Spicy Tuna Roll Aburi",
+    "price": "15,90 €",
+    "category": "Special Roll",
+    "description": "Lachs flambiert, Thunfisch flambiert, Avocado, Gurke, Spicy Tuna, Frühlingszwiebeln, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
+  },
+  {
+    "id": "sp4",
+    "name": "Dragon Roll",
+    "price": "15,50 €",
+    "category": "Special Roll",
+    "description": "Lachs flambiert, Ebi Tempura, Gurke, Avocado, Frischkäse, Frühlingszwiebeln, Sesam, Fischrogen",
+    "image": "",
     "pieces": "8 Stück",
     "tag": "Empfehlung"
   },
   {
-    "id": "3",
-    "name": "Maguro Nigiri",
-    "price": "6,50 €",
-    "category": "Nigiri",
-    "description": "Feinster Thunfisch auf Sushireis",
-    "image": "images/maguro_nigiri.png",
-    "pieces": "2 Stück"
-  },
-  {
-    "id": "4",
-    "name": "Rainbow Roll",
+    "id": "sp5",
+    "name": "Phoenix Roll",
     "price": "15,90 €",
-    "category": "Maki",
-    "description": "Lachs, Thunfisch und Bass mit Avocado",
-    "image": "images/rainbow_roll.png",
-    "pieces": "8 Stück"
+    "category": "Special Roll",
+    "description": "Lachs flambiert, Thunfisch flambiert, Flussaal, Gurke, Avocado, Frischkäse, Frühlingszwiebeln, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
   },
   {
-    "id": "5",
-    "name": "Gyoza",
-    "price": "6,90 €",
-    "category": "Appetizer",
-    "description": "Knusprige japanische Teigtaschen",
-    "image": "images/gyoza.png",
-    "pieces": "6 Stück"
+    "id": "sp6",
+    "name": "Dragon Roll (Ebi)",
+    "price": "14,90 €",
+    "category": "Special Roll",
+    "description": "Ebi Tempura, Avocado, Gurke, Lachsmantel, Fischrogen, Röstzwiebeln, Sesam",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
   },
   {
-    "id": "6",
-    "name": "Miso Soup",
-    "price": "3,50 €",
-    "category": "Soup",
-    "description": "Traditionelle Misosuppe",
-    "image": "images/miso_soup.png"
+    "id": "sp7",
+    "name": "Asupara Roll",
+    "price": "15,90 €",
+    "category": "Special Roll",
+    "description": "Spargel Tempura, Paprika Tempura, flambiert Lachs Mantel, Sesam, Frühlingszwiebeln, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
   },
   {
-    "id": "7",
-    "name": "Edamame",
-    "price": "4,50 €",
-    "category": "Appetizer",
-    "description": "Gedämpfte Sojabohnen",
-    "image": "images/edamame.png"
+    "id": "sp8",
+    "name": "Rainbow Roll",
+    "price": "16,90 €",
+    "category": "Special Roll",
+    "description": "Spargel Tempura, Lachs, Paprika Tempura, Flussaal, Thunfisch, Tintenfisch, Avocado, Garnelen, Jakobsmuschel, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": ""
   },
   {
-    "id": "8",
-    "name": "Ebi Tempura",
-    "price": "9,90 €",
-    "category": "Tempura",
-    "description": "Knusprige Garnelen im Tempurateig",
-    "image": "images/ebi_tempura.png",
-    "pieces": "5 Stück"
+    "id": "sp9",
+    "name": "Kimikimi Special Roll",
+    "price": "17,90 €",
+    "category": "Special Roll",
+    "description": "Gekochtes Krebsfleisch, Avocado, Gurken, Frischkäse, flambiert Lachs Mantel, Sesam, Fischrogen, Frühlingszwiebeln",
+    "image": "",
+    "pieces": "8 Stück",
+    "tag": "Bestseller"
   },
+
   {
-    "id": "9",
-    "name": "Sashimi Platter",
-    "price": "18,90 €",
+    "id": "sas1",
+    "name": "Sake Sashimi",
+    "price": "11,90 €",
     "category": "Sashimi",
-    "description": "Auswahl an frischem Sashimi",
-    "image": "images/sashimi_platter.png",
-    "pieces": "12 Stück",
-    "tag": "Neu"
+    "description": "Lachs (6 Stück)",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
   },
   {
-    "id": "1776081949290",
-    "code": "test 99",
-    "name": "test",
-    "price": "9.90",
-    "category": "Appetizer",
+    "id": "sas2",
+    "name": "Maguro Sashimi",
+    "price": "12,90 €",
+    "category": "Sashimi",
+    "description": "Thunfisch (6 Stück)",
     "image": "",
-    "description": "",
-    "tag": "",
-    "pieces": ""
+    "pieces": "6 Stück",
+    "tag": ""
   },
   {
-    "id": "1776082272564",
-    "code": "test 994",
-    "name": "444",
-    "price": "9.90",
-    "category": "Nigiri",
+    "id": "sas3",
+    "name": "Sake und Maguro Sashimi",
+    "price": "12,50 €",
+    "category": "Sashimi",
+    "description": "4 Lachs, 2 Thunfisch",
     "image": "",
-    "description": "",
-    "tag": "",
-    "pieces": ""
+    "pieces": "6 Stück",
+    "tag": ""
   },
   {
-    "id": "1776083166451",
-    "code": "03",
-    "name": "444",
-    "price": "9.90",
-    "category": "Maki",
+    "id": "sas4",
+    "name": "Thunfisch Tatar",
+    "price": "14,90 €",
+    "category": "Sashimi",
+    "description": "Thunfisch, Limettensaft, Spicy Sosse, Sesam, Fischrogen",
     "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sas5",
+    "name": "Salmon Tatar",
+    "price": "13,50 €",
+    "category": "Sashimi",
+    "description": "Lachs, Limettensaft, Spicy Sosse, Sesam, Fischrogen",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sas6",
+    "name": "Tuna Tataki",
+    "price": "14,90 €",
+    "category": "Sashimi",
+    "description": "Flambiert Tuna (6 Stück), Sesam, Sosse, Fischrogen",
+    "image": "",
+    "pieces": "6 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "lm1",
+    "name": "M1 Lunch Salmon Box",
+    "price": "14,00 €",
+    "category": "Lunch Menu",
+    "description": "6x Sake Maki, 8x Alaska Roll, 2x Lachs Nigiri, 1x Miso Suppe",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "lm2",
+    "name": "M2 Lunch Mix Box",
+    "price": "14,00 €",
+    "category": "Lunch Menu",
+    "description": "8x Fresh Sommer Roll, 6x Maguro Maki, 1x Lachs Nigiri, 1x Tuna Nigiri",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "lm3",
+    "name": "M3 Lunch Vegie Box",
+    "price": "13,00 €",
+    "category": "Lunch Menu",
+    "description": "4x Crunchy Avocado, 4x Avocado Roll, 4x Gurke Roll, 6x Gurke Maki",
+    "image": "",
+    "pieces": "",
+    "tag": "Veggie"
+  },
+
+  {
+    "id": "sb1",
+    "name": "B1 Sushi Veggie Box",
+    "price": "16,90 €",
+    "category": "Sushi Box",
+    "description": "8x Vegie Roll, 3x Gurke Maki, 3x Avocado Maki, 6x Crunchy Vegie",
+    "image": "",
+    "pieces": "",
+    "tag": "Vegetarisch"
+  },
+  {
+    "id": "sb2",
+    "name": "B2 Sushi Salmon Box",
+    "price": "21,90 €",
+    "category": "Sushi Box",
+    "description": "6x Sake Maki, 8x Alaska Roll, 2x Sake Nigiri, 3x Sake Sashimi",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sb3",
+    "name": "B3 Sushi Inside Out Box",
+    "price": "19,90 €",
+    "category": "Sushi Box",
+    "description": "8x Spicy Tuna Roll, 8x Fresh Sommer Roll, 8x Alaska Roll",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "sb4",
+    "name": "B4 Sushi Coupe (für 2 Personen)",
+    "price": "39,90 €",
+    "category": "Sushi Box",
+    "description": "6x Crunchy Salmon, 3x Mix Nigiri, 4x Spicy Tuna Aburi, 4x Dragon Roll Aburi, 3x Salmon Sashimi, 3x Tuna Sashimi, 6x Maki",
+    "image": "",
+    "pieces": "",
+    "tag": "Für 2 Personen"
+  },
+  {
+    "id": "sb5",
+    "name": "B5 Omakase (ab 2 Personen)",
+    "price": "30,00 €",
+    "category": "Sushi Box",
+    "description": "Unser Sushi-Chef trifft für Sie die Auswahl aus unserer exklusiven Karte an Sushi-Kreationen. Ab 2 Personen.",
+    "image": "",
+    "pieces": "",
+    "tag": "Ab 2 Personen"
+  },
+  {
+    "id": "sb6",
+    "name": "B6 Überraschung (3 Gänge Menü)",
+    "price": "39,90 €",
+    "category": "Sushi Box",
+    "description": "Vorspeisen, Desserts, 6x Mix Sashimi, 5x Nigiri, 16x Special Roll, 8x Inside Out Roll, 12x Maki, 12x Crunchy. Ab 2 Personen.",
+    "image": "",
+    "pieces": "",
+    "tag": "Ab 2 Personen"
+  },
+
+  {
+    "id": "ds1",
+    "name": "Mochi Ice Cream",
+    "price": "6,90 €",
+    "category": "Dessert",
+    "description": "3 japanische Reiskuchen mit Ice-Füllung",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
+  },
+  {
+    "id": "ds2",
+    "name": "Kokosnuss Bällchen",
+    "price": "5,50 €",
+    "category": "Dessert",
+    "description": "3 Stück",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
+  },
+  {
+    "id": "ds3",
+    "name": "Sesam Bällchen",
+    "price": "5,50 €",
+    "category": "Dessert",
+    "description": "3 Stück",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
+  },
+  {
+    "id": "ds4",
+    "name": "Bananen Bällchen",
+    "price": "5,50 €",
+    "category": "Dessert",
+    "description": "3 Stück",
+    "image": "",
+    "pieces": "3 Stück",
+    "tag": ""
+  },
+
+  {
+    "id": "dr1",
+    "name": "Cola / Cola Light / Fanta / Sprite / Spezi / Ginger Ale",
+    "price": "2,90 €",
+    "category": "Getränke",
+    "description": "Softdrink 0,3L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr2",
+    "name": "Wasser Medium / Wasser Still",
+    "price": "2,90 €",
+    "category": "Getränke",
+    "description": "0,3L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr3",
+    "name": "Saft (Apfel, Mango, Lychee, Maracuja, Johannisbeere, Orange, Guave)",
+    "price": "3,20 €",
+    "category": "Getränke",
+    "description": "Mit Schorle, 0,3L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr4",
+    "name": "Asahi Bier",
+    "price": "3,90 €",
+    "category": "Getränke",
+    "description": "Japanisches Bier, 0,33L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr5",
+    "name": "Kirin Bier",
+    "price": "3,90 €",
+    "category": "Getränke",
+    "description": "Japanisches Bier, 0,33L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr6",
+    "name": "Pils",
+    "price": "3,50 €",
+    "category": "Getränke",
+    "description": "0,33L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr7",
+    "name": "Bier Groß",
+    "price": "3,90 €",
+    "category": "Getränke",
+    "description": "0,5L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr8",
+    "name": "Hefeweizen",
+    "price": "3,90 €",
+    "category": "Getränke",
+    "description": "0,5L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr9",
+    "name": "Riesling",
+    "price": "4,50 €",
+    "category": "Getränke",
+    "description": "0,2L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr10",
+    "name": "Sauvignon Blanc",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "0,2L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr11",
+    "name": "Cabernet Sauvignon",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "0,2L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr12",
+    "name": "Lemberger",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "0,2L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr13",
+    "name": "Weinschorle (rot/weiß)",
+    "price": "4,50 €",
+    "category": "Getränke",
+    "description": "0,2L",
+    "image": "",
+    "pieces": "",
+    "tag": ""
+  },
+  {
+    "id": "dr14",
+    "name": "Obstgarten Limonade",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Pfirsichsirup, Cranberrysirup, Grenadinesirup, Minze und Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr15",
+    "name": "Gurkenschön Limonade",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Frische Gurke, Gurkensirup, Holundersirup, Zitronensaft, Minze und Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr16",
+    "name": "Cucumis Limonade",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Zitronensaft, Gurkensirup, Basilikumsirup, Basilikum Blätter, Limetten und Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr17",
+    "name": "Love Drink Limonade",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Erdbeere, Gurkensirup, Minze, Limetten und Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr18",
+    "name": "Asia Feeling Limonade",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Litschisaft, Gurkensirup, Minze, Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr19",
+    "name": "Kiwi Eistee",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Frische Kiwi, Honig, Limette, Grüner Tee",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr20",
+    "name": "Ingwer Zitronengras Eistee",
+    "price": "4,90 €",
+    "category": "Getränke",
+    "description": "Hausgemacht, 0,4L. Frische Ingwer, Stangen Zitronengras, Grüner Tee, Pfirsichsirup",
+    "image": "",
+    "pieces": "",
+    "tag": "Hausgemacht"
+  },
+  {
+    "id": "dr21",
+    "name": "Aperol Spritz",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Prosecco, Aperol, Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr22",
+    "name": "Aperol Maracuja",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Aperol, Maracuja-Saft, Prosecco",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr23",
+    "name": "Litschi Prosecco",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Litschinektar, Soda, Prosecco",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr24",
+    "name": "Hugo",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Prosecco, Holunderblütenaroma, Soda, Minze & Limette",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr25",
+    "name": "Mojito",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Rum, Minze, brauner Rohrzucker, Soda",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr26",
+    "name": "Pina Colada",
+    "price": "5,90 €",
+    "category": "Getränke",
+    "description": "Rum, Ananassaft, Cocosirup und Sahne",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail"
+  },
+  {
+    "id": "dr27",
+    "name": "Coconut Kiss",
+    "price": "5,50 €",
+    "category": "Getränke",
+    "description": "Kokos, Ananassaft, Orangensaft und Sahne",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail ohne Alkohol"
+  },
+  {
+    "id": "dr28",
+    "name": "Moskito",
+    "price": "5,50 €",
+    "category": "Getränke",
+    "description": "Brauner Rohrzucker, Limette, Minze und Ginger Ale",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail ohne Alkohol"
+  },
+  {
+    "id": "dr29",
+    "name": "Virgin Caipi",
+    "price": "5,50 €",
+    "category": "Getränke",
+    "description": "Brauner Rohrzucker, Limette, Maracujanektar & Ginger Ale",
+    "image": "",
+    "pieces": "",
+    "tag": "Cocktail ohne Alkohol"
+  },
+  {
+    "id": "dr30",
+    "name": "Jasmin Tee",
+    "price": "3,00 €",
+    "category": "Getränke",
     "description": "",
-    "tag": "",
-    "pieces": ""
+    "image": "",
+    "pieces": "",
+    "tag": "Tee"
+  },
+  {
+    "id": "dr31",
+    "name": "Japan Brown Rice Tee",
+    "price": "3,50 €",
+    "category": "Getränke",
+    "description": "",
+    "image": "",
+    "pieces": "",
+    "tag": "Tee"
+  },
+  {
+    "id": "dr32",
+    "name": "Ingwer Tee",
+    "price": "3,00 €",
+    "category": "Getränke",
+    "description": "",
+    "image": "",
+    "pieces": "",
+    "tag": "Tee"
+  },
+  {
+    "id": "dr33",
+    "name": "Zitronengras Tee",
+    "price": "3,50 €",
+    "category": "Getränke",
+    "description": "",
+    "image": "",
+    "pieces": "",
+    "tag": "Tee"
+  },
+  {
+    "id": "dr34",
+    "name": "Grüner Tee",
+    "price": "3,00 €",
+    "category": "Getränke",
+    "description": "",
+    "image": "",
+    "pieces": "",
+    "tag": "Tee"
   }
 ]

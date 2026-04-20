@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     (async () => {
         activeMenu = await loadMenuForWebsite();
         renderCategoryFilters();
-        renderMenu();
+        renderMenu('Special Roll');
 
         // Load combos from server (server is primary source)
         // Handle both raw array (Vercel/KV) and {success, items} (local MongoDB server) formats
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.reRenderMenu = () => {
         renderCategoryFilters();
-        renderMenu('all');
+        renderMenu(activeCategory);
     };
 
     window.reRenderCombos = () => {
@@ -334,6 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let activeMenu = typeof getMenu === 'function' ? getMenu() : [];
     let activeCombos = [];
+    let activeCategory = 'Special Roll';
 
     function renderCategoryFilters() {
         if (!filterTabsContainer) return;
@@ -359,12 +360,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             return t ? t[lang] : capitalize(cat);
         };
 
-        const alleLabel = (typeof i18n !== 'undefined') ? i18n.t('menu_filter_all') : 'Alle';
-        let filtersHtml = `<button class="filter-btn active px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="all">${alleLabel}</button>`;
+        const specialRollCat = 'Special Roll';
+        const hasSpecialRollItems = activeMenu.some(item => item.category && item.category.toLowerCase() === specialRollCat.toLowerCase());
+        const sortedCategories = categories
+            .filter(c => c && c.trim() && c.toLowerCase() !== specialRollCat.toLowerCase())
+            .sort((a, b) => a.localeCompare(b));
+        if (hasSpecialRollItems) {
+            sortedCategories.unshift(specialRollCat);
+        }
 
-        categories.forEach(cat => {
+        const alleLabel = (typeof i18n !== 'undefined') ? i18n.t('menu_filter_all') : 'Alle';
+        let filtersHtml = `<button class="filter-btn px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="all">${alleLabel}</button>`;
+
+        sortedCategories.forEach(cat => {
             const label = getFilterLabel(cat);
-            filtersHtml += `<button class="filter-btn px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="${cat}">${label}</button>`;
+            const isActive = cat.toLowerCase() === activeCategory.toLowerCase() ? ' active' : '';
+            filtersHtml += `<button class="filter-btn${isActive} px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="${cat}">${label}</button>`;
         });
 
         filterTabsContainer.innerHTML = filtersHtml;
@@ -377,9 +388,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const allBtns = filterTabsContainer.querySelectorAll('.filter-btn');
             allBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const filterValue = btn.getAttribute('data-filter');
-            
+            activeCategory = filterValue;
+
             if(menuGrid) {
                 menuGrid.style.opacity = '0';
                 setTimeout(() => {
@@ -410,7 +422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         [...menu].reverse().forEach(item => {
-            if (filterValue !== 'all' && item.category !== filterValue) return;
+            if (filterValue !== 'all' && item.category.toLowerCase() !== filterValue.toLowerCase()) return;
 
             let badgeHtml = '';
             if (item.tag) {
@@ -475,11 +487,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeMenu = sampleMenuItems;
             }
             renderCategoryFilters();
-            renderMenu('all');
         }).catch(err => {
             activeMenu = sampleMenuItems;
             renderCategoryFilters();
-            renderMenu('all');
         });
     }
 
@@ -495,6 +505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const allBtns = filterTabsContainer.querySelectorAll('.filter-btn');
                 allBtns.forEach(b => b.classList.remove('active'));
                 alleBtn.classList.add('active');
+                activeCategory = 'all';
                 if (menuGrid) {
                     menuGrid.style.opacity = '0';
                     setTimeout(() => {

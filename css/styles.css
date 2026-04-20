@@ -165,15 +165,18 @@ p, li {
     background: rgba(36, 52, 71, 0.6);
 }
 
-/* Filter Tabs Mobile — Wrap + Center */
+/* Filter Tabs — always wrap, mobile + desktop */
+#filter-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+}
+
 @media (max-width: 767px) {
     #filter-tabs-container {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        overflow-x: unset !important;
-        gap: 0.5rem !important;
-        padding: 0.25rem 0.5rem !important;
+        justify-content: center;
+        overflow-x: unset;
     }
 }
 
@@ -839,6 +842,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     box-shadow: 0 4px 22px rgba(42, 22, 8, 0.4), 0 0 25px rgba(197, 158, 92, 0.12);
     transform: translateY(-1px);
 }
+
+/* Global text overflow safety */
+.break-words { word-break: break-word; overflow-wrap: break-word; }
 
 /* ========================================
    OVERALL CARD ELEVATION

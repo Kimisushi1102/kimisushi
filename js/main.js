@@ -349,13 +349,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80">
                         ${badgeHtml}
                     </div>
-                    <div class="p-4 md:p-6 flex flex-col h-[calc(100%-9rem)] md:h-[calc(100%-14rem)]">
-                        <div class="flex justify-between items-start mb-2 md:mb-3">
-                            <h3 class="font-serif font-bold text-base md:text-xl text-brand-ivory">${item.name}</h3>
-                            <span class="text-brand-gold font-semibold whitespace-nowrap ml-2">${item.price}</span>
+                    <div class="p-4 md:p-6 flex flex-col min-h-0">
+                        <div class="flex justify-between items-center gap-2 mb-2 md:mb-3 flex-wrap">
+                            <h3 class="font-serif font-bold text-base md:text-xl text-brand-ivory break-words leading-snug">${item.name}</h3>
+                            <span class="text-brand-gold font-semibold whitespace-nowrap shrink-0">${item.price}</span>
                         </div>
-                        <p class="text-brand-ivory/50 text-xs md:text-sm mb-3 md:mb-5 font-light line-clamp-2 md:line-clamp-3 flex-grow leading-relaxed">${item.description}</p>
-                        <div class="flex justify-between items-center mt-auto pt-3 md:pt-4 border-t border-brand-border-gold/20">
+                        <p class="text-brand-ivory/50 text-xs md:text-sm mb-3 md:mb-5 font-light leading-relaxed line-clamp-2 md:line-clamp-3">${item.description}</p>
+                        <div class="flex justify-between items-center mt-auto pt-3 md:pt-4 border-t border-brand-border-gold/20 flex-wrap gap-2">
                             <span class="text-xs text-brand-ivory/35 font-medium">${item.pieces || ''}</span>
                             <button class="add-to-cart-btn w-9 h-9 rounded-full flex items-center justify-center" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
                                 <i class="ph ph-plus"></i>
@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const oldPriceHtml = c.oldPrice ? `<span class="opacity-70 line-through text-lg ml-1" style="color: ${hasVeggieTag ? 'rgba(242,251,249,0.35)' : 'rgba(42,27,15,0.35)'}">${c.oldPrice}</span>` : '';
 
-            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
+            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3 combo-list-item break-words"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
 
             const comboHtml = `
                 <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
@@ -827,7 +827,7 @@ function updateCartUI() {
                 <div class="flex items-center gap-2 py-1.5 px-1 rounded hover:bg-white/5 transition-colors">
                     <img src="${item.image}" alt="${item.name}" class="w-8 h-8 rounded object-cover shrink-0">
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-[11px] font-bold text-brand-ivory/80 truncate leading-tight">${item.name}</h4>
+                        <h4 class="text-[11px] font-bold text-brand-ivory/80 break-words leading-tight">${item.name}</h4>
                     </div>
                     <div class="flex items-center gap-1 bg-white/5 rounded p-0.5 shrink-0">
                         <button type="button" onclick="window.changeQuantity('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center text-brand-ivory/40 hover:text-brand-red rounded transition-all"><i class="ph ph-minus text-[10px]"></i></button>

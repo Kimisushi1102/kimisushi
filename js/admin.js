@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </td>
                 <td class="p-4">
                     <p class="font-semibold text-sm text-brand-dark">${item.name}</p>
-                    <p class="text-xs text-gray-500 truncate w-48">${item.description}</p>
+                    <p class="text-xs text-gray-500 break-words w-48">${item.description}</p>
                     ${item.tag ? `<span class="inline-block px-2 py-0.5 mt-1 rounded text-[10px] bg-gray-100 font-medium">${item.tag}</span>` : ''}
                 </td>
                 <td class="p-4 text-sm text-gray-600">${categoryName}</td>
@@ -970,7 +970,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0";
             
-            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="text-xs text-gray-500 truncate flex gap-1"><span class="text-brand-matcha">✔</span> ${i}</li>`).join('');
+            const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="text-xs text-gray-500 break-words flex gap-1"><span class="text-brand-matcha">✔</span> ${i}</li>`).join('');
 
             tr.innerHTML = `
                 <td class="p-4 align-top">

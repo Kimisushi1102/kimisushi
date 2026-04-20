@@ -25,7 +25,7 @@
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .safe-pt { padding-top: env(safe-area-inset-top); }
         
-        .touch-button { min-height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 12px; border-radius: 16px; font-weight: 700; transition: all 0.1s ease; }
+        .touch-button { min-height: 64px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; padding: 10px 8px; border-radius: 16px; font-weight: 700; transition: all 0.1s ease; overflow: hidden; }
         .touch-button:active { transform: scale(0.96); opacity: 0.8; }
         .mobile-tab-view { display: none; }
         .mobile-tab-view.active { display: flex; }
@@ -632,7 +632,7 @@
                 btn.innerHTML = `
                     <div class="flex flex-col items-center">
                         ${item.code ? `<span class="absolute top-1 left-2 text-[8px] font-black text-brand-red opacity-60">#${item.code}</span>` : ''}
-                        <span class="text-sm font-black uppercase leading-tight">${escapeHTML(item.name)}</span>
+                        <span class="text-sm font-black text-center break-words leading-tight w-full">${escapeHTML(item.name)}</span>
                         <span class="text-brand-red text-xs mt-1 font-bold">${item.price}</span>
                         ${isManagementMode ? `<div class="absolute inset-0 bg-red-500/10 flex items-center justify-center rounded-2xl backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph-bold ph-trash text-red-600 text-2xl"></i></div>` : ''}
                     </div>
@@ -813,9 +813,9 @@
                         div.className = `flex justify-between items-center p-4 rounded-2xl transition border-l-4 ${isSelected ? 'bg-brand-red/10 border-brand-red' : 'bg-white border-transparent shadow-sm'}`;
                         div.onclick = () => toggleItemSelection(index);
                         div.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 rounded-full border-2 ${isSelected ? 'bg-brand-red border-brand-red' : 'border-gray-200'} flex items-center justify-center text-white text-[10px]">${isSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div>
-                                <span class="text-sm font-black text-gray-800 uppercase tracking-tighter">${escapeHTML(item.name)}</span>
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-6 h-6 rounded-full border-2 ${isSelected ? 'bg-brand-red border-brand-red' : 'border-gray-200'} flex items-center justify-center text-white text-[10px] shrink-0">${isSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div>
+                                <span class="text-sm font-black text-gray-800 break-words leading-tight min-w-0 flex-1">${escapeHTML(item.name)}</span>
                             </div>
                             <span class="text-sm text-gray-500 font-bold">${item.price}</span>
                         `;
@@ -841,8 +841,8 @@
                         const div = document.createElement('div');
                         div.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-transparent flex justify-between items-center mb-1 group-bill-item";
                         div.innerHTML = `
-                            <div class="flex flex-col">
-                                <span class="text-sm font-black text-gray-800 uppercase tracking-tighter">${group.count}x ${escapeHTML(group.name)}</span>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-sm font-black text-gray-800 break-words leading-tight">${group.count}x ${escapeHTML(group.name)}</span>
                                 <span class="text-[10px] font-bold text-gray-400">${group.price} / Stk</span>
                             </div>
                             <div class="flex items-center gap-3">

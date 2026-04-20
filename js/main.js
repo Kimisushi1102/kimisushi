@@ -677,6 +677,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3 combo-list-item break-words"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
 
             const cartAddLabel = (typeof i18n !== 'undefined') ? i18n.t('cart_add') : 'In den Warenkorb';
+
+            const subtitleLower = (c.subtitle || '').toLowerCase();
+            const personMatch = subtitleLower.match(/ab\s+(\d+)\s+person(en)?/);
+            const minPersons = personMatch ? parseInt(personMatch[1]) : null;
+            const minPersonsAttr = minPersons ? ` data-minpersons="${minPersons}"` : '';
+
             const comboHtml = `
                 <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
                     ${badgesHtml}
@@ -692,7 +698,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${itemsListHtml}
                     </ul>
 
-                    <button class="${btnClasses}" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png">
+                    <button class="${btnClasses}" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png"${minPersonsAttr}>
                         <span class="flex items-center justify-center gap-2">
                             <i class="ph ph-shopping-cart-simple"></i> ${cartAddLabel}
                         </span>
@@ -950,9 +956,18 @@ function updateCartUI() {
 window.changeQuantity = (id, delta) => {
     const item = cart.find(i => i.id === id);
     if (item) {
-        item.quantity += delta;
-        if (item.quantity <= 0) {
-            cart = cart.filter(i => i.id !== id);
+        if (delta < 0 && item.minPersons) {
+            const newQty = item.quantity + delta;
+            if (newQty < item.minPersons) {
+                cart = cart.filter(i => i.id !== id);
+            } else {
+                item.quantity = newQty;
+            }
+        } else {
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
         }
         updateCartUI();
     }
@@ -975,11 +990,13 @@ document.body.addEventListener('click', (e) => {
         const price = cartBtn.dataset.price;
         const image = cartBtn.dataset.image;
 
+        const minPersons = cartBtn.dataset.minpersons ? parseInt(cartBtn.dataset.minpersons) : null;
+
         const existingItem = cart.find(i => i.id === id);
         if (existingItem) {
             existingItem.quantity++;
         } else {
-            cart.push({ id, name, price, image, quantity: 1 });
+            cart.push({ id, name, price, image, quantity: minPersons || 1, minPersons: minPersons || null });
         }
 
         // DEBUG: Log cart state

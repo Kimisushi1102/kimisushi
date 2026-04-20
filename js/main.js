@@ -1,5 +1,33 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    
+
+    // --- i18n: Initialize translation system ---
+    if (typeof i18n !== 'undefined') {
+        i18n.init();
+        i18n.updateUI();
+
+        // Language switcher button
+        const langBtn = document.getElementById('lang-switch-btn');
+        if (langBtn) {
+            // Set initial state from localStorage
+            const savedLang = localStorage.getItem('kimi_lang');
+            langBtn.textContent = (savedLang === 'en') ? 'DE' : 'EN';
+
+            langBtn.addEventListener('click', () => {
+                const nextLang = i18n.currentLang === 'de' ? 'en' : 'de';
+                i18n.setLang(nextLang);
+                langBtn.textContent = nextLang === 'de' ? 'EN' : 'DE';
+            });
+        }
+
+        // Re-apply translations whenever language changes (for JS-rendered content)
+        window.addEventListener('i18n-lang-change', () => {
+            if (typeof reRenderMenu === 'function') reRenderMenu();
+            if (typeof reRenderCombos === 'function') reRenderCombos();
+            if (typeof reRenderCheckout === 'function') reRenderCheckout();
+            if (typeof reRenderFAQ === 'function') reRenderFAQ();
+        });
+    }
+
     // --- Live Sync when Storage changes (from Admin/POS) ---
     window.addEventListener('storage', (e) => {
         if (e.key === 'kimi_settings' || e.key === 'kimi_menu' || e.key === 'kimi_combos') {
@@ -249,6 +277,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // --- i18n: Re-render functions for dynamic content ---
+    // Called when language changes to re-render JS-generated content
+
+    window.reRenderMenu = () => {
+        renderCategoryFilters();
+        renderMenu('all');
+    };
+
+    window.reRenderCombos = () => {
+        if (combosGrid) renderCombos();
+    };
+
+    window.reRenderCheckout = () => {
+        // Update checkout labels that come from the form itself (static i18n attrs handle most)
+        // The cart items list and order count are handled separately
+        if (typeof i18n !== 'undefined') {
+            const cartEmptyLabel = i18n.t('checkout_empty_cart');
+            const orderCountLabel = i18n.t('checkout_order_count');
+            const orderCountSpan = document.querySelector('[data-i18n-html="checkout_order_count_label"]');
+            if (orderCountSpan) {
+                orderCountSpan.innerHTML = `${i18n.t('checkout_order_count')}: <span id="co-count" class="font-bold text-brand-ivory/70">0</span> ${i18n.t('checkout_order_count')}`;
+            }
+            // Re-render cart if empty
+            if (cartItemsList && cart.length === 0) {
+                cartItemsList.innerHTML = `<div class="text-center py-4 text-gray-400 text-sm">${cartEmptyLabel}</div>`;
+            }
+        }
+    };
+
     // --- 3. Scroll Reveal Animations ---
     const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right');
     
@@ -280,23 +337,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderCategoryFilters() {
         if (!filterTabsContainer) return;
-        
+
         const categories = [...new Set(activeMenu.map(item => item.category))].filter(c => c && c.trim() !== "");
-        
-        // Helper to capitalize first letter
+
         const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-        
-        // Hardcoded mapping for legacy categories (optional)
-        const categoryLabels = {
-            'sushi': 'Nigiri',
-            'maki': 'Maki Rolls',
-            'sashimi': 'Sashimi'
+
+        // i18n-aware category labels
+        const getFilterLabel = (cat) => {
+            const lang = (typeof i18n !== 'undefined') ? i18n.currentLang : 'de';
+            const map = {
+                sushi: { de: 'Nigiri', en: 'Nigiri' },
+                maki: { de: 'Maki Rolls', en: 'Maki Rolls' },
+                sashimi: { de: 'Sashimi', en: 'Sashimi' },
+                warm: { de: 'Warme Gerichte', en: 'Warm Dishes' },
+                drinks: { de: 'Getränke', en: 'Drinks' },
+                desserts: { de: 'Desserts', en: 'Desserts' },
+                extras: { de: 'Extras', en: 'Extras' },
+                veggie: { de: 'Vegetarisch', en: 'Vegetarian' }
+            };
+            const t = map[cat.toLowerCase()];
+            return t ? t[lang] : capitalize(cat);
         };
 
-        let filtersHtml = `<button class="filter-btn active px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="all">Alle</button>`;
-        
+        const alleLabel = (typeof i18n !== 'undefined') ? i18n.t('menu_filter_all') : 'Alle';
+        let filtersHtml = `<button class="filter-btn active px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="all">${alleLabel}</button>`;
+
         categories.forEach(cat => {
-            const label = categoryLabels[cat.toLowerCase()] || capitalize(cat);
+            const label = getFilterLabel(cat);
             filtersHtml += `<button class="filter-btn px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap" data-filter="${cat}">${label}</button>`;
         });
 
@@ -329,35 +396,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         const menu = activeMenu;
         menuGrid.innerHTML = '';
 
+        // i18n tag labels
+        const getTagLabel = (tag) => {
+            if (!tag) return '';
+            const lang = (typeof i18n !== 'undefined') ? i18n.currentLang : 'de';
+            const tagMap = {
+                'Bestseller': { de: 'Bestseller', en: 'Bestseller' },
+                'Empfehlung': { de: 'Empfehlung', en: 'Recommendation' },
+                'Neu': { de: 'Neu', en: 'New' },
+                'Veggie': { de: 'Veggie', en: 'Veggie' }
+            };
+            return tagMap[tag] ? tagMap[tag][lang] : tag;
+        };
+
         [...menu].reverse().forEach(item => {
             if (filterValue !== 'all' && item.category !== filterValue) return;
 
             let badgeHtml = '';
             if (item.tag) {
+                const tagLabel = getTagLabel(item.tag);
                 if (item.tag === 'Bestseller') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-gold text-brand-dark text-xs font-semibold px-3 py-1 rounded-full">Bestseller</span>`;
-                } else if (item.tag === 'Empfehlung') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-elevated backdrop-blur border border-brand-border-gold/30 text-brand-ivory text-xs font-semibold px-3 py-1 rounded-full">Empfehlung</span>`;
-                } else if (item.tag === 'Neu') {
-                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-elevated backdrop-blur border border-brand-border-gold/30 text-brand-ivory text-xs font-semibold px-3 py-1 rounded-full">Neu</span>`;
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-gold text-brand-dark text-xs font-semibold px-3 py-1 rounded-full">${tagLabel}</span>`;
+                } else {
+                    badgeHtml = `<span class="absolute top-4 left-4 bg-brand-elevated backdrop-blur border border-brand-border-gold/30 text-brand-ivory text-xs font-semibold px-3 py-1 rounded-full">${tagLabel}</span>`;
                 }
             }
+
+            const itemName = item.name_en || item.name;
+            const itemDesc = item.description_en || item.description || '';
+            const piecesLabel = (typeof i18n !== 'undefined') ? i18n.t('sample_pieces') : 'Stück';
+            const piecesText = item.pieces ? `${item.pieces} ${piecesLabel}` : '';
 
             const itemHtml = `
                 <div class="menu-item rounded-2xl bg-brand-elevated border border-brand-border-gold/50 overflow-hidden hover-card group reveal-up active transition-all duration-400" data-category="${item.category}">
                     <div class="relative h-36 md:h-56 overflow-hidden">
-                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80">
+                        <img src="${item.image}" alt="${itemName}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80">
                         ${badgeHtml}
                     </div>
                     <div class="p-4 md:p-6 flex flex-col min-h-0">
                         <div class="flex justify-between items-center gap-2 mb-2 md:mb-3 flex-wrap">
-                            <h3 class="font-serif font-bold text-base md:text-xl text-brand-ivory break-words leading-snug">${item.name}</h3>
+                            <h3 class="font-serif font-bold text-base md:text-xl text-brand-ivory break-words leading-snug">${itemName}</h3>
                             <span class="text-brand-gold font-semibold whitespace-nowrap shrink-0">${item.price}</span>
                         </div>
-                        <p class="text-brand-ivory/50 text-xs md:text-sm mb-3 md:mb-5 font-light leading-relaxed line-clamp-2 md:line-clamp-3">${item.description}</p>
+                        <p class="text-brand-ivory/50 text-xs md:text-sm mb-3 md:mb-5 font-light leading-relaxed line-clamp-2 md:line-clamp-3">${itemDesc}</p>
                         <div class="flex justify-between items-center mt-auto pt-3 md:pt-4 border-t border-brand-border-gold/20 flex-wrap gap-2">
-                            <span class="text-xs text-brand-ivory/35 font-medium">${item.pieces || ''}</span>
-                            <button class="add-to-cart-btn w-9 h-9 rounded-full flex items-center justify-center" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image}">
+                            <span class="text-xs text-brand-ivory/35 font-medium">${piecesText}</span>
+                            <button class="add-to-cart-btn w-9 h-9 rounded-full flex items-center justify-center" data-id="${item.id}" data-name="${itemName}" data-price="${item.price}" data-image="${item.image}">
                                 <i class="ph ph-plus"></i>
                             </button>
                         </div>
@@ -373,14 +457,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Sample menu data - UI fallback only, does NOT affect database or logic
         const sampleMenuItems = [
-            { id: 'sm_1', name: 'Lachs Nigiri', price: '5,90 €', description: 'Frischer atlantischer Lachs auf perfekt geformtem Sushireis', category: 'sushi', image: 'images/lachs_nigiri.png', pieces: '2 Stück', tag: 'Bestseller' },
-            { id: 'sm_2', name: 'Thunfisch Nigiri', price: '6,50 €', description: 'Premium Thunfisch, zart und geschmackvoll', category: 'sushi', image: 'images/thunfisch_nigiri.png', pieces: '2 Stück', tag: 'Bestseller' },
-            { id: 'sm_3', name: 'Dragon Roll', price: '14,90 €', description: 'Tempura Garnele, Avocado, Gurke, topped mit Aal und Eiklar', category: 'maki', image: 'images/dragon_roll.png', pieces: '8 Stück', tag: 'Empfehlung' },
-            { id: 'sm_4', name: 'Rainbow Roll', price: '13,90 €', description: 'California Roll topped mit buntem Lachskaviar und Lachs', category: 'maki', image: 'images/rainbow_roll.png', pieces: '8 Stück', tag: 'Neu' },
-            { id: 'sm_5', name: 'Lachs Sashimi', price: '12,90 €', description: '18 hauchdünne Scheiben frischer Lachs', category: 'sashimi', image: 'images/lachs_sashimi.png', pieces: '18 Stück', tag: 'Bestseller' },
-            { id: 'sm_6', name: 'Mix Sashimi', price: '18,90 €', description: 'Auswahl der besten Sashimi: Lachs, Thunfisch und Tintenfisch', category: 'sashimi', image: 'images/mix_sashimi.png', pieces: '22 Stück', tag: 'Empfehlung' },
-            { id: 'sm_7', name: 'California Roll', price: '9,90 €', description: 'Krabbenstick, Avocado, Gurke mit Sesam', category: 'maki', image: 'images/california_roll.png', pieces: '8 Stück', tag: '' },
-            { id: 'sm_8', name: 'Avocado Maki', price: '7,90 €', description: 'Cremige Avocado in einem perfekt gerollten Maki', category: 'maki', image: 'images/avocado_maki.png', pieces: '8 Stück', tag: 'Veggie' }
+            { id: 'sm_1', name: 'Lachs Nigiri', name_en: 'Salmon Nigiri', price: '5,90 €', description: 'Frischer atlantischer Lachs auf perfekt geformtem Sushireis', description_en: 'Fresh Atlantic salmon on perfectly shaped sushi rice', category: 'sushi', image: 'images/lachs_nigiri.png', pieces: '2', tag: 'Bestseller' },
+            { id: 'sm_2', name: 'Thunfisch Nigiri', name_en: 'Tuna Nigiri', price: '6,50 €', description: 'Premium Thunfisch, zart und geschmackvoll', description_en: 'Premium tuna, tender and flavorful', category: 'sushi', image: 'images/thunfisch_nigiri.png', pieces: '2', tag: 'Bestseller' },
+            { id: 'sm_3', name: 'Dragon Roll', name_en: 'Dragon Roll', price: '14,90 €', description: 'Tempura Garnele, Avocado, Gurke, topped mit Aal und Eiklar', description_en: 'Tempura shrimp, avocado, cucumber, topped with eel and egg', category: 'maki', image: 'images/dragon_roll.png', pieces: '8', tag: 'Empfehlung' },
+            { id: 'sm_4', name: 'Rainbow Roll', name_en: 'Rainbow Roll', price: '13,90 €', description: 'California Roll topped mit buntem Lachskaviar und Lachs', description_en: 'California roll topped with colorful roe and salmon', category: 'maki', image: 'images/rainbow_roll.png', pieces: '8', tag: 'Neu' },
+            { id: 'sm_5', name: 'Lachs Sashimi', name_en: 'Salmon Sashimi', price: '12,90 €', description: '18 hauchdünne Scheiben frischer Lachs', description_en: '18 paper-thin slices of fresh salmon', category: 'sashimi', image: 'images/lachs_sashimi.png', pieces: '18', tag: 'Bestseller' },
+            { id: 'sm_6', name: 'Mix Sashimi', name_en: 'Mix Sashimi', price: '18,90 €', description: 'Auswahl der besten Sashimi: Lachs, Thunfisch und Tintenfisch', description_en: 'Selection of the best sashimi: salmon, tuna, and octopus', category: 'sashimi', image: 'images/mix_sashimi.png', pieces: '22', tag: 'Empfehlung' },
+            { id: 'sm_7', name: 'California Roll', name_en: 'California Roll', price: '9,90 €', description: 'Krabbenstick, Avocado, Gurke mit Sesam', description_en: 'Crab stick, avocado, cucumber with sesame', category: 'maki', image: 'images/california_roll.png', pieces: '8', tag: '' },
+            { id: 'sm_8', name: 'Avocado Maki', name_en: 'Avocado Maki', price: '7,90 €', description: 'Cremige Avocado in einem perfekt gerollten Maki', description_en: 'Creamy avocado in a perfectly rolled maki', category: 'maki', image: 'images/avocado_maki.png', pieces: '8', tag: 'Veggie' }
         ];
 
         // Fetch Live Menu from Server
@@ -435,10 +519,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderFAQ(items) {
         if (!faqList) return;
-        if (!items || items.length === 0) {
-            faqList.innerHTML = '<p class="text-brand-ivory/30 text-center text-sm p-8">Noch keine Fragen vorhanden.</p>';
-            return;
-        }
+            const faqEmptyLabel = (typeof i18n !== 'undefined') ? i18n.t('faq_empty') : 'Noch keine Fragen vorhanden.';
+            if (!items || items.length === 0) {
+                faqList.innerHTML = `<p class="text-brand-ivory/30 text-center text-sm p-8">${faqEmptyLabel}</p>`;
+                return;
+            }
         faqList.innerHTML = items.map((item, idx) => `
             <div class="faq-card p-5 md:p-7 reveal-up border border-brand-border-gold/20 cursor-pointer select-none" data-id="${item.id}" style="transition-delay: ${idx * 60}ms;">
                 <div class="faq-question flex justify-between items-start gap-4">
@@ -486,11 +571,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Fetch FAQ from server
+    // Store FAQ data globally for re-rendering
+    let activeFAQ = [];
     fetch('/api/faq')
         .then(r => r.json())
-        .then(data => renderFAQ(data))
+        .then(data => { activeFAQ = data; renderFAQ(data); })
         .catch(() => renderFAQ([]));
+
+    // i18n: re-render FAQ (called on language change)
+    window.reRenderFAQ = () => { renderFAQ(activeFAQ); };
 
 
     // --- 4.5. Render Combos ---
@@ -500,35 +589,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!combosGrid) return;
         // Use activeCombos (updated by async load) or fallback to localStorage
         let combos = activeCombos.length > 0 ? activeCombos : (typeof getCombosSync === 'function' ? getCombosSync() : []);
-        // Sample menu set data - UI fallback only, does NOT affect database or logic
+        // Sample menu set data - i18n-aware fallback
+        const lang = (typeof i18n !== 'undefined') ? i18n.currentLang : 'de';
+        const sampleCombos = lang === 'en' ? [
+            { id: 'combo_sample_1', name: 'Sushi Menu Classic', subtitle: 'Perfect for 2 persons', price: '24,90 €', oldPrice: '29,90 €', items: '8x Nigiri Sushi\n4x Maki Roll\n1x Miso Soup\n2x Wasabi & Ginger', tag: "Chef's Choice" },
+            { id: 'combo_sample_2', name: 'Sushi Menu Deluxe', subtitle: 'For 3–4 persons', price: '39,90 €', items: '12x Nigiri Sushi\n8x Maki Roll\n6x Sashimi\n2x Miso Soup\n1x Edamame', tag: 'Bestseller' },
+            { id: 'combo_sample_3', name: 'Vegetarian Menu', subtitle: 'For 2 persons', price: '19,90 €', items: '6x Avocado Maki\n4x Kappa Maki\n2x Veggie Roll\n1x Edamame\n1x Miso Soup', tag: 'Veggie' }
+        ] : [
+            { id: 'combo_sample_1', name: 'Sushi Menü Classic', subtitle: 'Perfekt für 2 Personen', price: '24,90 €', oldPrice: '29,90 €', items: '8x Nigiri Sushi\n4x Maki Roll\n1x Miso Suppe\n2x Wasabi & Ingwer', tag: "Chef's Choice" },
+            { id: 'combo_sample_2', name: 'Sushi Menü Deluxe', subtitle: 'Für 3–4 Personen', price: '39,90 €', items: '12x Nigiri Sushi\n8x Maki Roll\n6x Sashimi\n2x Miso Suppe\n1x Edamame', tag: 'Bestseller' },
+            { id: 'combo_sample_3', name: 'Vegetarisches Menü', subtitle: 'Für 2 Personen', price: '19,90 €', items: '6x Avocado Maki\n4x Kappa Maki\n2x Veggie Roll\n1x Edamame\n1x Miso Suppe', tag: 'Veggie' }
+        ];
         if (!combos || combos.length === 0) {
-            combos = [
-                {
-                    id: 'combo_sample_1',
-                    name: 'Sushi Menü Classic',
-                    subtitle: 'Perfekt für 2 Personen',
-                    price: '24,90 €',
-                    oldPrice: '29,90 €',
-                    items: '8x Nigiri Sushi\n4x Maki Roll\n1x Miso Suppe\n2x Wasabi & Ingwer',
-                    tag: "Chef's Choice"
-                },
-                {
-                    id: 'combo_sample_2',
-                    name: 'Sushi Menü Deluxe',
-                    subtitle: 'Für 3–4 Personen',
-                    price: '39,90 €',
-                    items: '12x Nigiri Sushi\n8x Maki Roll\n6x Sashimi\n2x Miso Suppe\n1x Edamame',
-                    tag: 'Bestseller'
-                },
-                {
-                    id: 'combo_sample_3',
-                    name: 'Vegetarisches Menü',
-                    subtitle: 'Für 2 Personen',
-                    price: '19,90 €',
-                    items: '6x Avocado Maki\n4x Kappa Maki\n2x Veggie Roll\n1x Edamame\n1x Miso Suppe',
-                    tag: 'Veggie'
-                }
-            ];
+            combos = sampleCombos;
         }
         combosGrid.innerHTML = '';
 
@@ -554,15 +627,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnClasses = "combo-cart-btn-featured w-full py-3.5 px-6 rounded-xl font-semibold text-sm transition-all duration-300";
             }
 
+            // i18n tag label
+            const getComboTagLabel = (tag) => {
+                if (!tag) return '';
+                const tlang = (typeof i18n !== 'undefined') ? i18n.currentLang : 'de';
+                const map = { "Chef's Choice": { de: "Chef's Choice", en: "Chef's Choice" }, 'Bestseller': { de: 'Bestseller', en: 'Bestseller' }, 'Veggie': { de: 'Veggie', en: 'Veggie' } };
+                return (map[tag] && map[tag][tlang]) ? map[tag][tlang] : tag;
+            };
+
             let badgesHtml = '';
 
             if (hasChefTag && hasVeggieTag) {
+                const vegLabel = getComboTagLabel('Veggie');
                 badgesHtml = `
                     <div class="absolute -top-3 right-7 z-10 flex gap-2">
                         <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">Chef's Choice</span>
                     </div>
                     <div class="absolute -top-3 right-[calc(7rem+0.5rem)] z-10">
-                        <span class="inline-block px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style="background:#123C3D;color:#DDF5F0;border:1px solid rgba(141,216,202,0.28);box-shadow:0 6px 18px rgba(0,0,0,0.22);">Veggie</span>
+                        <span class="inline-block px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style="background:#123C3D;color:#DDF5F0;border:1px solid rgba(141,216,202,0.28);box-shadow:0 6px 18px rgba(0,0,0,0.22);">${vegLabel}</span>
                     </div>`;
             } else if (hasChefTag) {
                 badgesHtml = `<div class="absolute -top-3 right-7 z-10">
@@ -573,8 +655,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="inline-block px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style="background:#123C3D;color:#DDF5F0;border:1px solid rgba(141,216,202,0.28);box-shadow:0 6px 18px rgba(0,0,0,0.22);">Veggie</span>
                 </div>`;
             } else if (hasAnyTag) {
+                const tagLabel = getComboTagLabel(c.tag);
                 badgesHtml = `<div class="absolute -top-3 right-7 z-10">
-                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">${c.tag}</span>
+                    <span class="inline-block bg-[#2A1608] text-[#D9B36A] text-[10px] font-bold px-5 py-1.5 rounded-full uppercase tracking-widest" style="box-shadow: 0 6px 18px rgba(0,0,0,0.28);">${tagLabel}</span>
                 </div>`;
             }
 
@@ -582,6 +665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const itemsListHtml = c.items.split('\n').filter(i => i.trim()).map(i => `<li class="flex items-start gap-3 combo-list-item break-words"><i class="ph ph-check-circle ${colorType} mt-0.5 shrink-0"></i> ${i}</li>`).join('');
 
+            const cartAddLabel = (typeof i18n !== 'undefined') ? i18n.t('cart_add') : 'In den Warenkorb';
             const comboHtml = `
                 <div class="${wrapperClasses}" style="transition-delay: ${(100 + (idx * 100))}ms;">
                     ${badgesHtml}
@@ -599,7 +683,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     <button class="${btnClasses}" data-id="${c.id}" data-name="${c.name}" data-price="${c.price}" data-image="images/hero_sushi.png">
                         <span class="flex items-center justify-center gap-2">
-                            <i class="ph ph-shopping-cart-simple"></i> In den Warenkorb
+                            <i class="ph ph-shopping-cart-simple"></i> ${cartAddLabel}
                         </span>
                     </button>
                 </div>
@@ -682,7 +766,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const btnText = submitBtn.querySelector('span');
                 const originalText = btnText.innerHTML;
                 
-                btnText.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Senden...';
+                const sendingLabel = (typeof i18n !== 'undefined') ? i18n.t('res_sending') : 'Senden...';
+                btnText.innerHTML = `<i class="ph ph-spinner animate-spin"></i> ${sendingLabel}`;
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
 
@@ -817,9 +902,10 @@ function updateCartUI() {
 
     // 2. Update Kasse List
     if (cartItemsList) {
-        if (cart.length === 0) {
-            cartItemsList.innerHTML = '<div class="text-center py-4 text-gray-400 text-sm">Warenkorb ist leer</div>';
-        } else {
+            const cartEmptyLabel = (typeof i18n !== 'undefined') ? i18n.t('checkout_empty_cart') : 'Warenkorb ist leer';
+            if (cart.length === 0) {
+                cartItemsList.innerHTML = `<div class="text-center py-4 text-gray-400 text-sm">${cartEmptyLabel}</div>`;
+            } else {
             cartItemsList.innerHTML = cart.map((item, index) => {
                 const unitPrice = parsePrice(item.price);
                 const subtotal = unitPrice * item.quantity;
@@ -917,7 +1003,8 @@ document.querySelectorAll('.cart-trigger').forEach(btn => {
             // CẬP NHẬT TIME SLOTS NGAY KHI MODAL MỞ - đảm bảo giờ đã chọn được khôi phục
             updateOrderSlots();
         } else {
-            alert('Warenkorb ist leer!');
+            const cartEmptyAlert = (typeof i18n !== 'undefined') ? i18n.t('checkout_empty_alert') : 'Warenkorb ist leer!';
+            alert(cartEmptyAlert);
         }
     });
 });

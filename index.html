@@ -124,20 +124,22 @@
 
                 <!-- Desktop Menu -->
                 <nav class="hidden lg:flex items-center gap-10">
-                    <a href="#about" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide">Über uns</a>
-                    <a href="#menu" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide">Speisekarte</a>
-                    <a href="#combos" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide">Menüs</a>
-                    <a href="#reviews" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide">Bewertungen</a>
-                    <a href="#contact" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide">Kontakt</a>
+                    <a href="#about" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide" data-i18n="nav_about">Über uns</a>
+                    <a href="#menu" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide" data-i18n="nav_menu">Speisekarte</a>
+                    <a href="#combos" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide" data-i18n="nav_combos">Menüs</a>
+                    <a href="#reviews" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide" data-i18n="nav_reviews">Bewertungen</a>
+                    <a href="#contact" class="text-sm font-medium text-white/60 hover:text-brand-gold transition-colors duration-300 nav-link tracking-wide" data-i18n="nav_contact">Kontakt</a>
                 </nav>
 
                 <!-- Desktop CTA & Cart -->
-                <div class="hidden lg:flex items-center gap-8">
+                <div class="hidden lg:flex items-center gap-5">
+                    <!-- Language Switcher -->
+                    <button id="lang-switch-btn" class="lang-switch-btn text-xs font-bold tracking-widest px-3 py-1.5 rounded-lg border border-brand-border-gold/30 text-brand-gold hover:bg-brand-gold/10 hover:border-brand-gold/60 transition-all duration-300" aria-label="Sprache wechseln">EN</button>
                     <button class="cart-trigger relative text-white/60 hover:text-brand-gold transition-colors duration-300" aria-label="Warenkorb">
                         <i class="ph ph-shopping-bag text-2xl"></i>
                         <span class="cart-badge absolute -top-1 -right-2 bg-brand-gold text-brand-dark text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full scale-0 transition-transform duration-300">0</span>
                     </button>
-                    <a href="#reservation" class="btn-primary">
+                    <a href="#reservation" class="btn-primary" data-i18n="cta_reserve">
                         Jetzt reservieren
                     </a>
                 </div>
@@ -158,14 +160,14 @@
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu" class="fixed inset-0 bg-brand-dark text-brand-ivory z-50 transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:hidden pt-24 px-8 flex flex-col border-l border-brand-border-gold/20 will-change-transform overflow-hidden">
             <nav class="flex flex-col gap-8 text-2xl font-serif">
-                <a href="#about" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Über uns</a>
-                <a href="#menu" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Speisekarte</a>
-                <a href="#combos" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Menüs</a>
-                <a href="#reviews" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Bewertungen</a>
-                <a href="#contact" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300">Kontakt</a>
+                <a href="#about" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300" data-i18n="nav_about">Über uns</a>
+                <a href="#menu" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300" data-i18n="nav_menu">Speisekarte</a>
+                <a href="#combos" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300" data-i18n="nav_combos">Menüs</a>
+                <a href="#reviews" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300" data-i18n="nav_reviews">Bewertungen</a>
+                <a href="#contact" class="mobile-link text-brand-ivory/60 hover:text-brand-gold transition-colors duration-300" data-i18n="nav_contact">Kontakt</a>
             </nav>
             <div class="mt-auto mb-12 flex flex-col gap-5">
-                <a href="#reservation" class="btn-primary text-center mobile-link justify-center">Jetzt reservieren</a>
+                <a href="#reservation" class="btn-primary text-center mobile-link justify-center" data-i18n="cta_reserve">Jetzt reservieren</a>
                 <a href="tel:+491234567890" id="site-phone-link-1" class="btn-secondary text-center border-brand-border-gold/30 hover:border-brand-gold hover:text-brand-gold flex items-center justify-center gap-2">
                     <i class="ph ph-phone"></i> <span id="site-phone-1">+49 123 4567890</span>
                 </a>
@@ -189,10 +191,10 @@
             <div class="max-w-2xl reveal-up">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-12 h-px bg-brand-gold/40"></div>
-                    <span class="text-brand-gold text-xs font-medium tracking-[0.2em] uppercase">Premium Sushi Cuisine</span>
+                    <span class="text-brand-gold text-xs font-medium tracking-[0.2em] uppercase" data-i18n="hero_tagline">Premium Sushi Cuisine</span>
                 </div>
 
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1] mb-8 text-white">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1] mb-8 text-white" data-i18n-html="hero_title">
                     Die Kunst des<br>
                     <span class="text-brand-gold italic font-normal">wahren Geschmacks.</span>
                 </h1>
@@ -202,10 +204,10 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="#reservation" class="btn-primary text-center">
+                    <a href="#reservation" class="btn-primary text-center" data-i18n="hero_btn_reserve">
                         <i class="ph-fill ph-calendar-check"></i> Jetzt reservieren
                     </a>
-                    <a href="#menu" class="btn-secondary text-white/70 border-white/10 hover:border-brand-gold/30 hover:text-brand-gold text-center flex items-center justify-center gap-2">
+                    <a href="#menu" class="btn-secondary text-white/70 border-white/10 hover:border-brand-gold/30 hover:text-brand-gold text-center flex items-center justify-center gap-2" data-i18n="hero_btn_menu">
                         Speisekarte ansehen
                     </a>
                 </div>
@@ -216,8 +218,8 @@
                             <i class="ph ph-fish-simple text-xl"></i>
                         </div>
                         <div class="text-sm">
-                            <p class="font-medium text-white/80">Täglich frisch</p>
-                            <p class="text-white/30 text-xs">Premium Zutaten</p>
+                            <p class="font-medium text-white/80" data-i18n="hero_stat_fresh">Täglich frisch</p>
+                            <p class="text-white/30 text-xs" data-i18n="hero_stat_fresh_sub">Premium Zutaten</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 delivery-content hidden">
@@ -225,8 +227,8 @@
                             <i class="ph ph-moped text-xl"></i>
                         </div>
                         <div class="text-sm">
-                            <p class="font-medium text-white/80">Schnelle Lieferung</p>
-                            <p class="text-white/30 text-xs">Im Umkreis von 5km</p>
+                            <p class="font-medium text-white/80" data-i18n="hero_stat_delivery">Schnelle Lieferung</p>
+                            <p class="text-white/30 text-xs" data-i18n="hero_stat_delivery_sub">Im Umkreis von 5km</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
@@ -234,8 +236,8 @@
                             <i class="ph ph-star text-xl"></i>
                         </div>
                         <div class="text-sm">
-                            <p class="font-medium text-white/80">Top bewertet</p>
-                            <p class="text-white/30 text-xs">4.9/5 bei Google</p>
+                            <p class="font-medium text-white/80" data-i18n="hero_stat_rated">Top bewertet</p>
+                            <p class="text-white/30 text-xs" data-i18n="hero_stat_rated_sub">4.9/5 bei Google</p>
                         </div>
                     </div>
                 </div>
@@ -253,17 +255,17 @@
                     </div>
                     <div class="absolute top-1/2 -left-10 -translate-y-1/2 z-20 bg-brand-elevated border border-brand-border-gold/40 p-8 rounded-2xl shadow-card hidden md:block badge-highlight">
                         <p class="font-serif text-5xl font-bold text-brand-gold mb-2">12+</p>
-                        <p class="text-xs text-brand-ivory/45 uppercase tracking-[0.15em] font-medium">Jahre<br>Erfahrung</p>
+                        <p class="text-xs text-brand-ivory/45 uppercase tracking-[0.15em] font-medium" data-i18n-html="about_badge">Jahre<br>Erfahrung</p>
                     </div>
                 </div>
 
                 <div class="w-full lg:w-1/2 reveal-right">
-                    <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block">Über Kimi Sushi</span>
-                    <h2 class="text-3xl md:text-5xl font-serif font-bold mb-8 text-brand-ivory leading-tight">Tradition trifft<br>auf Moderne.</h2>
-                    <p class="text-lg text-brand-ivory/50 mb-8 leading-relaxed font-light">
+                    <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="about_label">Über Kimi Sushi</span>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold mb-8 text-brand-ivory leading-tight" data-i18n-html="about_title_plain">Tradition trifft<br>auf Moderne.</h2>
+                    <p class="text-lg text-brand-ivory/50 mb-8 leading-relaxed font-light" data-i18n="about_p1">
                         Seit über einem Jahrzehnt widmen wir uns der Perfektionierung der Sushi-Kunst. In unserem kleinen, intimen Restaurant in der Altstadt verbinden wir traditionelle japanische Techniken mit modernen, kreativen Einflüssen.
                     </p>
-                    <p class="text-brand-ivory/40 mb-12 leading-relaxed font-light">
+                    <p class="text-brand-ivory/40 mb-12 leading-relaxed font-light" data-i18n="about_p2">
                         Unser Geheimnis? Es gibt keines. Nur den kompromisslosen Fokus auf absolute Frische, Reiskörner in perfekter Temperatur und den Respekt vor jedem einzelnen Produkt, das unsere Küche verlässt.
                     </p>
 
@@ -273,8 +275,8 @@
                                 <i class="ph ph-drop text-2xl"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-brand-ivory/90 mb-2">Frische Zutaten</h3>
-                                <p class="text-sm text-brand-ivory/35">Tägliche Lieferung vom ausgewählten Fischmarkt.</p>
+                                <h3 class="font-semibold text-brand-ivory/90 mb-2" data-i18n="about_feat1_title">Frische Zutaten</h3>
+                                <p class="text-sm text-brand-ivory/35" data-i18n="about_feat1_desc">Tägliche Lieferung vom ausgewählten Fischmarkt.</p>
                             </div>
                         </div>
                         <div class="flex gap-5">
@@ -282,8 +284,8 @@
                                 <i class="ph ph-knife text-2xl"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-brand-ivory/90 mb-2">Erfahrene Köche</h3>
-                                <p class="text-sm text-brand-ivory/35">Meister ihres Fachs mit jahrelanger Ausbildung.</p>
+                                <h3 class="font-semibold text-brand-ivory/90 mb-2" data-i18n="about_feat2_title">Erfahrene Köche</h3>
+                                <p class="text-sm text-brand-ivory/35" data-i18n="about_feat2_desc">Meister ihres Fachs mit jahrelanger Ausbildung.</p>
                             </div>
                         </div>
                         <div class="flex gap-5">
@@ -291,8 +293,8 @@
                                 <i class="ph ph-coffee text-2xl"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-brand-ivory/90 mb-2">Gemütliche Atmosphäre</h3>
-                                <p class="text-sm text-brand-ivory/35">Ein Stück Japan zum Wohlfühlen und Entspannen.</p>
+                                <h3 class="font-semibold text-brand-ivory/90 mb-2" data-i18n="about_feat3_title">Gemütliche Atmosphäre</h3>
+                                <p class="text-sm text-brand-ivory/35" data-i18n="about_feat3_desc">Ein Stück Japan zum Wohlfühlen und Entspannen.</p>
                             </div>
                         </div>
                         <div class="flex gap-5">
@@ -300,8 +302,8 @@
                                 <i class="ph ph-wallet text-2xl"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-brand-ivory/90 mb-2">Faire Preise</h3>
-                                <p class="text-sm text-brand-ivory/35">Höchste Qualität, die bezahlbar bleibt.</p>
+                                <h3 class="font-semibold text-brand-ivory/90 mb-2" data-i18n="about_feat4_title">Faire Preise</h3>
+                                <p class="text-sm text-brand-ivory/35" data-i18n="about_feat4_desc">Höchste Qualität, die bezahlbar bleibt.</p>
                             </div>
                         </div>
                     </div>
@@ -316,18 +318,18 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-brand-border-gold/10">
                 <div class="p-12 reveal-up bg-brand-dark relative premium-glow">
                     <i class="ph ph-certificate text-3xl text-brand-gold mb-6 inline-block"></i>
-                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory">Zertifizierte Frische</h3>
-                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed">Wir beziehen unseren Fisch ausschließlich von streng zertifizierten, nachhaltigen Händlern. Qualität, die man schmeckt.</p>
+                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory" data-i18n="quality1_title">Zertifizierte Frische</h3>
+                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed" data-i18n="quality1_desc">Wir beziehen unseren Fisch ausschließlich von streng zertifizierten, nachhaltigen Händlern. Qualität, die man schmeckt.</p>
                 </div>
                 <div class="p-12 reveal-up bg-brand-dark relative premium-glow" style="transition-delay: 100ms;">
                     <i class="ph ph-leaf text-3xl text-brand-gold mb-6 inline-block"></i>
-                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory">Echte Handarbeit</h3>
-                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed">Jede Rolle, jedes Nigiri wird von unseren erfahrenen Sushi-Meistern á la minute für Sie perfektioniert.</p>
+                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory" data-i18n="quality2_title">Echte Handarbeit</h3>
+                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed" data-i18n="quality2_desc">Jede Rolle, jedes Nigiri wird von unseren erfahrenen Sushi-Meistern á la minute für Sie perfektioniert.</p>
                 </div>
                 <div class="p-12 reveal-up bg-brand-dark relative premium-glow" style="transition-delay: 200ms;">
                     <i class="ph ph-heart text-3xl text-brand-gold mb-6 inline-block"></i>
-                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory">Authentische Rezeptur</h3>
-                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed">Unser Sushireis wird nach einem alten Familienrezept zubereitet – der Schlüssel zum wahren Umami-Erlebnis.</p>
+                    <h3 class="font-serif text-xl font-bold mb-4 text-brand-ivory" data-i18n="quality3_title">Authentische Rezeptur</h3>
+                    <p class="text-brand-ivory/35 text-sm font-light leading-relaxed" data-i18n="quality3_desc">Unser Sushireis wird nach einem alten Familienrezept zubereitet – der Schlüssel zum wahren Umami-Erlebnis.</p>
                 </div>
             </div>
         </div>
@@ -337,9 +339,9 @@
     <section id="menu" class="py-24 md:py-36 bg-brand-section relative glow-top">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 reveal-up">
-                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block">Unsere Speisekarte</span>
-                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6 text-brand-ivory">Beliebte Gerichte.</h2>
-                <p class="text-brand-ivory/40 font-light leading-relaxed">Entdecken Sie unsere feine Auswahl an handgerollten Sushi-Kreationen, frischem Sashimi und warmen japanischen Spezialitäten.</p>
+                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="menu_label">Unsere Speisekarte</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6 text-brand-ivory" data-i18n="menu_title">Beliebte Gerichte.</h2>
+                <p class="text-brand-ivory/40 font-light leading-relaxed" data-i18n="menu_desc">Entdecken Sie unsere feine Auswahl an handgerollten Sushi-Kreationen, frischem Sashimi und warmen japanischen Spezialitäten.</p>
             </div>
 
             <!-- Filter Tabs -->
@@ -353,7 +355,7 @@
             </div>
 
             <div class="text-center reveal-up">
-                <a href="#" id="see-full-menu-btn" class="btn-outline inline-flex items-center gap-2">
+                <a href="#" id="see-full-menu-btn" class="btn-outline inline-flex items-center gap-2" data-i18n="menu_see_full">
                     Gesamte Speisekarte ansehen <i class="ph ph-arrow-right"></i>
                 </a>
             </div>
@@ -365,10 +367,10 @@
         <div class="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal-up">
                 <div class="max-w-2xl">
-                    <span class="text-brand-gold font-semibold tracking-[0.2em] uppercase text-xs mb-6 block">Spezielle Menüs</span>
-                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-brand-ivory">Menü Sets.</h2>
+                    <span class="text-brand-gold font-semibold tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="combos_label">Spezielle Menüs</span>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-brand-ivory" data-i18n="combos_title">Menü Sets.</h2>
                 </div>
-                <p class="text-brand-ivory/45 font-light max-w-sm leading-relaxed">Perfekt abgestimmte Sets für ein rundum vollkommenes Geschmackserlebnis. Ideal zum Teilen.</p>
+                <p class="text-brand-ivory/45 font-light max-w-sm leading-relaxed" data-i18n="combos_desc">Perfekt abgestimmte Sets für ein rundum vollkommenes Geschmackserlebnis. Ideal zum Teilen.</p>
             </div>
 
             <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -381,10 +383,10 @@
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal-up">
                 <div class="max-w-2xl">
-                    <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block">Ambiente</span>
-                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-brand-ivory">Das Kimi Erlebnis.</h2>
+                    <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="gallery_label">Ambiente</span>
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold text-brand-ivory" data-i18n="gallery_title">Das Kimi Erlebnis.</h2>
                 </div>
-                <p class="text-brand-ivory/35 font-light max-w-sm leading-relaxed">Treten Sie ein in eine Welt der Ruhe und des Genusses. Eine kleine japanische Oase mitten in der Stadt.</p>
+                <p class="text-brand-ivory/35 font-light max-w-sm leading-relaxed" data-i18n="gallery_desc">Treten Sie ein in eine Welt der Ruhe und des Genusses. Eine kleine japanische Oase mitten in der Stadt.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
@@ -406,16 +408,16 @@
     <section id="reviews" class="py-24 md:py-36 bg-brand-dark relative overflow-hidden glow-top">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 reveal-up">
-                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block">Testimonials</span>
-                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-8 text-brand-ivory">Stimmen unserer Gäste.</h2>
+                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="reviews_label">Testimonials</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-8 text-brand-ivory" data-i18n="reviews_title">Stimmen unserer Gäste.</h2>
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <span class="text-3xl font-bold text-brand-ivory">4.9</span>
                     <div class="flex text-brand-gold">
                         <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
                     </div>
-                    <span class="text-brand-ivory/30 text-sm ml-2">Google Bewertungen</span>
+                    <span class="text-brand-ivory/30 text-sm ml-2" data-i18n="reviews_google">Google Bewertungen</span>
                 </div>
-                <a href="https://www.google.com/search?q=Kimi+Sushi+Filderstadt+reviews" target="_blank" class="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-brand-border-gold/40 text-brand-ivory/60 font-medium hover:border-brand-gold hover:text-brand-gold transition-all duration-300 text-sm">
+                <a href="https://www.google.com/search?q=Kimi+Sushi+Filderstadt+reviews" target="_blank" class="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-brand-border-gold/40 text-brand-ivory/60 font-medium hover:border-brand-gold hover:text-brand-gold transition-all duration-300 text-sm" data-i18n="reviews_all">
                     <i class="ph-fill ph-google-logo text-lg"></i>
                     Alle Rezensionen ansehen
                 </a>
@@ -476,8 +478,8 @@
                     <div class="absolute inset-0 bg-brand-elevated/60"></div>
 
                     <div class="relative z-10">
-                        <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 text-brand-ivory">Tisch reservieren</h3>
-                        <p class="text-brand-ivory/50 font-light mb-10 leading-relaxed">Sichern Sie sich Ihren Platz in unserem Restaurant. Für Gruppen ab 6 Personen rufen Sie uns bitte direkt an.</p>
+                        <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 text-brand-ivory" data-i18n="res_title">Tisch reservieren</h3>
+                        <p class="text-brand-ivory/50 font-light mb-10 leading-relaxed" data-i18n="res_subtitle">Sichern Sie sich Ihren Platz in unserem Restaurant. Für Gruppen ab 6 Personen rufen Sie uns bitte direkt an.</p>
 
                         <div class="space-y-8">
                             <div class="flex items-center gap-5">
@@ -485,7 +487,7 @@
                                     <i class="ph ph-phone text-xl"></i>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-brand-ivory/35 uppercase tracking-widest mb-2 font-medium">Rufen Sie uns an</p>
+                                    <p class="text-xs text-brand-ivory/35 uppercase tracking-widest mb-2 font-medium" data-i18n="res_call_label">Rufen Sie uns an</p>
                                     <p class="font-medium text-brand-ivory/75" id="res-site-phone">+49 123 4567890</p>
                                 </div>
                             </div>
@@ -494,7 +496,7 @@
                                     <i class="ph ph-clock text-xl"></i>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-brand-ivory/35 uppercase tracking-widest mb-2 font-medium">Öffnungszeiten</p>
+                                    <p class="text-xs text-brand-ivory/35 uppercase tracking-widest mb-2 font-medium" data-i18n="res_hours_label">Öffnungszeiten</p>
                                     <p class="font-medium text-brand-ivory/75 text-sm" id="res-hours-summary">Mo-Sa: 11:00-15:00 & 17:00-22:00 | So: 17:00-22:00</p>
                                 </div>
                             </div>
@@ -506,33 +508,33 @@
                     <form id="reservation-form" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="form-group">
-                                <label for="res-name" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Vollständiger Name *</label>
-                                <input type="text" id="res-name" name="name" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="Max Mustermann">
-                                <span class="error-msg text-red-400 text-xs mt-2 hidden">Bitte geben Sie Ihren Namen ein.</span>
+                                <label for="res-name" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_name_label">Vollständiger Name *</label>
+                                <input type="text" id="res-name" name="name" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" data-i18n-placeholder="res_name_placeholder" placeholder="Max Mustermann">
+                                <span class="error-msg text-red-400 text-xs mt-2 hidden" data-i18n="res_name_error">Bitte geben Sie Ihren Namen ein.</span>
                             </div>
                             <div class="form-group">
-                                <label for="res-email" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">E-Mail Adresse *</label>
-                                <input type="email" id="res-email" name="email" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="mail@beispiel.de">
-                                <span class="error-msg text-red-400 text-xs mt-2 hidden">Gültige E-Mail erforderlich.</span>
+                                <label for="res-email" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_email_label">E-Mail Adresse *</label>
+                                <input type="email" id="res-email" name="email" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" data-i18n-placeholder="res_email_placeholder" placeholder="mail@beispiel.de">
+                                <span class="error-msg text-red-400 text-xs mt-2 hidden" data-i18n="res_email_error">Gültige E-Mail erforderlich.</span>
                             </div>
                             <div class="form-group md:col-span-2">
-                                <label for="res-phone" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Telefonnummer *</label>
-                                <input type="tel" id="res-phone" name="phone" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" placeholder="+49 123 456789">
-                                <span class="error-msg text-red-400 text-xs mt-2 hidden">Gültige Telefonnummer erforderlich.</span>
+                                <label for="res-phone" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_phone_label">Telefonnummer *</label>
+                                <input type="tel" id="res-phone" name="phone" required class="w-full px-5 py-4 rounded-lg dark-input text-sm" data-i18n-placeholder="res_phone_placeholder" placeholder="+49 123 456789">
+                                <span class="error-msg text-red-400 text-xs mt-2 hidden" data-i18n="res_phone_error">Gültige Telefonnummer erforderlich.</span>
                             </div>
                             <div class="form-group">
-                                <label for="res-date" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Datum *</label>
+                                <label for="res-date" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_date_label">Datum *</label>
                                 <input type="date" id="res-date" name="date" required class="w-full px-5 py-4 rounded-lg dark-input text-sm">
                             </div>
                             <div class="grid grid-cols-2 gap-4 form-group">
                                 <div>
-                                    <label for="res-time" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Uhrzeit *</label>
+                                    <label for="res-time" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_time_label">Uhrzeit *</label>
                                     <select id="res-time" name="time" required class="w-full px-5 py-4 rounded-lg dark-input text-sm appearance-none">
-                                        <option value="" disabled selected>Wählen</option>
+                                        <option value="" disabled selected data-i18n="res_time_placeholder">Wählen</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="res-persons" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Personen *</label>
+                                    <label for="res-persons" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_persons_label">Personen *</label>
                                     <select id="res-persons" name="persons" required class="w-full px-5 py-4 rounded-lg dark-input text-sm appearance-none">
                                         <option value="1">1 Person</option>
                                         <option value="2" selected>2 Personen</option>
@@ -555,20 +557,20 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="res-message" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide">Anmerkungen (Optional)</label>
-                            <textarea id="res-message" name="message" rows="3" class="w-full px-5 py-4 rounded-lg dark-input text-sm resize-none" placeholder="Allergien, besondere Wünsche..."></textarea>
+                            <label for="res-message" class="block text-sm font-medium text-brand-ivory/50 mb-3 tracking-wide" data-i18n="res_message_label">Anmerkungen (Optional)</label>
+                            <textarea id="res-message" name="message" rows="3" class="w-full px-5 py-4 rounded-lg dark-input text-sm resize-none" data-i18n-placeholder="res_message_placeholder" placeholder="Allergien, besondere Wünsche..."></textarea>
                         </div>
 
                         <div id="form-success" class="hidden bg-brand-elevated border border-brand-border-gold/30 p-5 rounded-xl flex items-start gap-4">
                             <i class="ph-fill ph-check-circle text-brand-gold text-xl mt-0.5"></i>
                             <div>
-                                <h4 class="font-semibold text-brand-ivory/80 text-sm">Anfrage gesendet!</h4>
-                                <p class="text-brand-ivory/35 text-xs mt-1 leading-relaxed">Wir haben Ihre Reservierungsanfrage erhalten und bestätigen diese in Kürze.</p>
+                                <h4 class="font-semibold text-brand-ivory/80 text-sm" data-i18n="res_success_title">Anfrage gesendet!</h4>
+                                <p class="text-brand-ivory/35 text-xs mt-1 leading-relaxed" data-i18n="res_success_msg">Wir haben Ihre Reservierungsanfrage erhalten und bestätigen diese in Kürze.</p>
                             </div>
                         </div>
 
                         <button type="submit" id="submit-btn" class="w-full btn-primary py-4 text-center justify-center text-sm relative overflow-hidden group mt-4">
-                            <span class="relative z-10 flex items-center justify-center gap-2">Tisch anfragen <i class="ph ph-paper-plane-right"></i></span>
+                            <span class="relative z-10 flex items-center justify-center gap-2" data-i18n="res_submit_btn">Tisch anfragen <i class="ph ph-paper-plane-right"></i></span>
                         </button>
                     </form>
                 </div>
@@ -580,8 +582,8 @@
     <section id="faq" class="py-24 md:py-36 bg-brand-section relative glow-top">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 reveal-up">
-                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block">FAQ</span>
-                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6 text-brand-ivory">Häufige Fragen.</h2>
+                <span class="text-brand-gold font-medium tracking-[0.2em] uppercase text-xs mb-6 block" data-i18n="faq_label">FAQ</span>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold mb-6 text-brand-ivory" data-i18n="faq_title">Häufige Fragen.</h2>
             </div>
 
             <div class="max-w-3xl mx-auto space-y-4" id="faq-list">
@@ -599,7 +601,7 @@
                         <i class="ph-fill ph-flower-lotus text-3xl text-brand-gold" id="site-logo-icon-2"></i>
                         <span class="font-serif text-2xl font-bold tracking-tight text-brand-ivory" id="site-brand-2">Kimi Sushi</span>
                     </a>
-                    <p class="text-brand-ivory/35 font-light text-sm leading-relaxed max-w-xs">
+                    <p class="text-brand-ivory/35 font-light text-sm leading-relaxed max-w-xs" data-i18n="footer_desc">
                         Feinste Handwerkskunst, absolute Frische und ein Hauch von Tokio. Entdecken Sie den wahren Geschmack Japans.
                     </p>
                     <div class="flex gap-3">
@@ -609,7 +611,7 @@
                 </div>
 
                 <div>
-                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory">Kontakt</h4>
+                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory" data-i18n="footer_contact">Kontakt</h4>
                     <ul class="space-y-5 text-sm text-brand-ivory/35 font-light">
                         <li class="flex items-start gap-4">
                             <i class="ph ph-map-pin text-brand-gold mt-0.5"></i>
@@ -629,52 +631,52 @@
                 </div>
 
                 <div>
-                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory">Öffnungszeiten</h4>
+                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory" data-i18n="footer_hours">Öffnungszeiten</h4>
                     <ul class="space-y-4 text-sm text-brand-ivory/35 font-light">
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Montag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_mon">Montag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-mon-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-mon-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Dienstag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_tue">Dienstag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-tue-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-tue-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Mittwoch</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_wed">Mittwoch</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-wed-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-wed-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Donnerstag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_thu">Donnerstag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-thu-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-thu-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Freitag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_fri">Freitag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-fri-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-fri-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Samstag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_sat">Samstag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-sat-1">11:00 - 15:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-sat-2">17:00 - 22:00</span>
                             </div>
                         </li>
                         <li class="flex justify-between items-start pb-3 border-b border-brand-border-gold/10">
-                            <span class="text-brand-ivory/50">Sonntag</span>
+                            <span class="text-brand-ivory/50" data-i18n="footer_days_sun">Sonntag</span>
                             <div class="text-right">
                                 <span class="block text-xs" id="site-h-sun-1">17:00 - 22:00</span>
                                 <span class="block text-brand-ivory/30 text-xs mt-0.5" id="site-h-sun-2"></span>
@@ -684,28 +686,28 @@
                 </div>
 
                 <div>
-                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory">Links</h4>
+                    <h4 class="font-serif text-lg font-bold mb-8 text-brand-ivory" data-i18n="footer_links">Links</h4>
                     <ul class="space-y-4 text-sm text-brand-ivory/35 font-light">
-                        <li><a href="#about" class="hover:text-brand-gold transition-colors duration-300 block">Über uns</a></li>
-                        <li><a href="#menu" class="hover:text-brand-gold transition-colors duration-300 block">Speisekarte</a></li>
-                        <li><a href="#reservation" class="hover:text-brand-gold transition-colors duration-300 block">Tisch reservieren</a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors duration-300 block">Impressum</a></li>
-                        <li><a href="#" class="hover:text-brand-gold transition-colors duration-300 block">Datenschutz</a></li>
+                        <li><a href="#about" class="hover:text-brand-gold transition-colors duration-300 block" data-i18n="footer_link_about">Über uns</a></li>
+                        <li><a href="#menu" class="hover:text-brand-gold transition-colors duration-300 block" data-i18n="footer_link_menu">Speisekarte</a></li>
+                        <li><a href="#reservation" class="hover:text-brand-gold transition-colors duration-300 block" data-i18n="footer_link_reserve">Tisch reservieren</a></li>
+                        <li><a href="#" class="hover:text-brand-gold transition-colors duration-300 block" data-i18n="footer_link_impressum">Impressum</a></li>
+                        <li><a href="#" class="hover:text-brand-gold transition-colors duration-300 block" data-i18n="footer_link_privacy">Datenschutz</a></li>
                         <li><a href="admin.html" class="text-brand-ivory/15 hover:text-brand-gold transition-colors duration-300 block mt-6 text-[10px] uppercase tracking-[0.15em] font-bold">Staff Login</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="pt-10 border-t border-brand-border-gold/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-ivory/25 font-light">
-                <p>&copy; 2026 Kimi Sushi. Alle Rechte vorbehalten.</p>
-                <p>Designed with <i class="ph-fill ph-heart text-brand-gold mx-1"></i> for pure taste.</p>
+                <p>&copy; 2026 Kimi Sushi. <span data-i18n="footer_copyright">Alle Rechte vorbehalten.</span></p>
+                <p><span data-i18n="footer_designed">Designed with</span> <i class="ph-fill ph-heart text-brand-gold mx-1"></i> <span data-i18n="footer_for_taste">for pure taste.</span></p>
             </div>
         </div>
     </footer>
 
     <!-- Scroll to Top / Sticky CTA for Mobile -->
     <div class="fixed bottom-8 right-8 z-40 flex flex-col gap-4 items-end">
-        <a href="#reservation" class="md:hidden btn-primary shadow-card flex items-center justify-center gap-2 rounded-full px-7 py-4">
+        <a href="#reservation" class="md:hidden btn-primary shadow-card flex items-center justify-center gap-2 rounded-full px-7 py-4" data-i18n="mobile_reserve">
             <i class="ph ph-calendar-check"></i> Reservieren
         </a>
         <button id="back-to-top" class="w-12 h-12 bg-brand-elevated border border-brand-border-gold/30 backdrop-blur text-brand-ivory/40 rounded-full shadow-card flex items-center justify-center hover:bg-brand-gold hover:text-brand-dark hover:border-brand-gold transition-all duration-300 transform translate-y-20 opacity-0">
@@ -719,8 +721,8 @@
             <i class="ph-fill ph-check-circle text-2xl"></i>
         </div>
         <div>
-            <h4 class="font-bold text-sm text-brand-ivory/90 font-serif">Im Warenkorb</h4>
-            <p class="text-xs text-brand-ivory/35 mt-1">Gericht wurde erfolgreich hinzugefügt.</p>
+            <h4 class="font-bold text-sm text-brand-ivory/90 font-serif" data-i18n="toast_title">Im Warenkorb</h4>
+            <p class="text-xs text-brand-ivory/35 mt-1" data-i18n="toast_msg">Gericht wurde erfolgreich hinzugefügt.</p>
         </div>
     </div>
 
@@ -728,97 +730,97 @@
     <div id="checkout-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-brand-elevated p-5 rounded-2xl w-full max-w-md mx-4 relative transform scale-95 transition-transform duration-300 border border-brand-border-gold/20 overflow-y-auto max-h-[95vh]" id="checkout-box" style="box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 80px rgba(214,178,115,0.04);">
             <button id="close-checkout" class="absolute top-3 right-3 text-brand-ivory/30 hover:text-brand-gold transition-colors duration-300"><i class="ph ph-x text-xl"></i></button>
-            <h3 class="font-serif text-lg font-bold mb-3 text-brand-ivory pr-6">Kasse</h3>
+            <h3 class="font-serif text-lg font-bold mb-3 text-brand-ivory pr-6" data-i18n="checkout_title">Kasse</h3>
 
             <div id="checkout-cart-container" class="mb-3 max-h-60 overflow-y-auto pr-1 checkout-scrollbar border-b border-brand-border-gold/10 pb-3">
-                <p class="text-[10px] font-bold text-brand-ivory/30 uppercase tracking-[0.15em] mb-2">Ihre Bestellung</p>
+                <p class="text-[10px] font-bold text-brand-ivory/30 uppercase tracking-[0.15em] mb-2" data-i18n="checkout_order_label">Ihre Bestellung</p>
                 <div id="cart-items-list" class="space-y-1"></div>
             </div>
 
             <form id="checkout-form" class="space-y-3">
                 <div id="method-selection-wrapper" class="mb-3 bg-brand-dark p-1 rounded-xl flex gap-1 border border-brand-border-gold/10">
                     <button type="button" class="method-btn active flex-1 py-2 px-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all" data-method="pickup">
-                        <i class="ph ph-storefront mr-0.5 text-xs"></i> Abholung
+                        <i class="ph ph-storefront mr-0.5 text-xs"></i> <span data-i18n="checkout_pickup">Abholung</span>
                     </button>
                     <button type="button" class="method-btn delivery-method-btn flex-1 py-2 px-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all" data-method="delivery">
-                        <i class="ph ph-moped mr-0.5 text-xs"></i> Lieferung
+                        <i class="ph ph-moped mr-0.5 text-xs"></i> <span data-i18n="checkout_delivery">Lieferung</span>
                     </button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Ihr Name *</label>
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_name_label">Ihr Name *</label>
                         <input type="text" id="co-name" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Telefon *</label>
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_phone_label">Telefon *</label>
                         <input type="tel" id="co-phone" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">E-Mail *</label>
-                    <input type="email" id="co-email" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="mail@beispiel.de">
+                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_email_label">E-Mail *</label>
+                    <input type="email" id="co-email" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" data-i18n-placeholder="checkout_email_placeholder" placeholder="mail@beispiel.de">
                 </div>
 
                 <div id="delivery-fields" class="hidden space-y-2 pt-2 border-t border-brand-border-gold/10">
                     <div>
-                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Lieferadresse *</label>
-                        <input type="text" id="co-address" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="Straße, Hausnummer...">
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_address_label">Lieferadresse *</label>
+                        <input type="text" id="co-address" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" data-i18n-placeholder="checkout_address_placeholder" placeholder="Straße, Hausnummer...">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Etage / Whg.</label>
-                            <input type="text" id="co-floor" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="z.B. 3. OG">
+                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_floor_label">Etage / Whg.</label>
+                            <input type="text" id="co-floor" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" data-i18n-placeholder="checkout_floor_placeholder" placeholder="z.B. 3. OG">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Klingelname</label>
-                            <input type="text" id="co-bell" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" placeholder="z.B. Schmidt">
+                            <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_bell_label">Klingelname</label>
+                            <input type="text" id="co-bell" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm" data-i18n-placeholder="checkout_bell_placeholder" placeholder="z.B. Schmidt">
                         </div>
                     </div>
                 </div>
 
                 <div id="checkout-summary-box" class="hidden p-3 rounded-xl mb-2 bg-brand-dark border border-brand-border-gold/10 space-y-1.5">
                     <div class="flex justify-between items-center text-[10px] font-bold text-brand-ivory/30 uppercase">
-                        <span>Bestellwert</span>
+                        <span data-i18n="checkout_order_value">Bestellwert</span>
                         <span id="co-subtotal">0,00 €</span>
                     </div>
                     <div class="flex justify-between items-center text-[10px] font-bold text-brand-ivory/30 uppercase">
-                        <span>Liefergebühr (<span id="co-distance-text">0.0km</span>)</span>
-                        <span id="co-delivery-fee">Gratis</span>
+                        <span data-i18n-html="checkout_delivery_fee_range">Liefergebühr (<span id="co-distance-text">0.0km</span>)</span>
+                        <span id="co-delivery-fee" data-i18n="checkout_free">Gratis</span>
                     </div>
                     <div class="flex justify-between items-center pt-1.5 border-t border-brand-border-gold/10 font-black text-brand-ivory">
-                        <span>GESAMT</span>
+                        <span data-i18n="checkout_total">GESAMT</span>
                         <span id="co-total">0,00 €</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Abholdatum *</label>
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_pickup_date_label">Abholdatum *</label>
                         <input type="date" id="co-date" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Abholzeit *</label>
+                        <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_pickup_time_label">Abholzeit *</label>
                         <select id="co-time" required class="w-full px-3 py-2.5 rounded-lg dark-input text-sm">
-                            <option value="asap" selected>So schnell wie möglich</option>
+                            <option value="asap" selected data-i18n="checkout_asap">So schnell wie möglich</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide">Allergien / Wünsche</label>
-                    <textarea id="co-allergies" name="allergies" rows="1" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm resize-none" placeholder="Z.B. keine Mayo..."></textarea>
+                    <label class="block text-[10px] font-medium text-brand-ivory/40 mb-1 tracking-wide" data-i18n="checkout_allergies_label">Allergien / Wünsche</label>
+                    <textarea id="co-allergies" name="allergies" rows="1" class="w-full px-3 py-2.5 rounded-lg dark-input text-sm resize-none" data-i18n-placeholder="checkout_allergies_placeholder" placeholder="Z.B. keine Mayo..."></textarea>
                 </div>
 
                 <div id="shop-closed-notice" class="hidden p-2.5 rounded-xl bg-brand-dark border border-brand-border-gold/10 text-brand-ivory/50 text-[10px] font-medium">
-                    <i class="ph-fill ph-info mr-1"></i> Geschlossen – bitte Abholzeit in Öffnungszeiten wählen.
+                    <i class="ph-fill ph-info mr-1"></i> <span data-i18n="checkout_shop_closed">Geschlossen – bitte Abholzeit in Öffnungszeiten wählen.</span>
                 </div>
 
                 <div class="bg-brand-dark p-3 rounded-xl border border-brand-border-gold/10 flex justify-between items-center mt-2">
-                    <span class="text-brand-ivory/40 text-[11px] font-medium">Bestellung: <span id="co-count" class="font-bold text-brand-ivory/70">0</span> Gerichte</span>
+                    <span class="text-brand-ivory/40 text-[11px] font-medium"><span data-i18n="checkout_order_count">Bestellung</span>: <span id="co-count" class="font-bold text-brand-ivory/70">0</span> <span data-i18n="checkout_order_unit">Gerichte</span></span>
                 </div>
 
-                <button type="submit" class="w-full btn-primary justify-center mt-3 py-3.5">Kostenpflichtig Bestellen</button>
+                <button type="submit" class="w-full btn-primary justify-center mt-3 py-3.5" data-i18n="checkout_submit">Kostenpflichtig Bestellen</button>
             </form>
         </div>
     </div>
@@ -828,17 +830,18 @@
         <div class="bg-brand-elevated p-12 rounded-2xl w-full max-w-md mx-4 text-center border border-brand-border-gold/20" style="box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 80px rgba(214,178,115,0.04);">
             <div id="status-success">
                 <i class="ph-fill ph-check-circle text-6xl text-brand-gold mb-6 inline-block"></i>
-                <h3 class="font-serif text-3xl font-bold mb-4 text-brand-ivory">Vielen Dank!</h3>
-                <p class="text-brand-ivory/40 text-sm mb-8 pb-8 border-b border-brand-border-gold/10 leading-relaxed">
+                <h3 class="font-serif text-3xl font-bold mb-4 text-brand-ivory" data-i18n="status_thanks">Vielen Dank!</h3>
+                <p class="text-brand-ivory/40 text-sm mb-8 pb-8 border-b border-brand-border-gold/10 leading-relaxed" data-i18n="status_msg">
                     Wir haben Ihre Anfrage erfolgreich erhalten. Unser Team wird sich in Kürze telefonisch oder per E-Mail bei Ihnen melden.
                 </p>
-                <div class="text-xs text-brand-ivory/20 uppercase tracking-[0.15em] font-bold mb-8">Wir freuen uns auf Sie!</div>
-                <button class="btn-primary w-full justify-center shadow-md py-4" onclick="window.location.reload()">Zurück zur Startseite</button>
+                <div class="text-xs text-brand-ivory/20 uppercase tracking-[0.15em] font-bold mb-8" data-i18n="status_looking_forward">Wir freuen uns auf Sie!</div>
+                <button class="btn-primary w-full justify-center shadow-md py-4" onclick="window.location.reload()" data-i18n="status_back_home">Zurück zur Startseite</button>
             </div>
         </div>
     </div>
 
+    <script src="js/translations.js?v=1.0"></script>
     <script src="js/data.js?v=1.7"></script>
-    <script src="js/main.js?v=1.7"></script>
+    <script src="js/main.js?v=1.8"></script>
 </body>
 </html>

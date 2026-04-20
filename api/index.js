@@ -4,6 +4,58 @@ const dns = require('dns');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+// ─── Shared date/time utilities (same logic as js/dateUtils.js) ─────────────────
+const DATE_TZ = 'Europe/Berlin';
+const dateUtils = {
+  getLocalDateStr: (d) => (d || new Date()).toLocaleDateString('en-CA', { timeZone: DATE_TZ }),
+  getLocalMinutes: (d) => { const x = d || new Date(); return x.getHours() * 60 + x.getMinutes(); },
+  getDayName: (d) => ['sun','mon','tue','wed','thu','fri','sat'][(d || new Date()).getDay()],
+  parseHours: (str) => {
+    if (!str || !str.includes('-')) return null;
+    const parts = str.split('-').map(s => s.trim());
+    return {
+      start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
+      end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
+    };
+  },
+  isStoreOpenNow: (settings, d) => {
+    const date = d || new Date();
+    const dn = dateUtils.getDayName(date);
+    const dc = dn.charAt(0).toUpperCase() + dn.slice(1);
+    const slots = [dateUtils.parseHours(settings['hours' + dc + '1']), dateUtils.parseHours(settings['hours' + dc + '2'])].filter(Boolean);
+    if (!slots.length) return false;
+    return slots.some(s => dateUtils.getLocalMinutes(date) >= s.start && dateUtils.getLocalMinutes(date) < s.end - 20);
+  },
+  resolveAsap: (settings, d) => {
+    const date = d || new Date();
+    const nowMin = dateUtils.getLocalMinutes(date);
+    const openNow = dateUtils.isStoreOpenNow(settings, date);
+    const todayStr = dateUtils.getLocalDateStr(date);
+    const tomorrow = new Date(date); tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = dateUtils.getLocalDateStr(tomorrow);
+    const dn = dateUtils.getDayName(date);
+    const dc = dn.charAt(0).toUpperCase() + dn.slice(1);
+    const slots = [dateUtils.parseHours(settings['hours' + dc + '1']), dateUtils.parseHours(settings['hours' + dc + '2'])].filter(Boolean);
+
+    if (openNow && slots.length > 0) {
+      const allSlots = [...slots].sort((a, b) => a.start - b.start);
+      let earliest = allSlots[0].start;
+      if (nowMin >= earliest) earliest = Math.ceil((nowMin + 30) / 30) * 30;
+      const h = String(Math.floor(earliest / 60)).padStart(2, '0');
+      const m = String(earliest % 60).padStart(2, '0');
+      return { pickupDate: todayStr, pickupTime: `${h}:${m}`, pickupTimeDisplay: `Schnellstmöglich (ca. ${h}:${m} Uhr)`, reason: 'open_today' };
+    }
+    const tn = dateUtils.getDayName(tomorrow);
+    const tc = tn.charAt(0).toUpperCase() + tn.slice(1);
+    const nextSlots = [dateUtils.parseHours(settings['hours' + tc + '1']), dateUtils.parseHours(settings['hours' + tc + '2'])].filter(Boolean);
+    if (nextSlots.length === 0) return { pickupDate: tomorrowStr, pickupTime: '11:00', pickupTimeDisplay: `${tomorrow.toLocaleDateString('de-DE')} um 11:00 Uhr`, reason: 'closed_tomorrow_no_hours' };
+    const earliest = Math.min(...nextSlots.map(s => s.start));
+    const h = String(Math.floor(earliest / 60)).padStart(2, '0');
+    const m = String(earliest % 60).padStart(2, '0');
+    return { pickupDate: tomorrowStr, pickupTime: `${h}:${m}`, pickupTimeDisplay: `${tomorrow.toLocaleDateString('de-DE')} um ${h}:${m} Uhr`, reason: 'closed_today_next_open_tomorrow' };
+  }
+};
+
 // ─── MongoDB DNS fix & cached connection ──────────────────────────────────────
 const googleResolver = new dns.promises.Resolver();
 googleResolver.setServers(['8.8.8.8']);
@@ -271,43 +323,11 @@ module.exports = async (req, res) => {
         item.createdAt = new Date();
         item.updatedAt = new Date();
         if (item.type !== 'reservation' && item.pickupTime === 'asap') {
-          const now = new Date();
-          const nowMin = now.getHours() * 60 + now.getMinutes();
-          const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-          const todayKey = dayNames[now.getDay()];
           const settings = await getSettingsObj();
-          const parseHours = (str) => {
-            if (!str || !str.includes('-')) return null;
-            const parts = str.split('-').map(s => s.trim());
-            return { start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]), end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1]) };
-          };
-          const todayKeyCap = todayKey.charAt(0).toUpperCase() + todayKey.slice(1);
-          const todaySlots = [parseHours(settings['hours' + todayKeyCap + '1']), parseHours(settings['hours' + todayKeyCap + '2'])].filter(Boolean);
-          const isStoreOpen = todaySlots.some(s => nowMin >= s.start && nowMin < s.end - 20);
-          if (isStoreOpen) {
-            const allSlots = [...todaySlots].sort((a, b) => a.start - b.start);
-            let earliest = allSlots[0].start;
-            if (nowMin >= earliest) earliest = Math.ceil((nowMin + 30) / 30) * 30;
-            const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
-            const nextMm = String(earliest % 60).padStart(2, '0');
-            item.pickupDate = now.toISOString().split('T')[0];
-            item.pickupTime = nextHh + ':' + nextMm;
-            item.pickupTimeDisplay = 'Schnellstm\u00f6glich (ca. ' + nextHh + ':' + nextMm + ' Uhr)';
-          } else {
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const nextDayKey = dayNames[tomorrow.getDay()];
-            const nextDayKeyCap = nextDayKey.charAt(0).toUpperCase() + nextDayKey.slice(1);
-            const nextSlots = [parseHours(settings['hours' + nextDayKeyCap + '1']), parseHours(settings['hours' + nextDayKeyCap + '2'])].filter(Boolean);
-            if (nextSlots.length > 0) {
-              const earliest = Math.min(...nextSlots.map(s => s.start));
-              const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
-              const nextMm = String(earliest % 60).padStart(2, '0');
-              item.pickupDate = tomorrow.toISOString().split('T')[0];
-              item.pickupTime = nextHh + ':' + nextMm;
-              item.pickupTimeDisplay = tomorrow.toLocaleDateString('de-DE') + ' um ' + nextHh + ':' + nextMm + ' Uhr';
-            }
-          }
+          const resolved = dateUtils.resolveAsap(settings);
+          item.pickupDate = resolved.pickupDate;
+          item.pickupTime = resolved.pickupTime;
+          item.pickupTimeDisplay = resolved.pickupTimeDisplay;
         }
         await schemas.Order.findOneAndUpdate({ id: item.id }, { $set: item }, { upsert: true, new: true });
         return res.status(200).json({ success: true, id: item.id });
@@ -637,10 +657,19 @@ module.exports = async (req, res) => {
       if (data.total) telegramText += '💰 <b>SUMME: ' + data.total + '€</b>\n';
       telegramText += '━━━━━━━━━━━━━━━━━━\n⏰ ' + new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' });
 
+      const orderId = data.id || data.orderId || 'unknown';
+      const replyMarkup = isReservation ? undefined : {
+        inline_keyboard: [
+          [{ text: '⏱ 10 Min', callback_data: `pk_10_${orderId}` }, { text: '⏱ 15 Min', callback_data: `pk_15_${orderId}` }, { text: '⏱ 20 Min', callback_data: `pk_20_${orderId}` }],
+          [{ text: '⏱ 25 Min', callback_data: `pk_25_${orderId}` }, { text: '⏱ 30 Min', callback_data: `pk_30_${orderId}` }, { text: '🔔 Bereit!', callback_data: `pk_ready_${orderId}` }],
+          [{ text: '✅ Erhalten', callback_data: `st_rcv_${orderId}` }, { text: '🍳 Bereitet vor', callback_data: `st_prep_${orderId}` }, { text: '❌ Stornieren', callback_data: `st_canc_${orderId}` }]
+        ]
+      };
+
       const response = await fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: telegramText, parse_mode: 'HTML' })
+        body: JSON.stringify({ chat_id: chatId, text: telegramText, parse_mode: 'HTML', reply_markup: replyMarkup })
       });
       const result = await response.json();
       return res.status(200).json({ success: result.ok, data: result });

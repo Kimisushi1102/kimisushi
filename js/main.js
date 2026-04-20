@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     
     // --- Live Sync when Storage changes (from Admin/POS) ---
     window.addEventListener('storage', (e) => {
@@ -135,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return config;
     }
     
-    // Start loading settings
-    loadSettingsForWebsite();
+    // Load settings from server first so checkout date logic has correct opening hours
+    await loadSettingsForWebsite();
     
     // --- 4. Load Menu (Server First, then localStorage, then defaults) ---
     async function loadMenuForWebsite() {
@@ -1096,7 +1096,6 @@ if (checkoutForm) {
 
     coDate.addEventListener('change', updateOrderSlots);
     const now = new Date();
-    // Dùng local date thay vì UTC để tránh lệch múi giờ
     const getLocalDateStr = (d) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -1110,21 +1109,32 @@ if (checkoutForm) {
 
     const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     const todayKey = dayNames[now.getDay()];
-    const cfg = typeof getSettings === 'function' ? getSettings() : {};
+    const cfg = typeof getSettingsSync === 'function' ? (getSettingsSync() || {}) : {};
     const h1 = cfg[`hours${todayKey.charAt(0).toUpperCase() + todayKey.slice(1)}1`] || '';
     const h2 = cfg[`hours${todayKey.charAt(0).toUpperCase() + todayKey.slice(1)}2`] || '';
     const storeOpenToday = h1.includes('-') || h2.includes('-');
 
+    const parseHours = (str) => {
+        if (!str || !str.includes('-')) return null;
+        const parts = str.split('-').map(s => s.trim());
+        return {
+            start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
+            end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
+        };
+    };
+    const todaySlots = [parseHours(h1), parseHours(h2)].filter(Boolean);
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const lastClosingToday = todaySlots.length > 0 ? Math.max(...todaySlots.map(s => s.end)) : null;
+    const storeClosedRightNow = !storeOpenToday || (lastClosingToday !== null && nowMinutes >= lastClosingToday);
+
     let defaultDate = todayStr;
-    if (!storeOpenToday) {
-        defaultDate = tomorrowStr;
-    } else if (now.getHours() >= 22) {
+    if (storeClosedRightNow) {
         defaultDate = tomorrowStr;
     }
 
     coDate.min = todayStr;
     coDate.value = defaultDate;
-    updateOrderSlots(); // Cập nhật slots ngay
+    updateOrderSlots();
 
     const rDate = document.getElementById('res-date');
     if (rDate) {

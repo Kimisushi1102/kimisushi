@@ -6,6 +6,7 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const https = require('https');
 const crypto = require('crypto');
+const { resolveAsapPickup } = require('./js/dateUtils');
 
 const app = express();
 const server = http.createServer(app);
@@ -37,53 +38,87 @@ const io = new Server(server, {
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-function sendTelegramMessage(message) {
+// Build inline keyboard for order actions (Giai đoạn 2: inline buttons)
+function buildOrderInlineKeyboard(orderId) {
+  return {
+    inline_keyboard: [
+      [
+        { text: '⏱ 10 Min', callback_data: `pk_10_${orderId}` },
+        { text: '⏱ 15 Min', callback_data: `pk_15_${orderId}` },
+        { text: '⏱ 20 Min', callback_data: `pk_20_${orderId}` }
+      ],
+      [
+        { text: '⏱ 25 Min', callback_data: `pk_25_${orderId}` },
+        { text: '⏱ 30 Min', callback_data: `pk_30_${orderId}` },
+        { text: '🔔 Bereit!', callback_data: `pk_ready_${orderId}` }
+      ],
+      [
+        { text: '✅ Erhalten', callback_data: `st_rcv_${orderId}` },
+        { text: '🍳 Bereitet vor', callback_data: `st_prep_${orderId}` },
+        { text: '❌ Stornieren', callback_data: `st_canc_${orderId}` }
+      ]
+    ]
+  };
+}
+
+function sendTelegramMessage(message, replyMarkup) {
   if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' ||
       !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
     console.warn('[TELEGRAM] Config missing — skipping notification');
-    return;
+    return Promise.resolve(null);
   }
 
-  const data = JSON.stringify({
+  const payload = {
     chat_id: TELEGRAM_CHAT_ID,
     text: message,
     parse_mode: 'HTML'
-  });
-
-  const options = {
-    hostname: 'api.telegram.org',
-    port: 443,
-    path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(data)
-    }
   };
+  if (replyMarkup) {
+    payload.reply_markup = replyMarkup;
+  }
 
-  const req = https.request(options, (res) => {
-    let body = '';
-    res.on('data', (chunk) => { body += chunk; });
-    res.on('end', () => {
-      try {
-        const parsed = JSON.parse(body);
-        if (parsed.ok) {
-          console.log('[TELEGRAM] Message sent successfully.');
-        } else {
-          console.error('[TELEGRAM] API error — code:', parsed.error_code, '| description:', parsed.description);
-        }
-      } catch (e) {
-        console.error('[TELEGRAM] Failed to parse response:', body);
+  const data = JSON.stringify(payload);
+
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'api.telegram.org',
+      port: 443,
+      path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
       }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          if (parsed.ok) {
+            console.log('[TELEGRAM] Message sent. message_id:', parsed.result.message_id);
+            resolve(parsed.result.message_id);
+          } else {
+            console.error('[TELEGRAM] API error — code:', parsed.error_code, '| description:', parsed.description);
+            resolve(null);
+          }
+        } catch (e) {
+          console.error('[TELEGRAM] Failed to parse response:', body);
+          resolve(null);
+        }
+      });
     });
-  });
 
-  req.on('error', (e) => {
-    console.error('[TELEGRAM] Network error:', e.message);
-  });
+    req.on('error', (e) => {
+      console.error('[TELEGRAM] Network error:', e.message);
+      resolve(null);
+    });
 
-  req.write(data);
-  req.end();
+    req.write(data);
+    req.end();
+  });
 }
 
 // ==================== GMAIL SMTP ====================
@@ -497,59 +532,13 @@ app.post('/api/inbox', async (req, res) => {
     item.createdAt = new Date();
     item.updatedAt = new Date();
 
-    // ASAP resolution logic
+    // ASAP resolution — using shared dateUtils for consistent Europe/Berlin timezone
     if (item.type !== 'reservation' && item.pickupTime === 'asap') {
-      const now = new Date();
-      const nowMin = now.getHours() * 60 + now.getMinutes();
-      const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
-      const todayKey = dayNames[now.getDay()];
-
       const settings = await getSettingsObj();
-      const parseHours = (str) => {
-        if (!str || !str.includes('-')) return null;
-        const parts = str.split('-').map(s => s.trim());
-        return {
-          start: parseInt(parts[0].split(':')[0]) * 60 + parseInt(parts[0].split(':')[1]),
-          end: parseInt(parts[1].split(':')[0]) * 60 + parseInt(parts[1].split(':')[1])
-        };
-      };
-
-      const todayKeyCap = todayKey.charAt(0).toUpperCase() + todayKey.slice(1);
-      const todaySlots = [
-        parseHours(settings['hours' + todayKeyCap + '1']),
-        parseHours(settings['hours' + todayKeyCap + '2'])
-      ].filter(Boolean);
-
-      const isStoreOpen = todaySlots.some(s => nowMin >= s.start && nowMin < s.end - 20);
-
-      if (isStoreOpen) {
-        const allSlots = [...todaySlots].sort((a, b) => a.start - b.start);
-        let earliest = allSlots[0].start;
-        if (nowMin >= earliest) earliest = Math.ceil((nowMin + 30) / 30) * 30;
-        const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
-        const nextMm = String(earliest % 60).padStart(2, '0');
-        item.pickupDate = now.toISOString().split('T')[0];
-        item.pickupTime = `${nextHh}:${nextMm}`;
-        item.pickupTimeDisplay = `Schnellstmöglich (ca. ${nextHh}:${nextMm} Uhr)`;
-      } else {
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const nextDayKey = dayNames[tomorrow.getDay()];
-        const nextDayKeyCap = nextDayKey.charAt(0).toUpperCase() + nextDayKey.slice(1);
-        const nextSlots = [
-          parseHours(settings['hours' + nextDayKeyCap + '1']),
-          parseHours(settings['hours' + nextDayKeyCap + '2'])
-        ].filter(Boolean);
-
-        if (nextSlots.length > 0) {
-          const earliest = Math.min(...nextSlots.map(s => s.start));
-          const nextHh = String(Math.floor(earliest / 60)).padStart(2, '0');
-          const nextMm = String(earliest % 60).padStart(2, '0');
-          item.pickupDate = tomorrow.toISOString().split('T')[0];
-          item.pickupTime = `${nextHh}:${nextMm}`;
-          item.pickupTimeDisplay = `${tomorrow.toLocaleDateString('de-DE')} um ${nextHh}:${nextMm} Uhr`;
-        }
-      }
+      const resolved = resolveAsapPickup(settings);
+      item.pickupDate = resolved.pickupDate;
+      item.pickupTime = resolved.pickupTime;
+      item.pickupTimeDisplay = resolved.pickupTimeDisplay;
     }
 
     // Upsert: update if exists, create if not
@@ -646,7 +635,9 @@ ${item.notes && item.notes.trim() ? `⚠️ ALLERGIEN / WÜNSCHE:
 Status: ${status.toUpperCase()}`;
     }
 
-    sendTelegramMessage(telegramMsg);
+    // Chỉ đơn hàng (không phải reservation) mới có inline buttons
+    const replyMarkup = isReservation ? undefined : buildOrderInlineKeyboard(item.id);
+    sendTelegramMessage(telegramMsg, replyMarkup);
 
     // Broadcast via Socket.IO
     io.emit(item.type === 'reservation' ? 'new_reservation' : 'new_order', item);
@@ -938,6 +929,50 @@ app.get('/api/admin/activity-log', async (req, res) => {
   }
 });
 
+// ==================== API: TELEGRAM WEBHOOK (Giai đoạn 2) ====================
+app.post('/api/telegram-webhook', async (req, res) => {
+  try {
+    const update = req.body;
+
+    // Xử lý callback_query (khi bấm inline button)
+    if (update.callback_query) {
+      const { id: callback_id, data: callback_data, from: user, message } = update.callback_query;
+
+      // Parse callback_data: format "pk_10_<orderId>" hoặc "st_rcv_<orderId>"
+      const parts = (callback_data || '').split('_');
+      const action = parts.slice(0, 2).join('_');  // e.g. "pk_10" or "st_rcv"
+      const orderId = parts.slice(2).join('_');    // remaining = orderId
+
+      console.log(`[TELEGRAM CB] action=${action} orderId=${orderId} from=${user?.first_name} ${user?.last_name || ''} (id=${user?.id})`);
+      console.log(`[TELEGRAM CB] raw callback_data: "${callback_data}"`);
+      console.log(`[TELEGRAM CB] parts: ${JSON.stringify(parts)}`);
+
+      // Trả lời callback thành công cho Telegram (bắt buộc trong 30s)
+      // Giai đoạn 2: chỉ log, chưa xử lý order hay gửi email
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: callback_id,
+          text: `✅ Action received: ${action} for order ${orderId}`,
+          show_alert: false
+        })
+      });
+
+      // Giai đoạn 3: sẽ update order status + gửi email cho khách ở đây
+      console.log(`[TELEGRAM CB] >>> Giai đoạn 2: đã log, chờ Giai đoạn 3 xử lý tiếp`);
+
+      return res.status(200).json({ ok: true });
+    }
+
+    // Các loại update khác (message, edited_message, etc.) — ignore
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('[TELEGRAM WEBHOOK] Error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ==================== API: SEO FILES ====================
 app.get('/sitemap.xml', (req, res) => {
   const baseUrl = process.env.VPS_DOMAIN || 'https://kimisushi.de';
@@ -1022,7 +1057,7 @@ ${notes ? `⚠️ ALLERGIEN / WÜNSCHE:
 ━━━━━━━━━━━━━━━
 Status: NEU`;
 
-    sendTelegramMessage(telegramMsg);
+    sendTelegramMessage(telegramMsg, buildOrderInlineKeyboard(orderId));
   });
 
   socket.on('submit_reservation', async (resv) => {
